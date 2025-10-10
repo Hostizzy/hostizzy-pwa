@@ -1,0 +1,1469 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#FF5A5F">
+    <title>Hostizzy - Property Reservation Management</title>
+    <link rel="manifest" href="manifest.json">
+    <link rel="icon" type="image/png" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏨</text></svg>">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #FF5A5F;
+            --secondary: #00A699;
+            --background: #F7F7F7;
+            --text: #484848;
+            --success: #008489;
+            --accent: #FC642D;
+            --white: #FFFFFF;
+            --border: #DDDDDD;
+            --spacing: 20px;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background-color: var(--background);
+            color: var(--text);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: var(--spacing);
+        }
+
+        /* Login Screen */
+        .login-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+        }
+
+        .login-card {
+            background: var(--white);
+            padding: 40px;
+            border-radius: 16px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 400px;
+        }
+
+        .logo {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .logo h1 {
+            color: var(--primary);
+            font-size: 32px;
+            font-weight: 700;
+        }
+
+        .logo p {
+            color: var(--text);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: var(--text);
+        }
+
+        input, select, textarea {
+            width: 100%;
+            padding: 12px 16px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 14px;
+            font-family: inherit;
+            transition: border-color 0.3s;
+        }
+
+        input:focus, select:focus, textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-primary:hover {
+            background-color: #E04E53;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 90, 95, 0.3);
+        }
+
+        .btn-secondary {
+            background-color: var(--secondary);
+            color: var(--white);
+            margin-top: 10px;
+        }
+
+        .btn-secondary:hover {
+            background-color: #009688;
+        }
+
+        .btn-success {
+            background-color: var(--success);
+            color: var(--white);
+        }
+
+        .btn-accent {
+            background-color: var(--accent);
+            color: var(--white);
+        }
+
+        .btn-outline {
+            background-color: transparent;
+            border: 2px solid var(--primary);
+            color: var(--primary);
+        }
+
+        /* Navigation */
+        .navbar {
+            background-color: var(--white);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            padding: 15px 0;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+
+        .navbar-content {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 var(--spacing);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .navbar-brand {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .navbar-menu {
+            display: flex;
+            gap: 20px;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary);
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 8px 16px;
+            background-color: var(--background);
+            border-radius: 20px;
+        }
+
+        /* Dashboard */
+        .dashboard-header {
+            margin-bottom: 30px;
+        }
+
+        .dashboard-header h2 {
+            font-size: 28px;
+            margin-bottom: 10px;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: var(--spacing);
+            margin-bottom: 30px;
+        }
+
+        .stat-card {
+            background: var(--white);
+            padding: 24px;
+            border-radius: 12px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .stat-label {
+            font-size: 14px;
+            color: #767676;
+            margin-bottom: 8px;
+        }
+
+        .stat-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .stat-change {
+            font-size: 12px;
+            margin-top: 8px;
+        }
+
+        .stat-change.positive {
+            color: var(--success);
+        }
+
+        .stat-change.negative {
+            color: var(--primary);
+        }
+
+        /* Card */
+        .card {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 24px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+            margin-bottom: var(--spacing);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 20px;
+            font-weight: 600;
+        }
+
+        /* Table */
+        .table-responsive {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        thead {
+            background-color: var(--background);
+        }
+
+        th {
+            padding: 12px;
+            text-align: left;
+            font-weight: 600;
+            color: var(--text);
+            border-bottom: 2px solid var(--border);
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        tbody tr:hover {
+            background-color: #FAFAFA;
+        }
+
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-confirmed {
+            background-color: #E8F5E9;
+            color: var(--success);
+        }
+
+        .status-pending {
+            background-color: #FFF3E0;
+            color: var(--accent);
+        }
+
+        .status-cancelled {
+            background-color: #FFEBEE;
+            color: var(--primary);
+        }
+
+        .status-checked-in {
+            background-color: #E3F2FD;
+            color: #1976D2;
+        }
+
+        .status-checked-out {
+            background-color: #F3E5F5;
+            color: #7B1FA2;
+        }
+
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+        }
+
+        .btn-icon {
+            padding: 6px 12px;
+            font-size: 12px;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.3s;
+        }
+
+        .btn-edit {
+            background-color: var(--secondary);
+            color: var(--white);
+        }
+
+        .btn-delete {
+            background-color: var(--primary);
+            color: var(--white);
+        }
+
+        .btn-view {
+            background-color: var(--text);
+            color: var(--white);
+        }
+
+        /* Modal */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+            z-index: 1000;
+            overflow-y: auto;
+        }
+
+        .modal.active {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .modal-content {
+            background: var(--white);
+            border-radius: 12px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: 600;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text);
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        /* Charts */
+        .chart-container {
+            height: 300px;
+            margin-top: 20px;
+        }
+
+        /* Filters */
+        .filters {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-item {
+            flex: 1;
+            min-width: 200px;
+        }
+
+        /* Search */
+        .search-box {
+            position: relative;
+            margin-bottom: 20px;
+        }
+
+        .search-box input {
+            padding-left: 40px;
+        }
+
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #999;
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .navbar-menu {
+                flex-direction: column;
+                gap: 10px;
+            }
+
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .filters {
+                flex-direction: column;
+            }
+
+            table {
+                font-size: 14px;
+            }
+
+            th, td {
+                padding: 8px;
+            }
+        }
+
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
+        }
+
+        .text-center {
+            text-align: center;
+        }
+
+        .mt-20 {
+            margin-top: 20px;
+        }
+
+        .mb-20 {
+            margin-bottom: 20px;
+        }
+
+        /* Loading Spinner */
+        .spinner {
+            border: 3px solid var(--background);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .empty-state h3 {
+            margin-bottom: 10px;
+            color: var(--text);
+        }
+
+        .empty-state p {
+            color: #999;
+            margin-bottom: 20px;
+        }
+
+        /* PWA Install Banner */
+        .install-banner {
+            background: linear-gradient(135deg, var(--primary), var(--accent));
+            color: var(--white);
+            padding: 15px 20px;
+            text-align: center;
+            display: none;
+        }
+
+        .install-banner.show {
+            display: block;
+        }
+
+        .install-banner button {
+            background: var(--white);
+            color: var(--primary);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-weight: 600;
+            cursor: pointer;
+            margin-left: 15px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Install Banner -->
+    <div id="installBanner" class="install-banner">
+        <span>Install Hostizzy app for quick access! 📱</span>
+        <button onclick="installPWA()">Install</button>
+        <button onclick="dismissInstallBanner()" style="background: transparent; color: white; border: 1px solid white;">Dismiss</button>
+    </div>
+
+    <!-- Login Screen -->
+    <div id="loginScreen" class="login-container">
+        <div class="login-card">
+            <div class="logo">
+                <h1>🏨 Hostizzy</h1>
+                <p>Property Reservation Management</p>
+            </div>
+            <div class="form-group">
+                <label for="loginEmail">Email</label>
+                <input type="email" id="loginEmail" placeholder="Enter your email" required>
+            </div>
+            <div class="form-group">
+                <label for="loginPassword">Password</label>
+                <input type="password" id="loginPassword" placeholder="Enter your password" required>
+            </div>
+            <button class="btn btn-primary" onclick="login()">Login</button>
+            <p style="text-align: center; margin-top: 20px; color: #999; font-size: 12px;">
+                Demo: admin@hostizzy.com / admin123
+            </p>
+        </div>
+    </div>
+
+    <!-- Main App -->
+    <div id="mainApp" class="hidden">
+        <!-- Navigation -->
+        <nav class="navbar">
+            <div class="navbar-content">
+                <div class="navbar-brand">🏨 Hostizzy</div>
+                <div class="navbar-menu">
+                    <a class="nav-link active" onclick="showView('dashboard')">Dashboard</a>
+                    <a class="nav-link" onclick="showView('reservations')">Reservations</a>
+                    <a class="nav-link" onclick="showView('properties')">Properties</a>
+                    <a class="nav-link" onclick="showView('team')">Team</a>
+                    <div class="user-info">
+                        <span id="userEmail"></span>
+                        <a class="nav-link" onclick="logout()">Logout</a>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <!-- Dashboard View -->
+        <div id="dashboardView" class="container">
+            <div class="dashboard-header">
+                <h2>Dashboard</h2>
+                <p>Welcome to Hostizzy Reservation Management</p>
+            </div>
+
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-label">Total Reservations</div>
+                    <div class="stat-value" id="totalReservations">0</div>
+                    <div class="stat-change positive">↑ This year</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Active Reservations</div>
+                    <div class="stat-value" id="activeReservations">0</div>
+                    <div class="stat-change positive">Currently checked in</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Properties</div>
+                    <div class="stat-value" id="totalProperties">0</div>
+                    <div class="stat-change">Total managed</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">Revenue (₹)</div>
+                    <div class="stat-value" id="totalRevenue">0</div>
+                    <div class="stat-change positive">↑ This year</div>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Recent Reservations</h3>
+                    <button class="btn-icon btn-edit" onclick="showView('reservations')">View All</button>
+                </div>
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Guest Name</th>
+                                <th>Property</th>
+                                <th>Check-in</th>
+                                <th>Check-out</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentReservationsTable">
+                            <tr>
+                                <td colspan="6" class="text-center">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Monthly Overview</h3>
+                </div>
+                <div class="chart-container" id="monthlyChart">
+                    <canvas id="revenueChart"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reservations View -->
+        <div id="reservationsView" class="container hidden">
+            <div class="dashboard-header">
+                <h2>Reservations</h2>
+                <button class="btn btn-primary" onclick="openReservationModal()">+ New Reservation</button>
+            </div>
+
+            <div class="card">
+                <div class="search-box">
+                    <span class="search-icon">🔍</span>
+                    <input type="text" id="searchReservations" placeholder="Search by guest name, booking ID, or property..." onkeyup="filterReservations()">
+                </div>
+
+                <div class="filters">
+                    <div class="filter-item">
+                        <select id="statusFilter" onchange="filterReservations()">
+                            <option value="">All Statuses</option>
+                            <option value="confirmed">Confirmed</option>
+                            <option value="pending">Pending</option>
+                            <option value="checked-in">Checked In</option>
+                            <option value="checked-out">Checked Out</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <select id="propertyFilter" onchange="filterReservations()">
+                            <option value="">All Properties</option>
+                        </select>
+                    </div>
+                    <div class="filter-item">
+                        <input type="date" id="dateFilter" onchange="filterReservations()">
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Booking ID</th>
+                                <th>Guest Name</th>
+                                <th>Contact</th>
+                                <th>Property</th>
+                                <th>Check-in</th>
+                                <th>Check-out</th>
+                                <th>Guests</th>
+                                <th>Amount (₹)</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="reservationsTable">
+                            <tr>
+                                <td colspan="10" class="text-center">Loading reservations...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Properties View -->
+        <div id="propertiesView" class="container hidden">
+            <div class="dashboard-header">
+                <h2>Properties</h2>
+                <button class="btn btn-primary" onclick="openPropertyModal()">+ Add Property</button>
+            </div>
+
+            <div class="stats-grid" id="propertiesGrid">
+                <!-- Properties will be dynamically loaded here -->
+            </div>
+        </div>
+
+        <!-- Team View -->
+        <div id="teamView" class="container hidden">
+            <div class="dashboard-header">
+                <h2>Team Management</h2>
+                <button class="btn btn-primary" onclick="openTeamModal()">+ Add Team Member</button>
+            </div>
+
+            <div class="card">
+                <div class="table-responsive">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="teamTable">
+                            <tr>
+                                <td colspan="5" class="text-center">Loading team members...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Reservation Modal -->
+    <div id="reservationModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="reservationModalTitle">New Reservation</h3>
+                <button class="close-btn" onclick="closeReservationModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="guestName">Guest Name *</label>
+                <input type="text" id="guestName" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="guestEmail">Email *</label>
+                    <input type="email" id="guestEmail" required>
+                </div>
+                <div class="form-group">
+                    <label for="guestPhone">Phone *</label>
+                    <input type="tel" id="guestPhone" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="propertySelect">Property *</label>
+                <select id="propertySelect" required>
+                    <option value="">Select a property</option>
+                </select>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="checkIn">Check-in Date *</label>
+                    <input type="date" id="checkIn" required>
+                </div>
+                <div class="form-group">
+                    <label for="checkOut">Check-out Date *</label>
+                    <input type="date" id="checkOut" required>
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="numberOfGuests">Number of Guests *</label>
+                    <input type="number" id="numberOfGuests" min="1" required>
+                </div>
+                <div class="form-group">
+                    <label for="totalAmount">Total Amount (₹) *</label>
+                    <input type="number" id="totalAmount" min="0" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="reservationStatus">Status *</label>
+                <select id="reservationStatus" required>
+                    <option value="pending">Pending</option>
+                    <option value="confirmed">Confirmed</option>
+                    <option value="checked-in">Checked In</option>
+                    <option value="checked-out">Checked Out</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label for="specialRequests">Special Requests</label>
+                <textarea id="specialRequests" rows="3" placeholder="Any special requests or notes..."></textarea>
+            </div>
+            <input type="hidden" id="editReservationId">
+            <button class="btn btn-primary" onclick="saveReservation()">Save Reservation</button>
+        </div>
+    </div>
+
+    <!-- Property Modal -->
+    <div id="propertyModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Property</h3>
+                <button class="close-btn" onclick="closePropertyModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="propertyName">Property Name *</label>
+                <input type="text" id="propertyName" required>
+            </div>
+            <div class="form-group">
+                <label for="propertyLocation">Location *</label>
+                <input type="text" id="propertyLocation" required>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="propertyType">Property Type *</label>
+                    <select id="propertyType" required>
+                        <option value="hotel">Hotel</option>
+                        <option value="resort">Resort</option>
+                        <option value="villa">Villa</option>
+                        <option value="apartment">Apartment</option>
+                        <option value="hostel">Hostel</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="propertyCapacity">Max Capacity *</label>
+                    <input type="number" id="propertyCapacity" min="1" required>
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="propertyDescription">Description</label>
+                <textarea id="propertyDescription" rows="3" placeholder="Describe your property..."></textarea>
+            </div>
+            <button class="btn btn-primary" onclick="saveProperty()">Save Property</button>
+        </div>
+    </div>
+
+    <!-- Team Modal -->
+    <div id="teamModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Add Team Member</h3>
+                <button class="close-btn" onclick="closeTeamModal()">&times;</button>
+            </div>
+            <div class="form-group">
+                <label for="teamMemberName">Name *</label>
+                <input type="text" id="teamMemberName" required>
+            </div>
+            <div class="form-group">
+                <label for="teamMemberEmail">Email *</label>
+                <input type="email" id="teamMemberEmail" required>
+            </div>
+            <div class="form-group">
+                <label for="teamMemberPassword">Password *</label>
+                <input type="password" id="teamMemberPassword" required>
+            </div>
+            <div class="form-group">
+                <label for="teamMemberRole">Role *</label>
+                <select id="teamMemberRole" required>
+                    <option value="admin">Admin</option>
+                    <option value="manager">Manager</option>
+                    <option value="staff">Staff</option>
+                </select>
+            </div>
+            <button class="btn btn-primary" onclick="saveTeamMember()">Add Team Member</button>
+        </div>
+    </div>
+
+    <script>
+        // PWA Installation
+        let deferredPrompt;
+        
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            document.getElementById('installBanner').classList.add('show');
+        });
+
+        function installPWA() {
+            if (deferredPrompt) {
+                deferredPrompt.prompt();
+                deferredPrompt.userChoice.then((choiceResult) => {
+                    if (choiceResult.outcome === 'accepted') {
+                        console.log('User accepted the install prompt');
+                    }
+                    deferredPrompt = null;
+                    document.getElementById('installBanner').classList.remove('show');
+                });
+            }
+        }
+
+        function dismissInstallBanner() {
+            document.getElementById('installBanner').classList.remove('show');
+        }
+
+        // Service Worker Registration
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js').then(() => {
+                console.log('Service Worker Registered');
+            });
+        }
+
+        // LocalStorage Database
+        class Database {
+            constructor() {
+                this.init();
+            }
+
+            init() {
+                if (!localStorage.getItem('hostizzy_users')) {
+                    const defaultUsers = [
+                        { id: 1, name: 'Admin User', email: 'admin@hostizzy.com', password: 'admin123', role: 'admin', status: 'active' }
+                    ];
+                    localStorage.setItem('hostizzy_users', JSON.stringify(defaultUsers));
+                }
+
+                if (!localStorage.getItem('hostizzy_properties')) {
+                    const defaultProperties = [
+                        { id: 1, name: 'Hostizzy Delhi Central', location: 'New Delhi, India', type: 'hotel', capacity: 50, description: 'Premium hotel in central Delhi' },
+                        { id: 2, name: 'Hostizzy Goa Beach Resort', location: 'Goa, India', type: 'resort', capacity: 80, description: 'Beachfront resort in Goa' },
+                        { id: 3, name: 'Hostizzy Mumbai Villa', location: 'Mumbai, India', type: 'villa', capacity: 20, description: 'Luxury villa in Mumbai' }
+                    ];
+                    localStorage.setItem('hostizzy_properties', JSON.stringify(defaultProperties));
+                }
+
+                if (!localStorage.getItem('hostizzy_reservations')) {
+                    const defaultReservations = this.generateSampleReservations();
+                    localStorage.setItem('hostizzy_reservations', JSON.stringify(defaultReservations));
+                }
+            }
+
+            generateSampleReservations() {
+                const properties = this.getProperties();
+                const reservations = [];
+                const statuses = ['confirmed', 'pending', 'checked-in', 'checked-out', 'cancelled'];
+                const names = ['Rajesh Kumar', 'Priya Sharma', 'Amit Patel', 'Sneha Reddy', 'Vikram Singh', 'Anita Gupta', 'Rahul Mehta', 'Kavita Joshi'];
+                
+                let id = 1;
+                // Generate reservations for the current year
+                for (let month = 0; month < 12; month++) {
+                    for (let i = 0; i < 5; i++) {
+                        const property = properties[Math.floor(Math.random() * properties.length)];
+                        const checkInDate = new Date(2025, month, Math.floor(Math.random() * 28) + 1);
+                        const checkOutDate = new Date(checkInDate);
+                        checkOutDate.setDate(checkOutDate.getDate() + Math.floor(Math.random() * 7) + 1);
+                        
+                        reservations.push({
+                            id: id++,
+                            bookingId: `BK${String(id).padStart(6, '0')}`,
+                            guestName: names[Math.floor(Math.random() * names.length)],
+                            guestEmail: `guest${id}@example.com`,
+                            guestPhone: `+91 ${Math.floor(Math.random() * 9000000000) + 1000000000}`,
+                            propertyId: property.id,
+                            propertyName: property.name,
+                            checkIn: checkInDate.toISOString().split('T')[0],
+                            checkOut: checkOutDate.toISOString().split('T')[0],
+                            numberOfGuests: Math.floor(Math.random() * 4) + 1,
+                            totalAmount: (Math.floor(Math.random() * 10000) + 2000),
+                            status: statuses[Math.floor(Math.random() * statuses.length)],
+                            specialRequests: i % 3 === 0 ? 'Early check-in requested' : '',
+                            createdAt: checkInDate.toISOString()
+                        });
+                    }
+                }
+                
+                return reservations;
+            }
+
+            getUsers() {
+                return JSON.parse(localStorage.getItem('hostizzy_users')) || [];
+            }
+
+            getProperties() {
+                return JSON.parse(localStorage.getItem('hostizzy_properties')) || [];
+            }
+
+            getReservations() {
+                return JSON.parse(localStorage.getItem('hostizzy_reservations')) || [];
+            }
+
+            saveReservation(reservation) {
+                const reservations = this.getReservations();
+                if (reservation.id) {
+                    const index = reservations.findIndex(r => r.id === reservation.id);
+                    if (index !== -1) {
+                        reservations[index] = reservation;
+                    }
+                } else {
+                    reservation.id = reservations.length > 0 ? Math.max(...reservations.map(r => r.id)) + 1 : 1;
+                    reservation.bookingId = `BK${String(reservation.id).padStart(6, '0')}`;
+                    reservation.createdAt = new Date().toISOString();
+                    reservations.push(reservation);
+                }
+                localStorage.setItem('hostizzy_reservations', JSON.stringify(reservations));
+            }
+
+            deleteReservation(id) {
+                const reservations = this.getReservations().filter(r => r.id !== id);
+                localStorage.setItem('hostizzy_reservations', JSON.stringify(reservations));
+            }
+
+            saveProperty(property) {
+                const properties = this.getProperties();
+                if (property.id) {
+                    const index = properties.findIndex(p => p.id === property.id);
+                    if (index !== -1) {
+                        properties[index] = property;
+                    }
+                } else {
+                    property.id = properties.length > 0 ? Math.max(...properties.map(p => p.id)) + 1 : 1;
+                    properties.push(property);
+                }
+                localStorage.setItem('hostizzy_properties', JSON.stringify(properties));
+            }
+
+            saveUser(user) {
+                const users = this.getUsers();
+                if (user.id) {
+                    const index = users.findIndex(u => u.id === user.id);
+                    if (index !== -1) {
+                        users[index] = user;
+                    }
+                } else {
+                    user.id = users.length > 0 ? Math.max(...users.map(u => u.id)) + 1 : 1;
+                    user.status = 'active';
+                    users.push(user);
+                }
+                localStorage.setItem('hostizzy_users', JSON.stringify(users));
+            }
+
+            deleteUser(id) {
+                const users = this.getUsers().filter(u => u.id !== id);
+                localStorage.setItem('hostizzy_users', JSON.stringify(users));
+            }
+        }
+
+        const db = new Database();
+
+        // Authentication
+        function login() {
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            const users = db.getUsers();
+            const user = users.find(u => u.email === email && u.password === password);
+
+            if (user) {
+                sessionStorage.setItem('currentUser', JSON.stringify(user));
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('userEmail').textContent = user.email;
+                showView('dashboard');
+                loadDashboard();
+            } else {
+                alert('Invalid credentials. Try admin@hostizzy.com / admin123');
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('currentUser');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('loginScreen').classList.remove('hidden');
+            document.getElementById('loginEmail').value = '';
+            document.getElementById('loginPassword').value = '';
+        }
+
+        // View Management
+        function showView(viewName) {
+            const views = ['dashboard', 'reservations', 'properties', 'team'];
+            views.forEach(view => {
+                document.getElementById(`${view}View`).classList.add('hidden');
+            });
+            document.getElementById(`${viewName}View`).classList.remove('hidden');
+
+            // Update active nav link
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+
+            // Load data for the view
+            if (viewName === 'dashboard') loadDashboard();
+            if (viewName === 'reservations') loadReservations();
+            if (viewName === 'properties') loadProperties();
+            if (viewName === 'team') loadTeam();
+        }
+
+        // Dashboard
+        function loadDashboard() {
+            const reservations = db.getReservations();
+            const properties = db.getProperties();
+            
+            // Calculate stats
+            const totalReservations = reservations.length;
+            const activeReservations = reservations.filter(r => r.status === 'checked-in').length;
+            const totalRevenue = reservations.reduce((sum, r) => sum + r.totalAmount, 0);
+            
+            document.getElementById('totalReservations').textContent = totalReservations;
+            document.getElementById('activeReservations').textContent = activeReservations;
+            document.getElementById('totalProperties').textContent = properties.length;
+            document.getElementById('totalRevenue').textContent = totalRevenue.toLocaleString('en-IN');
+
+            // Load recent reservations
+            const recentReservations = reservations.slice(-5).reverse();
+            const tableBody = document.getElementById('recentReservationsTable');
+            tableBody.innerHTML = recentReservations.map(r => `
+                <tr>
+                    <td>${r.bookingId}</td>
+                    <td>${r.guestName}</td>
+                    <td>${r.propertyName}</td>
+                    <td>${formatDate(r.checkIn)}</td>
+                    <td>${formatDate(r.checkOut)}</td>
+                    <td><span class="status-badge status-${r.status}">${r.status.toUpperCase()}</span></td>
+                </tr>
+            `).join('');
+        }
+
+        // Reservations
+        function loadReservations() {
+            const reservations = db.getReservations();
+            const properties = db.getProperties();
+            
+            // Populate property filter
+            const propertyFilter = document.getElementById('propertyFilter');
+            propertyFilter.innerHTML = '<option value="">All Properties</option>' + 
+                properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+            displayReservations(reservations);
+        }
+
+        function displayReservations(reservations) {
+            const tableBody = document.getElementById('reservationsTable');
+            
+            if (reservations.length === 0) {
+                tableBody.innerHTML = `
+                    <tr>
+                        <td colspan="10">
+                            <div class="empty-state">
+                                <div class="empty-state-icon">📋</div>
+                                <h3>No reservations found</h3>
+                                <p>Start by creating your first reservation</p>
+                                <button class="btn btn-primary" onclick="openReservationModal()">Create Reservation</button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+                return;
+            }
+
+            tableBody.innerHTML = reservations.map(r => `
+                <tr>
+                    <td>${r.bookingId}</td>
+                    <td>${r.guestName}</td>
+                    <td>${r.guestPhone}</td>
+                    <td>${r.propertyName}</td>
+                    <td>${formatDate(r.checkIn)}</td>
+                    <td>${formatDate(r.checkOut)}</td>
+                    <td>${r.numberOfGuests}</td>
+                    <td>₹${r.totalAmount.toLocaleString('en-IN')}</td>
+                    <td><span class="status-badge status-${r.status}">${r.status.toUpperCase()}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            <button class="btn-icon btn-edit" onclick="editReservation(${r.id})">Edit</button>
+                            <button class="btn-icon btn-delete" onclick="deleteReservation(${r.id})">Delete</button>
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function filterReservations() {
+            let reservations = db.getReservations();
+            
+            const searchTerm = document.getElementById('searchReservations').value.toLowerCase();
+            const statusFilter = document.getElementById('statusFilter').value;
+            const propertyFilter = document.getElementById('propertyFilter').value;
+            const dateFilter = document.getElementById('dateFilter').value;
+
+            if (searchTerm) {
+                reservations = reservations.filter(r => 
+                    r.guestName.toLowerCase().includes(searchTerm) ||
+                    r.bookingId.toLowerCase().includes(searchTerm) ||
+                    r.propertyName.toLowerCase().includes(searchTerm)
+                );
+            }
+
+            if (statusFilter) {
+                reservations = reservations.filter(r => r.status === statusFilter);
+            }
+
+            if (propertyFilter) {
+                reservations = reservations.filter(r => r.propertyId == propertyFilter);
+            }
+
+            if (dateFilter) {
+                reservations = reservations.filter(r => r.checkIn === dateFilter || r.checkOut === dateFilter);
+            }
+
+            displayReservations(reservations);
+        }
+
+        function openReservationModal(id = null) {
+            const modal = document.getElementById('reservationModal');
+            const properties = db.getProperties();
+            
+            // Populate property select
+            const propertySelect = document.getElementById('propertySelect');
+            propertySelect.innerHTML = '<option value="">Select a property</option>' + 
+                properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+
+            if (id) {
+                const reservation = db.getReservations().find(r => r.id === id);
+                document.getElementById('reservationModalTitle').textContent = 'Edit Reservation';
+                document.getElementById('guestName').value = reservation.guestName;
+                document.getElementById('guestEmail').value = reservation.guestEmail;
+                document.getElementById('guestPhone').value = reservation.guestPhone;
+                document.getElementById('propertySelect').value = reservation.propertyId;
+                document.getElementById('checkIn').value = reservation.checkIn;
+                document.getElementById('checkOut').value = reservation.checkOut;
+                document.getElementById('numberOfGuests').value = reservation.numberOfGuests;
+                document.getElementById('totalAmount').value = reservation.totalAmount;
+                document.getElementById('reservationStatus').value = reservation.status;
+                document.getElementById('specialRequests').value = reservation.specialRequests || '';
+                document.getElementById('editReservationId').value = reservation.id;
+            } else {
+                document.getElementById('reservationModalTitle').textContent = 'New Reservation';
+                document.getElementById('guestName').value = '';
+                document.getElementById('guestEmail').value = '';
+                document.getElementById('guestPhone').value = '';
+                document.getElementById('propertySelect').value = '';
+                document.getElementById('checkIn').value = '';
+                document.getElementById('checkOut').value = '';
+                document.getElementById('numberOfGuests').value = '';
+                document.getElementById('totalAmount').value = '';
+                document.getElementById('reservationStatus').value = 'pending';
+                document.getElementById('specialRequests').value = '';
+                document.getElementById('editReservationId').value = '';
+            }
+
+            modal.classList.add('active');
+        }
+
+        function closeReservationModal() {
+            document.getElementById('reservationModal').classList.remove('active');
+        }
+
+        function saveReservation() {
+            const propertyId = parseInt(document.getElementById('propertySelect').value);
+            const property = db.getProperties().find(p => p.id === propertyId);
+            
+            const reservation = {
+                id: document.getElementById('editReservationId').value ? parseInt(document.getElementById('editReservationId').value) : null,
+                guestName: document.getElementById('guestName').value,
+                guestEmail: document.getElementById('guestEmail').value,
+                guestPhone: document.getElementById('guestPhone').value,
+                propertyId: propertyId,
+                propertyName: property.name,
+                checkIn: document.getElementById('checkIn').value,
+                checkOut: document.getElementById('checkOut').value,
+                numberOfGuests: parseInt(document.getElementById('numberOfGuests').value),
+                totalAmount: parseInt(document.getElementById('totalAmount').value),
+                status: document.getElementById('reservationStatus').value,
+                specialRequests: document.getElementById('specialRequests').value
+            };
+
+            db.saveReservation(reservation);
+            closeReservationModal();
+            loadReservations();
+            loadDashboard();
+            alert('Reservation saved successfully!');
+        }
+
+        function editReservation(id) {
+            openReservationModal(id);
+        }
+
+        function deleteReservation(id) {
+            if (confirm('Are you sure you want to delete this reservation?')) {
+                db.deleteReservation(id);
+                loadReservations();
+                loadDashboard();
+                alert('Reservation deleted successfully!');
+            }
+        }
+
+        // Properties
+        function loadProperties() {
+            const properties = db.getProperties();
+            const reservations = db.getReservations();
+            const grid = document.getElementById('propertiesGrid');
+
+            grid.innerHTML = properties.map(p => {
+                const propertyReservations = reservations.filter(r => r.propertyId === p.id);
+                const activeBookings = propertyReservations.filter(r => r.status === 'checked-in').length;
+                
+                return `
+                    <div class="stat-card">
+                        <h3 style="margin-bottom: 10px; color: var(--primary);">${p.name}</h3>
+                        <p style="color: #999; font-size: 14px; margin-bottom: 10px;">📍 ${p.location}</p>
+                        <p style="margin-bottom: 10px;"><strong>Type:</strong> ${p.type}</p>
+                        <p style="margin-bottom: 10px;"><strong>Capacity:</strong> ${p.capacity} guests</p>
+                        <p style="margin-bottom: 15px;"><strong>Active Bookings:</strong> ${activeBookings}</p>
+                        <p style="color: #666; font-size: 13px;">${p.description}</p>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openPropertyModal() {
+            document.getElementById('propertyModal').classList.add('active');
+        }
+
+        function closePropertyModal() {
+            document.getElementById('propertyModal').classList.remove('active');
+            document.getElementById('propertyName').value = '';
+            document.getElementById('propertyLocation').value = '';
+            document.getElementById('propertyType').value = 'hotel';
+            document.getElementById('propertyCapacity').value = '';
+            document.getElementById('propertyDescription').value = '';
+        }
+
+        function saveProperty() {
+            const property = {
+                name: document.getElementById('propertyName').value,
+                location: document.getElementById('propertyLocation').value,
+                type: document.getElementById('propertyType').value,
+                capacity: parseInt(document.getElementById('propertyCapacity').value),
+                description: document.getElementById('propertyDescription').value
+            };
+
+            db.saveProperty(property);
+            closePropertyModal();
+            loadProperties();
+            loadDashboard();
+            alert('Property saved successfully!');
+        }
+
+        // Team
+        function loadTeam() {
+            const users = db.getUsers();
+            const tableBody = document.getElementById('teamTable');
+
+            tableBody.innerHTML = users.map(u => `
+                <tr>
+                    <td>${u.name}</td>
+                    <td>${u.email}</td>
+                    <td><span class="status-badge status-confirmed">${u.role.toUpperCase()}</span></td>
+                    <td><span class="status-badge ${u.status === 'active' ? 'status-confirmed' : 'status-cancelled'}">${u.status.toUpperCase()}</span></td>
+                    <td>
+                        <div class="action-buttons">
+                            ${u.id !== 1 ? `<button class="btn-icon btn-delete" onclick="deleteTeamMember(${u.id})">Remove</button>` : ''}
+                        </div>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function openTeamModal() {
+            document.getElementById('teamModal').classList.add('active');
+        }
+
+        function closeTeamModal() {
+            document.getElementById('teamModal').classList.remove('active');
+            document.getElementById('teamMemberName').value = '';
+            document.getElementById('teamMemberEmail').value = '';
+            document.getElementById('teamMemberPassword').value = '';
+            document.getElementById('teamMemberRole').value = 'staff';
+        }
+
+        function saveTeamMember() {
+            const user = {
+                name: document.getElementById('teamMemberName').value,
+                email: document.getElementById('teamMemberEmail').value,
+                password: document.getElementById('teamMemberPassword').value,
+                role: document.getElementById('teamMemberRole').value
+            };
+
+            db.saveUser(user);
+            closeTeamModal();
+            loadTeam();
+            alert('Team member added successfully!');
+        }
+
+        function deleteTeamMember(id) {
+            if (confirm('Are you sure you want to remove this team member?')) {
+                db.deleteUser(id);
+                loadTeam();
+                alert('Team member removed successfully!');
+            }
+        }
+
+        // Utility Functions
+        function formatDate(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        }
+
+        // Check if user is logged in on page load
+        window.addEventListener('load', () => {
+            const currentUser = sessionStorage.getItem('currentUser');
+            if (currentUser) {
+                const user = JSON.parse(currentUser);
+                document.getElementById('loginScreen').classList.add('hidden');
+                document.getElementById('mainApp').classList.remove('hidden');
+                document.getElementById('userEmail').textContent = user.email;
+                loadDashboard();
+            }
+        });
+    </script>
+</body>
+</html>
