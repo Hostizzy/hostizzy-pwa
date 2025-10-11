@@ -812,6 +812,8 @@
         }
 
         </style>
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
 <body>
     <!-- Install Banner -->
@@ -1185,6 +1187,219 @@
     </div>
 
     <script>
+
+        // ================================================
+        // SUPABASE CONFIGURATION
+        // ================================================
+        // TODO: Replace these with your actual Supabase credentials
+        // Get them from: Supabase Dashboard -> Settings -> API
+        
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE';  // e.g., 'https://xxxxx.supabase.co'
+        const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY_HERE';  // Long string from Settings -> API
+        
+        // Initialize Supabase client
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        
+        // ================================================
+        // SUPABASE DATABASE LAYER
+        // ================================================
+        
+        const supabaseDB = {
+            // Properties
+            async getProperties() {
+                try {
+                    const { data, error } = await supabase
+                        .from('properties')
+                        .select('*')
+                        .order('name');
+                    
+                    if (error) throw error;
+                    return data || [];
+                } catch (error) {
+                    console.error('Error fetching properties:', error);
+                    return [];
+                }
+            },
+            
+            async saveProperty(property) {
+                try {
+                    if (property.id) {
+                        // Update existing
+                        const { data, error } = await supabase
+                            .from('properties')
+                            .update(property)
+                            .eq('id', property.id)
+                            .select();
+                        
+                        if (error) throw error;
+                        return data[0];
+                    } else {
+                        // Insert new
+                        const { data, error } = await supabase
+                            .from('properties')
+                            .insert([property])
+                            .select();
+                        
+                        if (error) throw error;
+                        return data[0];
+                    }
+                } catch (error) {
+                    console.error('Error saving property:', error);
+                    throw error;
+                }
+            },
+            
+            async deleteProperty(id) {
+                try {
+                    const { error } = await supabase
+                        .from('properties')
+                        .delete()
+                        .eq('id', id);
+                    
+                    if (error) throw error;
+                    return true;
+                } catch (error) {
+                    console.error('Error deleting property:', error);
+                    throw error;
+                }
+            },
+            
+            // Reservations
+            async getReservations() {
+                try {
+                    const { data, error } = await supabase
+                        .from('reservations')
+                        .select('*')
+                        .order('check_in', { ascending: false });
+                    
+                    if (error) throw error;
+                    
+                    // Convert snake_case to camelCase for compatibility
+                    return (data || []).map(r => ({
+                        id: r.id,
+                        bookingId: r.booking_id,
+                        propertyId: r.property_id,
+                        propertyName: r.property_name,
+                        bookingDate: r.booking_date,
+                        checkIn: r.check_in,
+                        checkOut: r.check_out,
+                        month: r.month,
+                        nights: r.nights,
+                        guestName: r.guest_name,
+                        guestEmail: r.guest_email,
+                        guestPhone: r.guest_phone,
+                        guestCity: r.guest_city,
+                        status: r.status,
+                        bookingSource: r.booking_source,
+                        numberOfRooms: r.number_of_rooms,
+                        adults: r.adults,
+                        kids: r.kids,
+                        numberOfGuests: r.number_of_guests,
+                        stayAmount: parseFloat(r.stay_amount) || 0,
+                        extraGuestCharges: parseFloat(r.extra_guest_charges) || 0,
+                        mealsChef: parseFloat(r.meals_chef) || 0,
+                        bonfireOther: parseFloat(r.bonfire_other) || 0,
+                        taxes: parseFloat(r.taxes) || 0,
+                        totalAmountPreTax: parseFloat(r.total_amount_pre_tax) || 0,
+                        totalAmountIncTax: parseFloat(r.total_amount_inc_tax) || 0,
+                        totalAmount: parseFloat(r.total_amount) || 0,
+                        damages: parseFloat(r.damages) || 0,
+                        hostizzyRevenue: parseFloat(r.hostizzy_revenue) || 0,
+                        revenueSharePercent: parseFloat(r.revenue_share_percent) || 0,
+                        avgRoomRate: parseFloat(r.avg_room_rate) || 0,
+                        avgNightlyRate: parseFloat(r.avg_nightly_rate) || 0,
+                        availableInventory: r.available_inventory,
+                        specialRequests: r.special_requests,
+                        createdAt: r.created_at
+                    }));
+                } catch (error) {
+                    console.error('Error fetching reservations:', error);
+                    return [];
+                }
+            },
+            
+            async saveReservation(reservation) {
+                try {
+                    // Convert camelCase to snake_case for database
+                    const dbReservation = {
+                        booking_id: reservation.bookingId,
+                        property_id: reservation.propertyId,
+                        property_name: reservation.propertyName,
+                        booking_date: reservation.bookingDate,
+                        check_in: reservation.checkIn,
+                        check_out: reservation.checkOut,
+                        month: reservation.month,
+                        nights: reservation.nights,
+                        guest_name: reservation.guestName,
+                        guest_email: reservation.guestEmail,
+                        guest_phone: reservation.guestPhone,
+                        guest_city: reservation.guestCity,
+                        status: reservation.status,
+                        booking_source: reservation.bookingSource,
+                        number_of_rooms: reservation.numberOfRooms,
+                        adults: reservation.adults,
+                        kids: reservation.kids,
+                        number_of_guests: reservation.numberOfGuests,
+                        stay_amount: reservation.stayAmount,
+                        extra_guest_charges: reservation.extraGuestCharges,
+                        meals_chef: reservation.mealsChef,
+                        bonfire_other: reservation.bonfireOther,
+                        taxes: reservation.taxes,
+                        total_amount_pre_tax: reservation.totalAmountPreTax,
+                        total_amount_inc_tax: reservation.totalAmountIncTax,
+                        total_amount: reservation.totalAmount,
+                        damages: reservation.damages,
+                        hostizzy_revenue: reservation.hostizzyRevenue,
+                        revenue_share_percent: reservation.revenueSharePercent,
+                        avg_room_rate: reservation.avgRoomRate,
+                        avg_nightly_rate: reservation.avgNightlyRate,
+                        available_inventory: reservation.availableInventory,
+                        special_requests: reservation.specialRequests
+                    };
+                    
+                    if (reservation.id) {
+                        // Update existing
+                        const { data, error } = await supabase
+                            .from('reservations')
+                            .update(dbReservation)
+                            .eq('id', reservation.id)
+                            .select();
+                        
+                        if (error) throw error;
+                        return data[0];
+                    } else {
+                        // Insert new
+                        const { data, error } = await supabase
+                            .from('reservations')
+                            .insert([dbReservation])
+                            .select();
+                        
+                        if (error) throw error;
+                        return data[0];
+                    }
+                } catch (error) {
+                    console.error('Error saving reservation:', error);
+                    throw error;
+                }
+            },
+            
+            async deleteReservation(id) {
+                try {
+                    const { error } = await supabase
+                        .from('reservations')
+                        .delete()
+                        .eq('id', id);
+                    
+                    if (error) throw error;
+                    return true;
+                } catch (error) {
+                    console.error('Error deleting reservation:', error);
+                    throw error;
+                }
+            }
+        };
+
+
         // PWA Installation
         let deferredPrompt;
         
@@ -20332,9 +20547,9 @@
 
         // Dashboard
 // ENHANCED Dashboard with Advanced Analytics
-        function loadDashboard() {
-            const reservations = db.getReservations();
-            const properties = db.getProperties();
+        async function loadDashboard() {
+            const reservations = await db.getReservations();
+            const properties = await db.getProperties();
             
             // Basic stats
             const totalReservations = reservations.length;
@@ -20535,9 +20750,9 @@
         }
 
                 // Reservations
-        function loadReservations() {
-            const reservations = db.getReservations();
-            const properties = db.getProperties();
+        async function loadReservations() {
+            const reservations = await db.getReservations();
+            const properties = await db.getProperties();
             
             // Populate property filter
             const propertyFilter = document.getElementById('propertyFilter');
@@ -20640,7 +20855,7 @@
 
         function openReservationModal(id = null) {
             const modal = document.getElementById('reservationModal');
-            const properties = db.getProperties();
+            const properties = await db.getProperties();
             
             // Populate property select
             const propertySelect = document.getElementById('propertySelect');
@@ -20920,9 +21135,9 @@
         }
 
         // Properties
-        function loadProperties() {
-            const properties = db.getProperties();
-            const reservations = db.getReservations();
+        async function loadProperties() {
+            const properties = await db.getProperties();
+            const reservations = await db.getReservations();
             const grid = document.getElementById('propertiesGrid');
 
             grid.innerHTML = properties.map(p => {
@@ -21033,7 +21248,7 @@
 
         // Export to CSV
         function exportToCSV() {
-            const reservations = db.getReservations();
+            const reservations = await db.getReservations();
             
             // Create CSV header
             let csv = 'Booking ID,Guest Name,Email,Phone,Property,Check-in,Check-out,Guests,Amount (₹),Status,Booking Source\n';
