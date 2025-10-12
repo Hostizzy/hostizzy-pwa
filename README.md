@@ -1,4 +1,4 @@
-# Hostizzy PWA - Property Reservation Management System
+# Hostizzy -  Reservation Management System
 
 A comprehensive Progressive Web App (PWA) for managing property reservations for Hostizzy, built by Hostsphere India Private Limited.
 
