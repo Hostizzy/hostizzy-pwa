@@ -1,51 +1,33 @@
 {
-  "name": "Hostizzy - Property Reservation Management",
+  "name": "Hostizzy Management System",
   "short_name": "Hostizzy",
-  "description": "Professional property reservation management system for Hostizzy hospitality brand",
-  "start_url": "/hostizzy-pwa.html",
+  "description": "Property & Reservation Management System",
+  "start_url": "/",
   "display": "standalone",
-  "background_color": "#F7F7F7",
-  "theme_color": "#FF5A5F",
-  "orientation": "portrait-primary",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "any",
   "icons": [
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'><rect width='192' height='192' fill='%23FF5A5F'/><text x='96' y='140' font-size='120' text-anchor='middle' fill='white'>🏨</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%232563eb'/><text y='75' x='50' text-anchor='middle' font-size='60' fill='white'>🏨</text></svg>",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     },
     {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' fill='%23FF5A5F'/><text x='256' y='380' font-size='320' text-anchor='middle' fill='white'>🏨</text></svg>",
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' fill='%232563eb'/><text y='75' x='50' text-anchor='middle' font-size='60' fill='white'>🏨</text></svg>",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
     }
   ],
-  "categories": ["business", "productivity", "utilities"],
-  "shortcuts": [
+  "categories": ["business", "productivity"],
+  "screenshots": [
     {
-      "name": "New Reservation",
-      "short_name": "New Booking",
-      "description": "Create a new property reservation",
-      "url": "/hostizzy-pwa.html?action=new-reservation",
-      "icons": [
-        {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><text y='.9em' font-size='80'>➕</text></svg>",
-          "sizes": "96x96"
-        }
-      ]
-    },
-    {
-      "name": "Dashboard",
-      "short_name": "Dashboard",
-      "description": "View dashboard and analytics",
-      "url": "/hostizzy-pwa.html?action=dashboard",
-      "icons": [
-        {
-          "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 96 96'><text y='.9em' font-size='80'>📊</text></svg>",
-          "sizes": "96x96"
-        }
-      ]
+      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect width='540' height='720' fill='%23f8fafc'/><text y='360' x='270' text-anchor='middle' font-size='40' fill='%232563eb'>Hostizzy Dashboard</text></svg>",
+      "sizes": "540x720",
+      "type": "image/svg+xml",
+      "form_factor": "narrow"
     }
   ]
 }

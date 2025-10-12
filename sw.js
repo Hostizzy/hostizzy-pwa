@@ -1,6 +1,7 @@
 const CACHE_NAME = 'hostizzy-v1';
 const urlsToCache = [
-  '/hostizzy-pwa.html',
+  '/',
+  '/index.html',
   '/manifest.json'
 ];
 
@@ -13,9 +14,10 @@ self.addEventListener('install', event => {
         return cache.addAll(urlsToCache);
       })
   );
+  self.skipWaiting();
 });
 
-// Fetch from cache
+// Fetch with Cache Strategy
 self.addEventListener('fetch', event => {
   event.respondWith(
     caches.match(event.request)
@@ -25,29 +27,26 @@ self.addEventListener('fetch', event => {
           return response;
         }
         
-        return fetch(event.request).then(
-          response => {
-            // Check if we received a valid response
-            if(!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone the response
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
+        return fetch(event.request).then(response => {
+          // Check if valid response
+          if (!response || response.status !== 200 || response.type !== 'basic') {
             return response;
           }
-        );
+          
+          // Clone the response
+          const responseToCache = response.clone();
+          
+          caches.open(CACHE_NAME).then(cache => {
+            cache.put(event.request, responseToCache);
+          });
+          
+          return response;
+        });
       })
   );
 });
 
-// Update Service Worker
+// Activate Service Worker
 self.addEventListener('activate', event => {
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
@@ -61,9 +60,10 @@ self.addEventListener('activate', event => {
       );
     })
   );
+  return self.clients.claim();
 });
 
-// Background Sync for offline reservation creation
+// Background Sync (for offline actions)
 self.addEventListener('sync', event => {
   if (event.tag === 'sync-reservations') {
     event.waitUntil(syncReservations());
@@ -71,29 +71,20 @@ self.addEventListener('sync', event => {
 });
 
 async function syncReservations() {
-  // This would sync any pending reservations created while offline
+  // Sync offline data when back online
   console.log('Syncing reservations...');
 }
 
-// Push Notifications (for future implementation)
+// Push Notifications (optional for future)
 self.addEventListener('push', event => {
   const options = {
-    body: event.data ? event.data.text() : 'New notification from Hostizzy',
-    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 192 192"><rect width="192" height="192" fill="%23FF5A5F"/><text x="96" y="140" font-size="120" text-anchor="middle" fill="white">🏨</text></svg>',
-    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 96 96"><text y=".9em" font-size="80">🏨</text></svg>',
-    vibrate: [200, 100, 200],
-    tag: 'hostizzy-notification'
+    body: event.data ? event.data.text() : 'New notification',
+    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%232563eb"/><text y="75" x="50" text-anchor="middle" font-size="60" fill="white">🏨</text></svg>',
+    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%232563eb"/></svg>',
+    vibrate: [200, 100, 200]
   };
-
+  
   event.waitUntil(
     self.registration.showNotification('Hostizzy', options)
-  );
-});
-
-// Notification click handler
-self.addEventListener('notificationclick', event => {
-  event.notification.close();
-  event.waitUntil(
-    clients.openWindow('/hostizzy-pwa.html')
   );
 });
