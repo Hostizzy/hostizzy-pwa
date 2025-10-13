@@ -1,7 +1,7 @@
 {
   "name": "Hostizzy Management System",
   "short_name": "Hostizzy",
-  "description": "Property & Reservation Management System",
+  "description": "Property & Reservation Management System by Hostsphere India",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
@@ -19,15 +19,6 @@
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any maskable"
-    }
-  ],
-  "categories": ["business", "productivity"],
-  "screenshots": [
-    {
-      "src": "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 540 720'><rect width='540' height='720' fill='%23f8fafc'/><text y='360' x='270' text-anchor='middle' font-size='40' fill='%232563eb'>Hostizzy Dashboard</text></svg>",
-      "sizes": "540x720",
-      "type": "image/svg+xml",
-      "form_factor": "narrow"
     }
   ]
 }

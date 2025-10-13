@@ -1,4 +1,4 @@
-const CACHE_NAME = 'hostizzy-v1';
+const CACHE_NAME = 'hostizzy-v3';
 const urlsToCache = [
   '/',
   '/index.html',
@@ -7,53 +7,56 @@ const urlsToCache = [
 
 // Install Service Worker
 self.addEventListener('install', event => {
+  console.log('Service Worker installing...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('Opened cache');
+        console.log('Cache opened');
         return cache.addAll(urlsToCache);
       })
   );
   self.skipWaiting();
 });
 
-// Fetch with Cache Strategy
+// Fetch with Network-First Strategy
 self.addEventListener('fetch', event => {
+  if (event.request.method !== 'GET') {
+    return;
+  }
+  
   event.respondWith(
-    caches.match(event.request)
+    fetch(event.request)
       .then(response => {
-        // Cache hit - return response
-        if (response) {
-          return response;
-        }
-        
-        return fetch(event.request).then(response => {
-          // Check if valid response
-          if (!response || response.status !== 200 || response.type !== 'basic') {
-            return response;
-          }
-          
-          // Clone the response
-          const responseToCache = response.clone();
-          
-          caches.open(CACHE_NAME).then(cache => {
-            cache.put(event.request, responseToCache);
-          });
-          
-          return response;
+        const responseToCache = response.clone();
+        caches.open(CACHE_NAME).then(cache => {
+          cache.put(event.request, responseToCache);
         });
+        return response;
+      })
+      .catch(() => {
+        return caches.match(event.request)
+          .then(response => {
+            if (response) {
+              return response;
+            }
+            if (event.request.mode === 'navigate') {
+              return caches.match('/index.html');
+            }
+          });
       })
   );
 });
 
 // Activate Service Worker
 self.addEventListener('activate', event => {
+  console.log('Service Worker activating...');
   const cacheWhitelist = [CACHE_NAME];
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheWhitelist.indexOf(cacheName) === -1) {
+            console.log('Deleting old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
@@ -63,28 +66,4 @@ self.addEventListener('activate', event => {
   return self.clients.claim();
 });
 
-// Background Sync (for offline actions)
-self.addEventListener('sync', event => {
-  if (event.tag === 'sync-reservations') {
-    event.waitUntil(syncReservations());
-  }
-});
-
-async function syncReservations() {
-  // Sync offline data when back online
-  console.log('Syncing reservations...');
-}
-
-// Push Notifications (optional for future)
-self.addEventListener('push', event => {
-  const options = {
-    body: event.data ? event.data.text() : 'New notification',
-    icon: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%232563eb"/><text y="75" x="50" text-anchor="middle" font-size="60" fill="white">🏨</text></svg>',
-    badge: 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><circle cx="50" cy="50" r="50" fill="%232563eb"/></svg>',
-    vibrate: [200, 100, 200]
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification('Hostizzy', options)
-  );
-});
+console.log('Service Worker loaded');
