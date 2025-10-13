@@ -2392,7 +2392,7 @@
                     return;
                 }
                 document.getElementById('reservationModalTitle').textContent = 'Edit Reservation';
-                document.getElementById('editReservationId').value = r.booking_id;
+                document.getElementById('editReservationId').value = r.id;
                 document.getElementById('propertySelect').value = r.property_id;
                 document.getElementById('bookingStatus').value = r.status;
                 document.getElementById('checkInDate').value = r.check_in;
@@ -2526,7 +2526,14 @@
                 
                 // Generate booking_id for new reservations
                 if (!editId) {
-                    reservation.booking_id = `HST${Date.now()}${Math.random().toString(36).substring(2, 7).toUpperCase()}`;
+                    const year = new Date().getFullYear().toString().slice(-2); // last two digits of year
+                    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // avoids ambiguous chars
+                    const bytes = crypto.getRandomValues(new Uint8Array(6));    // length of random part
+                    let rand = "";
+                    for (const b of bytes) {
+                        rand += alphabet[b % alphabet.length];
+                    }
+                    reservation.booking_id = `HST${year}${rand}`; // e.g. HST25QN0RNM
                 }
                 
                 if (navigator.onLine) {
