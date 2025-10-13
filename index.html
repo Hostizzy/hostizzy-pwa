@@ -3337,5 +3337,46 @@
             }
         });
     </script>
+    <script>
+    // Register SW
+    if ('serviceWorker' in navigator) {
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(reg => console.log('SW registered', reg.scope))
+            .catch(err => console.error('SW registration failed', err));
+        });
+    }
+
+    // Handle PWA install prompt
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+    const installBar = document.getElementById('installBar');
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+        // Stop Chrome from auto-showing the mini-infobar
+        e.preventDefault();
+        deferredPrompt = e;
+        if (installBar) installBar.style.display = 'flex';
+    });
+
+    if (installBtn) {
+        installBtn.addEventListener('click', async () => {
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`PWA install: ${outcome}`);
+        deferredPrompt = null;
+        if (installBar) installBar.style.display = 'none';
+        });
+    }
+
+    // Optional: hide prompt UI if already installed
+    window.addEventListener('appinstalled', () => {
+        deferredPrompt = null;
+        if (installBar) installBar.style.display = 'none';
+        console.log('PWA installed');
+    });
+</script>
+
 </body>
 </html>
