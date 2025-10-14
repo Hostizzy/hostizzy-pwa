@@ -1447,6 +1447,11 @@
                     <label>Check-out Date *</label>
                     <input type="date" id="checkOutDate" required onchange="calculateTaxes()">
                 </div>
+                <!-- NEW: auto nights -->
+                <div class="form-group">
+                    <label>Nights (auto)</label>
+                    <input type="number" id="nights" value="0" readonly style="background:#f1f5f9;">
+                </div>
             </div>
 
             <div class="form-row">
@@ -3014,7 +3019,7 @@
                 return;
             }
             
- // Check online status
+        // Check online status
             if (!navigator.onLine) {
                 if (!confirm('You are offline. This reservation will be saved locally and synced when you are back online. Continue?')) {
                     return;
@@ -3037,7 +3042,13 @@
                     showToast('Validation Error', 'Check-out date must be after check-in date', '❌');
                     return;
                 }
+                // Calculate number of nights
+                const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
                 
+                if (nights <= 0) {
+                    showToast('Validation Error', 'Check-out date must be after check-in date', '❌');
+                    return;
+        }
                 const adults = parseInt(document.getElementById('adults').value) || 0;
                 const kids = parseInt(document.getElementById('kids').value) || 0;
                 const numberOfGuests = adults + kids;
