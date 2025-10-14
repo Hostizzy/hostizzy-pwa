@@ -138,6 +138,11 @@
             color: white;
         }
 
+        .btn-warning {
+            background: var(--warning);
+            color: white;
+        }
+
         .btn-sm {
             padding: 8px 16px;
             font-size: 13px;
@@ -686,6 +691,56 @@
             color: var(--primary);
         }
 
+        /* Notification Toast */
+        .toast {
+            position: fixed;
+            bottom: 100px;
+            right: 20px;
+            background: white;
+            padding: 16px 20px;
+            border-radius: 8px;
+            box-shadow: var(--shadow-lg);
+            display: none;
+            align-items: center;
+            gap: 12px;
+            z-index: 1001;
+            max-width: 400px;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        .toast.show {
+            display: flex;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast-icon {
+            font-size: 24px;
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+
+        .toast-message {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
         @media (max-width: 768px) {
             .navbar {
                 display: none;
@@ -768,6 +823,13 @@
                 right: 8px;
                 font-size: 11px;
                 padding: 6px 12px;
+            }
+
+            .toast {
+                bottom: 70px;
+                right: 10px;
+                left: 10px;
+                max-width: none;
             }
         }
 
@@ -856,6 +918,37 @@
             border-radius: 50%;
             background: var(--danger);
         }
+
+        /* Revenue Split Card */
+        .split-card {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            padding: 20px;
+            background: var(--background);
+            border-radius: 8px;
+        }
+
+        .split-item {
+            text-align: center;
+        }
+
+        .split-amount {
+            font-size: 28px;
+            font-weight: 700;
+            margin-bottom: 8px;
+        }
+
+        .split-label {
+            font-size: 14px;
+            color: var(--text-secondary);
+        }
+
+        .split-percentage {
+            font-size: 12px;
+            color: var(--text-secondary);
+            margin-top: 4px;
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -873,6 +966,16 @@
         <button id="manualSyncBtn" class="sync-button" onclick="manualSync()" style="display: none; background: none; border: none; color: inherit; cursor: pointer; padding: 4px 8px; border-radius: 4px; font-size: 12px;">
             🔄 Sync
         </button>
+    </div>
+
+    <!-- Notification Toast -->
+    <div id="notificationToast" class="toast">
+        <div class="toast-icon" id="toastIcon">🔔</div>
+        <div class="toast-content">
+            <div class="toast-title" id="toastTitle">Notification</div>
+            <div class="toast-message" id="toastMessage">Message here</div>
+        </div>
+        <button onclick="hideToast()" style="background: none; border: none; cursor: pointer; font-size: 18px;">×</button>
     </div>
 
     <!-- Login Screen -->
@@ -994,6 +1097,10 @@
                     <div class="stat-value" id="activeReservations">0</div>
                 </div>
                 <div class="stat-card">
+                    <div class="stat-label">Upcoming Bookings</div>
+                    <div class="stat-value" id="upcomingReservations">0</div>
+                </div>
+                <div class="stat-card">
                     <div class="stat-label">Total Revenue</div>
                     <div class="stat-value">₹<span id="totalRevenue">0</span></div>
                 </div>
@@ -1006,6 +1113,46 @@
             <!-- Enhanced Metrics -->
             <div id="enhancedMetrics" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 24px;">
                 <!-- Will be populated by JavaScript -->
+            </div>
+
+            <!-- Payment Analytics & Revenue Split -->
+            <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); gap: 20px; margin-bottom: 24px;">
+                <!-- Revenue Split -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">💰 Revenue Split</h3>
+                    </div>
+                    <div class="split-card">
+                        <div class="split-item">
+                            <div class="split-amount" style="color: var(--primary);" id="hostizzyTotal">₹0</div>
+                            <div class="split-label">🏢 Hostizzy Revenue</div>
+                            <div class="split-percentage" id="hostizzyPercentage">0%</div>
+                        </div>
+                        <div class="split-item">
+                            <div class="split-amount" style="color: var(--success);" id="ownerTotal">₹0</div>
+                            <div class="split-label">🏠 Owner Revenue</div>
+                            <div class="split-percentage" id="ownerPercentage">0%</div>
+                        </div>
+                    </div>
+                    <div style="margin-top: 16px; padding: 12px; background: var(--background); border-radius: 6px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-size: 13px;">Total Collected:</span>
+                            <strong id="totalCollected">₹0</strong>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="font-size: 13px;">Pending Collection:</span>
+                            <strong style="color: var(--danger);" id="pendingCollection">₹0</strong>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Payment Method Distribution -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">💳 Payment Methods</h3>
+                    </div>
+                    <div id="paymentMethodChart"></div>
+                </div>
             </div>
 
             <!-- Analytics Grid -->
@@ -1033,6 +1180,15 @@
                     <h3 class="card-title">📈 Monthly Performance</h3>
                 </div>
                 <div id="monthlyTrends" style="max-height: 300px; overflow-y: auto;"></div>
+            </div>
+
+            <!-- Payment Reminders -->
+            <div class="card" id="paymentReminders" style="display: none;">
+                <div class="card-header">
+                    <h3 class="card-title">⚠️ Payment Reminders</h3>
+                    <button class="btn btn-primary btn-sm" onclick="openBulkPaymentModal()">Collect Payments</button>
+                </div>
+                <div id="remindersList"></div>
             </div>
 
             <!-- Recent Reservations -->
@@ -1076,7 +1232,7 @@
                     <div class="filter-item">
                         <input type="text" id="searchReservations" placeholder="Search by guest, booking ID..." onkeyup="filterReservations()">
                     </div>
-                    <div class="filter-item" style="max-width: 200px;">
+                    <div class="filter-item" style="max-width: 180px;">
                         <select id="statusFilter" onchange="filterReservations()">
                             <option value="">All Status</option>
                             <option value="confirmed">Confirmed</option>
@@ -1084,6 +1240,16 @@
                             <option value="checked-in">Checked In</option>
                             <option value="checked-out">Checked Out</option>
                             <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    <div class="filter-item" style="max-width: 180px;">
+                        <select id="propertyFilter" onchange="filterReservations()">
+                            <option value="">All Properties</option>
+                        </select>
+                    </div>
+                    <div class="filter-item" style="max-width: 180px;">
+                        <select id="monthFilter" onchange="filterReservations()">
+                            <option value="">All Months</option>
                         </select>
                     </div>
                     <button class="btn btn-secondary btn-sm" onclick="clearFilters()">Clear</button>
@@ -1275,11 +1441,11 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Check-in Date *</label>
-                    <input type="date" id="checkInDate" required>
+                    <input type="date" id="checkInDate" required onchange="calculateTaxes()">
                 </div>
                 <div class="form-group">
                     <label>Check-out Date *</label>
-                    <input type="date" id="checkOutDate" required>
+                    <input type="date" id="checkOutDate" required onchange="calculateTaxes()">
                 </div>
             </div>
 
@@ -1337,33 +1503,36 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Stay Amount (₹)</label>
-                    <input type="number" id="stayAmount" min="0" step="0.01" value="0">
+                    <input type="number" id="stayAmount" min="0" step="0.01" value="0" oninput="calculateTaxes()">
                 </div>
                 <div class="form-group">
                     <label>Extra Guest Charges (₹)</label>
-                    <input type="number" id="extraGuestCharges" min="0" step="0.01" value="0">
+                    <input type="number" id="extraGuestCharges" min="0" step="0.01" value="0" oninput="calculateTaxes()">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
                     <label>Meals/Chef (₹)</label>
-                    <input type="number" id="mealsChef" min="0" step="0.01" value="0">
+                    <input type="number" id="mealsChef" min="0" step="0.01" value="0" oninput="calculateTaxes()">
                 </div>
                 <div class="form-group">
                     <label>Bonfire/Other (₹)</label>
-                    <input type="number" id="bonfireOther" min="0" step="0.01" value="0">
+                    <input type="number" id="bonfireOther" min="0" step="0.01" value="0" oninput="calculateTaxes()">
                 </div>
             </div>
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Taxes (₹)</label>
-                    <input type="number" id="taxes" min="0" step="0.01" value="0">
+                    <label>Taxes (₹) - Auto-calculated</label>
+                    <input type="number" id="taxes" min="0" step="0.01" value="0" readonly style="background: #f1f5f9;">
+                    <small style="font-size: 11px; color: var(--text-secondary); display: block; margin-top: 4px;">
+                        5% for ≤₹7500/night, 18% for >₹7500/night
+                    </small>
                 </div>
                 <div class="form-group">
                     <label>Damages (₹)</label>
-                    <input type="number" id="damages" min="0" step="0.01" value="0">
+                    <input type="number" id="damages" min="0" step="0.01" value="0" oninput="calculateTaxes()">
                 </div>
             </div>
 
@@ -1414,12 +1583,21 @@
 
             <div class="form-group">
                 <label>Payment Method *</label>
-                <select id="paymentMethod" required>
+                <select id="paymentMethod" required onchange="toggleRecipientField()">
                     <option value="">Select Method</option>
                     <option value="cash">💵 Cash</option>
                     <option value="upi">📱 UPI</option>
-                    <option value="card">💳 Card</option>
+                    <option value="gateway">💳 Gateway</option>
                     <option value="bank_transfer">🏦 Bank Transfer</option>
+                </select>
+            </div>
+
+            <div class="form-group" id="paymentRecipientGroup" style="display: none;">
+                <label>Payment Received By *</label>
+                <select id="paymentRecipient" required>
+                    <option value="">Select Recipient</option>
+                    <option value="hostizzy">🏢 Hostizzy</option>
+                    <option value="property_owner">🏠 Property Owner</option>
                 </select>
             </div>
 
@@ -1442,9 +1620,66 @@
         </div>
     </div>
 
+    <!-- Bulk Payment Modal -->
+    <div id="bulkPaymentModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <div class="modal-header">
+                <h3 class="modal-title">💰 Bulk Payment Collection</h3>
+                <button class="close-btn" onclick="closeBulkPaymentModal()">&times;</button>
+            </div>
+
+            <div style="background: var(--background); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <div style="font-weight: 600; margin-bottom: 12px;">Selected Bookings: <span id="bulkPaymentCount">0</span></div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 8px;">
+                    <span>Total Due:</span>
+                    <strong style="color: var(--danger);" id="bulkTotalDue">₹0</strong>
+                </div>
+            </div>
+
+            <div id="bulkPaymentList" style="max-height: 300px; overflow-y: auto; margin-bottom: 20px;">
+                <!-- Will be populated dynamically -->
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label>Payment Method *</label>
+                    <select id="bulkPaymentMethod" required onchange="toggleBulkRecipientField()">
+                        <option value="">Select Method</option>
+                        <option value="cash">💵 Cash</option>
+                        <option value="upi">📱 UPI</option>
+                        <option value="gateway">💳 Gateway</option>
+                        <option value="bank_transfer">🏦 Bank Transfer</option>
+                    </select>
+                </div>
+                <div class="form-group" id="bulkPaymentRecipientGroup" style="display: none;">
+                    <label>Payment Received By *</label>
+                    <select id="bulkPaymentRecipient" required>
+                        <option value="">Select Recipient</option>
+                        <option value="hostizzy">🏢 Hostizzy</option>
+                        <option value="property_owner">🏠 Property Owner</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Payment Date *</label>
+                <input type="date" id="bulkPaymentDate" required>
+            </div>
+
+            <div class="form-group">
+                <label>Notes</label>
+                <textarea id="bulkPaymentNotes" rows="2" placeholder="Optional notes for all payments..."></textarea>
+            </div>
+
+            <button class="btn btn-primary" style="width: 100%;" onclick="saveBulkPayments()">
+                💰 Collect All Payments
+            </button>
+        </div>
+    </div>
+
     <!-- Payment History Modal -->
     <div id="paymentHistoryModal" class="modal">
-        <div class="modal-content" style="max-width: 800px;">
+        <div class="modal-content" style="max-width: 900px;">
             <div class="modal-header">
                 <h3 class="modal-title">Payment History</h3>
                 <button class="close-btn" onclick="closePaymentHistoryModal()">&times;</button>
@@ -1476,6 +1711,7 @@
             </div>
         </div>
     </div>
+
 
     <!-- Property Modal -->
     <div id="propertyModal" class="modal">
@@ -1699,6 +1935,23 @@
             return total;
         }
 
+        // Toast Notifications
+        function showToast(title, message, icon = '🔔') {
+            const toast = document.getElementById('notificationToast');
+            document.getElementById('toastIcon').textContent = icon;
+            document.getElementById('toastTitle').textContent = title;
+            document.getElementById('toastMessage').textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 5000);
+        }
+
+        function hideToast() {
+            document.getElementById('notificationToast').classList.remove('show');
+        }
+
         // Sync Status Management
         function updateSyncIndicator() {
             const indicator = document.getElementById('syncIndicator');
@@ -1751,6 +2004,7 @@
             console.log('Network: Online');
             isOnline = true;
             updateSyncIndicator();
+            showToast('Connection Restored', 'You are back online. Syncing data...', '✅');
             setTimeout(() => autoSync(), 1000);
         });
         
@@ -1758,6 +2012,7 @@
             console.log('Network: Offline');
             isOnline = false;
             updateSyncIndicator();
+            showToast('No Connection', 'You are offline. Changes will be saved locally.', '⚠️');
         });
 
         async function autoSync() {
@@ -1777,21 +2032,21 @@
         async function manualSync() {
             if (syncInProgress) return;
             if (!isOnline) {
-                alert('Cannot sync while offline');
+                showToast('Cannot Sync', 'You are offline', '❌');
                 return;
             }
             
             try {
                 const pendingCount = await countPendingItems();
                 if (pendingCount === 0) {
-                    alert('Nothing to sync!');
+                    showToast('Nothing to Sync', 'All data is up to date', 'ℹ️');
                     return;
                 }
                 
                 await syncAllPendingData();
             } catch (error) {
                 console.error('Manual sync error:', error);
-                alert('Sync failed: ' + error.message);
+                showToast('Sync Failed', error.message, '❌');
             }
         }
 
@@ -1842,17 +2097,18 @@
                 }
                 
                 if (failCount === 0) {
-                    alert(`✅ Synced ${successCount} items successfully!`);
+                    showToast('Sync Complete', `Successfully synced ${successCount} items`, '✅');
                 } else {
-                    alert(`⚠️ Synced ${successCount}, ${failCount} failed`);
+                    showToast('Partial Sync', `Synced ${successCount}, ${failCount} failed`, '⚠️');
                 }
                 
                 await loadReservations();
                 await loadPayments();
+                await loadDashboard();
                 
             } catch (error) {
                 console.error('Sync error:', error);
-                alert('Sync failed: ' + error.message);
+                showToast('Sync Failed', error.message, '❌');
             } finally {
                 syncInProgress = false;
                 updateSyncIndicator();
@@ -1907,9 +2163,7 @@
                 return data;
             },
             async saveReservation(reservation) {
-                // For updates: check if id exists
                 if (reservation.id) {
-                    // Update existing reservation using id
                     const { data, error } = await supabase
                         .from('reservations')
                         .update(reservation)
@@ -1921,7 +2175,6 @@
                     }
                     return data?.[0];
                 } else {
-                    // Insert new reservation - remove id field, let Supabase auto-generate
                     const { id, ...cleanReservation } = reservation;
                     const { data, error } = await supabase
                         .from('reservations')
@@ -2003,7 +2256,7 @@
                 }
             },
             async deleteTeamMember(id) {
-                const { error } = await supabase.from('team_members').delete().eq('id', id);
+                const { error} = await supabase.from('team_members').delete().eq('id', id);
                 if (error) throw error;
             },
             async bulkUpdateReservations(bookingIds, updates) {
@@ -2021,7 +2274,7 @@
             const password = document.getElementById('loginPassword').value;
             
             if (!email || !password) {
-                alert('Please enter email and password');
+                showToast('Login Error', 'Please enter email and password', '❌');
                 return;
             }
             
@@ -2042,12 +2295,13 @@
                     document.getElementById('sidebarUserEmail').textContent = user.email;
                     
                     await loadDashboard();
+                    showToast('Welcome!', `Logged in as ${user.name}`, '👋');
                 } else {
-                    alert('Invalid credentials');
+                    showToast('Login Failed', 'Invalid credentials', '❌');
                 }
             } catch (error) {
                 console.error('Login error:', error);
-                alert('Login error: ' + error.message);
+                showToast('Login Error', error.message, '❌');
             }
         }
 
@@ -2056,6 +2310,7 @@
             currentUser = null;
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
+            showToast('Logged Out', 'See you soon!', '👋');
         }
 
         // Mobile Navigation
@@ -2102,31 +2357,25 @@
         async function loadDashboard() {
             try {
                 allReservations = await db.getReservations();
+                allPayments = await db.getAllPayments();
                 const properties = await db.getProperties();
                 
                 const confirmedReservations = allReservations.filter(r => r.status !== 'cancelled');
                 
                 const totalRevenue = confirmedReservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0);
                 const activeBookings = allReservations.filter(r => r.status === 'checked-in').length;
+                const upcomingBookings = allReservations.filter(r => r.status === 'confirmed').length;
                 const avgBookingValue = confirmedReservations.length > 0 ? totalRevenue / confirmedReservations.length : 0;
-                
-                const pendingPayments = confirmedReservations
-                    .filter(r => r.payment_status !== 'paid')
-                    .reduce((sum, r) => {
-                        const total = parseFloat(r.total_amount) || 0;
-                        const paid = parseFloat(r.paid_amount) || 0;
-                        return sum + (total - paid);
-                    }, 0);
                 
                 // Update primary stats
                 document.getElementById('totalReservations').textContent = allReservations.length;
                 document.getElementById('activeReservations').textContent = activeBookings;
+                document.getElementById('upcomingReservations').textContent = upcomingBookings;
                 document.getElementById('totalRevenue').textContent = Math.round(totalRevenue).toLocaleString('en-IN');
                 document.getElementById('avgBookingValue').textContent = Math.round(avgBookingValue).toLocaleString('en-IN');
                 
                 // Calculate enhanced metrics
                 const hostizzyRevenue = confirmedReservations.reduce((sum, r) => sum + (parseFloat(r.hostizzy_revenue) || 0), 0);
-                const upcomingBookings = allReservations.filter(r => r.status === 'confirmed').length;
                 const totalNights = confirmedReservations.reduce((sum, r) => sum + (r.nights || 0), 0);
                 const avgOccupancyRate = properties.length > 0 ? ((totalNights / (properties.length * 365)) * 100).toFixed(1) : 0;
                 
@@ -2160,6 +2409,12 @@
                 
                 document.getElementById('enhancedMetrics').innerHTML = enhancedHTML;
                 
+                // Payment Analytics - Revenue Split
+                renderRevenueSplit(allPayments, confirmedReservations);
+                
+                // Payment Method Distribution
+                renderPaymentMethodChart(allPayments);
+                
                 // Top Properties Analysis
                 renderTopProperties(confirmedReservations, properties);
                 
@@ -2168,6 +2423,9 @@
                 
                 // Monthly Trends
                 renderMonthlyTrends(confirmedReservations);
+                
+                // Payment Reminders
+                renderPaymentReminders(confirmedReservations);
                 
                 // Recent reservations
                 const recent = allReservations.slice(0, 10);
@@ -2183,8 +2441,78 @@
                 `).join('');
             } catch (error) {
                 console.error('Dashboard error:', error);
-                alert('Error loading dashboard');
+                showToast('Dashboard Error', error.message, '❌');
             }
+        }
+
+        // Feature 1: Payment Analytics - Revenue Split
+        function renderRevenueSplit(payments, reservations) {
+            let hostizzyTotal = 0;
+            let ownerTotal = 0;
+            let totalCollected = 0;
+            
+            payments.forEach(p => {
+                const amount = parseFloat(p.amount) || 0;
+                totalCollected += amount;
+                
+                if (p.payment_recipient === 'hostizzy') {
+                    hostizzyTotal += amount;
+                } else if (p.payment_recipient === 'property_owner') {
+                    ownerTotal += amount;
+                }
+            });
+            
+            const totalRevenue = reservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0);
+            const totalPaid = reservations.reduce((sum, r) => sum + (parseFloat(r.paid_amount) || 0), 0);
+            const pendingCollection = totalRevenue - totalPaid;
+            
+            const hostizzyPercentage = totalCollected > 0 ? ((hostizzyTotal / totalCollected) * 100).toFixed(1) : 0;
+            const ownerPercentage = totalCollected > 0 ? ((ownerTotal / totalCollected) * 100).toFixed(1) : 0;
+            
+            document.getElementById('hostizzyTotal').textContent = '₹' + (hostizzyTotal/100000).toFixed(1) + 'L';
+            document.getElementById('ownerTotal').textContent = '₹' + (ownerTotal/100000).toFixed(1) + 'L';
+            document.getElementById('hostizzyPercentage').textContent = hostizzyPercentage + '% of collected';
+            document.getElementById('ownerPercentage').textContent = ownerPercentage + '% of collected';
+            document.getElementById('totalCollected').textContent = '₹' + Math.round(totalCollected).toLocaleString('en-IN');
+            document.getElementById('pendingCollection').textContent = '₹' + Math.round(pendingCollection).toLocaleString('en-IN');
+        }
+
+        function renderPaymentMethodChart(payments) {
+            const methods = {};
+            
+            payments.forEach(p => {
+                const method = p.payment_method || 'unknown';
+                if (!methods[method]) {
+                    methods[method] = { count: 0, amount: 0 };
+                }
+                methods[method].count += 1;
+                methods[method].amount += parseFloat(p.amount) || 0;
+            });
+            
+            const sortedMethods = Object.entries(methods)
+                .sort((a, b) => b[1].amount - a[1].amount);
+            
+            const totalAmount = payments.reduce((sum, p) => sum + (parseFloat(p.amount) || 0), 0);
+            const colors = { cash: '#10b981', upi: '#3b82f6', gateway: '#8b5cf6', bank_transfer: '#f59e0b' };
+            const icons = { cash: '💵', upi: '📱', gateway: '💳', bank_transfer: '🏦' };
+            
+            const html = sortedMethods.map(([method, data]) => {
+                const percentage = totalAmount > 0 ? ((data.amount / totalAmount) * 100).toFixed(1) : 0;
+                return `
+                    <div style="margin-bottom: 16px;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 4px;">
+                            <span style="font-weight: 600; font-size: 14px;">${icons[method] || '💳'} ${method.replace('_', ' ').toUpperCase()}</span>
+                            <span style="font-weight: 700;">₹${(data.amount/1000).toFixed(1)}K (${percentage}%)</span>
+                        </div>
+                        <div style="background: var(--background); height: 8px; border-radius: 4px; overflow: hidden;">
+                            <div style="width: ${percentage}%; height: 100%; background: ${colors[method] || '#6b7280'}; transition: width 0.3s;"></div>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">${data.count} transactions</div>
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('paymentMethodChart').innerHTML = html || '<div style="text-align: center; color: var(--text-secondary);">No payment data available</div>';
         }
 
         function renderTopProperties(reservations, properties) {
@@ -2313,7 +2641,209 @@
             document.getElementById('monthlyTrends').innerHTML = html || '<div style="text-align: center; color: var(--text-secondary);">No data available</div>';
         }
 
-        // Reservations
+        // Feature 6: Payment Reminders
+        function renderPaymentReminders(reservations) {
+            const today = new Date();
+            const upcomingCheckIns = reservations.filter(r => {
+                const checkInDate = new Date(r.check_in);
+                const daysUntilCheckIn = Math.ceil((checkInDate - today) / (1000 * 60 * 60 * 24));
+                return r.payment_status !== 'paid' && daysUntilCheckIn <= 7 && daysUntilCheckIn >= 0 && r.status !== 'cancelled';
+            }).sort((a, b) => new Date(a.check_in) - new Date(b.check_in));
+
+            const overduePayments = reservations.filter(r => {
+                const checkInDate = new Date(r.check_in);
+                return r.payment_status !== 'paid' && checkInDate < today && r.status !== 'cancelled';
+            });
+
+            const allReminders = [...overduePayments, ...upcomingCheckIns];
+
+            if (allReminders.length === 0) {
+                document.getElementById('paymentReminders').style.display = 'none';
+                return;
+            }
+
+            document.getElementById('paymentReminders').style.display = 'block';
+
+            const html = `
+                <table style="width: 100%;">
+                    <thead>
+                        <tr>
+                            <th style="width: 40px;"><input type="checkbox" id="selectAllReminders" onchange="toggleAllReminders(this)"></th>
+                            <th>Booking ID</th>
+                            <th>Guest</th>
+                            <th>Check-in</th>
+                            <th>Due Amount</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${allReminders.map(r => {
+                            const checkInDate = new Date(r.check_in);
+                            const daysUntilCheckIn = Math.ceil((checkInDate - today) / (1000 * 60 * 60 * 24));
+                            const isOverdue = daysUntilCheckIn < 0;
+                            const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                            
+                            return `
+                                <tr style="background: ${isOverdue ? '#fee2e2' : '#fef3c7'};">
+                                    <td><input type="checkbox" class="reminder-checkbox" data-booking-id="${r.booking_id}"></td>
+                                    <td><strong>${r.booking_id}</strong></td>
+                                    <td>${r.guest_name}</td>
+                                    <td>${formatDate(r.check_in)} ${isOverdue ? '<span style="color: var(--danger); font-weight: 600;">(OVERDUE)</span>' : `<span style="color: var(--warning);">(${daysUntilCheckIn} days)</span>`}</td>
+                                    <td style="color: var(--danger); font-weight: 700;">₹${Math.round(balance).toLocaleString('en-IN')}</td>
+                                    <td><span class="payment-status ${r.payment_status}">${r.payment_status.toUpperCase()}</span></td>
+                                    <td><button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')">Collect</button></td>
+                                </tr>
+                            `;
+                        }).join('')}
+                    </tbody>
+                </table>
+            `;
+
+            document.getElementById('remindersList').innerHTML = html;
+        }
+
+        function toggleAllReminders(checkbox) {
+            document.querySelectorAll('.reminder-checkbox').forEach(cb => {
+                cb.checked = checkbox.checked;
+            });
+        }
+
+        // Feature 2: Bulk Payment Collection
+        function openBulkPaymentModal() {
+            const selectedCheckboxes = document.querySelectorAll('.reminder-checkbox:checked');
+            if (selectedCheckboxes.length === 0) {
+                showToast('No Selection', 'Please select bookings to collect payment', '⚠️');
+                return;
+            }
+
+            const bookingIds = Array.from(selectedCheckboxes).map(cb => cb.getAttribute('data-booking-id'));
+            const selectedBookings = allReservations.filter(r => bookingIds.includes(r.booking_id));
+            
+            let totalDue = 0;
+            const listHTML = selectedBookings.map(r => {
+                const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                totalDue += balance;
+                return `
+                    <div style="padding: 12px; background: var(--background); border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: 600;">${r.booking_id} - ${r.guest_name}</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">${r.property_name} • ${formatDate(r.check_in)}</div>
+                        </div>
+                        <div style="font-weight: 700; color: var(--danger);">₹${Math.round(balance).toLocaleString('en-IN')}</div>
+                    </div>
+                `;
+            }).join('');
+
+            document.getElementById('bulkPaymentCount').textContent = selectedBookings.length;
+            document.getElementById('bulkTotalDue').textContent = '₹' + Math.round(totalDue).toLocaleString('en-IN');
+            document.getElementById('bulkPaymentList').innerHTML = listHTML;
+            document.getElementById('bulkPaymentDate').value = new Date().toISOString().split('T')[0];
+            document.getElementById('bulkPaymentMethod').value = '';
+            document.getElementById('bulkPaymentRecipient').value = '';
+            document.getElementById('bulkPaymentRecipientGroup').style.display = 'none';
+            document.getElementById('bulkPaymentNotes').value = '';
+
+            // Store selected booking IDs
+            window.bulkPaymentBookings = selectedBookings;
+
+            document.getElementById('bulkPaymentModal').classList.add('active');
+        }
+
+        function closeBulkPaymentModal() {
+            document.getElementById('bulkPaymentModal').classList.remove('active');
+            window.bulkPaymentBookings = null;
+        }
+
+        function toggleBulkRecipientField() {
+            const method = document.getElementById('bulkPaymentMethod').value;
+            const recipientGroup = document.getElementById('bulkPaymentRecipientGroup');
+            const recipientSelect = document.getElementById('bulkPaymentRecipient');
+            
+            if (method === 'cash' || method === 'upi' || method === 'bank_transfer') {
+                recipientGroup.style.display = 'block';
+                recipientSelect.required = true;
+            } else {
+                recipientGroup.style.display = 'none';
+                recipientSelect.required = false;
+                recipientSelect.value = '';
+            }
+        }
+
+        async function saveBulkPayments() {
+            if (!window.bulkPaymentBookings || window.bulkPaymentBookings.length === 0) {
+                showToast('Error', 'No bookings selected', '❌');
+                return;
+            }
+
+            const method = document.getElementById('bulkPaymentMethod').value;
+            const date = document.getElementById('bulkPaymentDate').value;
+            const notes = document.getElementById('bulkPaymentNotes').value;
+
+            if (!method || !date) {
+                showToast('Validation Error', 'Please fill all required fields', '❌');
+                return;
+            }
+
+            const recipientGroup = document.getElementById('bulkPaymentRecipientGroup');
+            if (recipientGroup.style.display !== 'none') {
+                const recipient = document.getElementById('bulkPaymentRecipient').value;
+                if (!recipient) {
+                    showToast('Validation Error', 'Please select payment recipient', '❌');
+                    return;
+                }
+            }
+
+            const recipient = document.getElementById('bulkPaymentRecipient').value || null;
+
+            try {
+                let successCount = 0;
+                for (const booking of window.bulkPaymentBookings) {
+                    const balance = (parseFloat(booking.total_amount) || 0) - (parseFloat(booking.paid_amount) || 0);
+                    
+                    if (balance <= 0) continue;
+
+                    const payment = {
+                        booking_id: booking.booking_id,
+                        payment_date: date,
+                        amount: balance,
+                        payment_method: method,
+                        payment_recipient: recipient,
+                        reference_number: null,
+                        notes: notes || `Bulk payment collection`,
+                        created_by: currentUser?.id || null
+                    };
+
+                    if (navigator.onLine) {
+                        await db.savePayment(payment);
+                        await recalculatePaymentStatus(booking.booking_id);
+                    } else {
+                        await saveToOfflineDB('pendingPayments', payment);
+                    }
+                    
+                    successCount++;
+                }
+
+                closeBulkPaymentModal();
+                await loadDashboard();
+                await loadPayments();
+                await loadReservations();
+                
+                showToast('Success', `Collected payments for ${successCount} bookings`, '✅');
+                
+                // Clear checkboxes
+                document.querySelectorAll('.reminder-checkbox').forEach(cb => cb.checked = false);
+                if (document.getElementById('selectAllReminders')) {
+                    document.getElementById('selectAllReminders').checked = false;
+                }
+
+            } catch (error) {
+                console.error('Bulk payment error:', error);
+                showToast('Error', 'Failed to save payments: ' + error.message, '❌');
+            }
+        }
+
+         // Reservations
         async function loadReservations() {
             try {
                 allReservations = await db.getReservations();
@@ -2323,10 +2853,21 @@
                 propertySelect.innerHTML = '<option value="">Select Property</option>' + 
                     properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
                 
+                // Populate property filter
+                const propertyFilter = document.getElementById('propertyFilter');
+                propertyFilter.innerHTML = '<option value="">All Properties</option>' + 
+                    properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
+                
+                // Populate month filter with unique months from reservations
+                const months = [...new Set(allReservations.map(r => r.month).filter(Boolean))].sort().reverse();
+                const monthFilter = document.getElementById('monthFilter');
+                monthFilter.innerHTML = '<option value="">All Months</option>' + 
+                    months.map(m => `<option value="${m}">${m}</option>`).join('');
+                
                 displayReservations(allReservations);
             } catch (error) {
                 console.error('Reservations error:', error);
-                alert('Error loading reservations');
+                showToast('Error', 'Failed to load reservations', '❌');
             }
         }
 
@@ -2363,6 +2904,8 @@
         function filterReservations() {
             const search = document.getElementById('searchReservations').value.toLowerCase();
             const status = document.getElementById('statusFilter').value;
+            const property = document.getElementById('propertyFilter').value;
+            const month = document.getElementById('monthFilter').value;
             
             let filtered = allReservations.filter(r => {
                 const matchesSearch = !search || 
@@ -2370,7 +2913,9 @@
                     (r.booking_id || '').toLowerCase().includes(search) ||
                     (r.property_name || '').toLowerCase().includes(search);
                 const matchesStatus = !status || r.status === status;
-                return matchesSearch && matchesStatus;
+                const matchesProperty = !property || r.property_id == property;
+                const matchesMonth = !month || r.month === month;
+                return matchesSearch && matchesStatus && matchesProperty && matchesMonth;
             });
             
             displayReservations(filtered);
@@ -2379,6 +2924,8 @@
         function clearFilters() {
             document.getElementById('searchReservations').value = '';
             document.getElementById('statusFilter').value = '';
+            document.getElementById('propertyFilter').value = '';
+            document.getElementById('monthFilter').value = '';
             displayReservations(allReservations);
         }
 
@@ -2388,7 +2935,7 @@
             if (booking_id) {
                 const r = allReservations.find(res => res.booking_id === booking_id);
                 if (!r) {
-                    alert('Reservation not found');
+                    showToast('Error', 'Reservation not found', '❌');
                     return;
                 }
                 document.getElementById('reservationModalTitle').textContent = 'Edit Reservation';
@@ -2429,15 +2976,45 @@
             document.getElementById('reservationModal').classList.remove('active');
         }
 
+        // Auto-calculate taxes based on per night rate
+        function calculateTaxes() {
+            const checkIn = document.getElementById('checkInDate').value;
+            const checkOut = document.getElementById('checkOutDate').value;
+            
+            if (!checkIn || !checkOut) return;
+            
+            const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
+            if (nights <= 0) return;
+            
+            const stayAmount = parseFloat(document.getElementById('stayAmount').value) || 0;
+            const extraGuestCharges = parseFloat(document.getElementById('extraGuestCharges').value) || 0;
+            const mealsChef = parseFloat(document.getElementById('mealsChef').value) || 0;
+            const bonfireOther = parseFloat(document.getElementById('bonfireOther').value) || 0;
+            
+            const totalAmountPreTax = stayAmount + extraGuestCharges + mealsChef + bonfireOther;
+            const perNightRate = totalAmountPreTax / nights;
+            
+            // Tax calculation: 5% if ≤7500/night, 18% if >7500/night
+            let taxRate = 0;
+            if (perNightRate <= 7500) {
+                taxRate = 0.05; // 5%
+            } else {
+                taxRate = 0.18; // 18%
+            }
+            
+            const taxes = totalAmountPreTax * taxRate;
+            document.getElementById('taxes').value = taxes.toFixed(2);
+        }
+
         async function saveReservation() {
             const propertyId = parseInt(document.getElementById('propertySelect').value);
             
             if (!propertyId) {
-                alert('Please select a property');
+                showToast('Validation Error', 'Please select a property', '❌');
                 return;
             }
             
-            // Check online status
+ // Check online status
             if (!navigator.onLine) {
                 if (!confirm('You are offline. This reservation will be saved locally and synced when you are back online. Continue?')) {
                     return;
@@ -2449,7 +3026,7 @@
                 const property = properties.find(p => p.id === propertyId);
                 
                 if (!property) {
-                    alert('Property not found');
+                    showToast('Error', 'Property not found', '❌');
                     return;
                 }
                 
@@ -2457,13 +3034,7 @@
                 const checkOut = document.getElementById('checkOutDate').value;
                 
                 if (!checkIn || !checkOut) {
-                    alert('Please select check-in and check-out dates');
-                    return;
-                }
-                
-                const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
-                if (nights <= 0) {
-                    alert('Check-out date must be after check-in date');
+                    showToast('Validation Error', 'Check-out date must be after check-in date', '❌');
                     return;
                 }
                 
@@ -2526,18 +3097,17 @@
                 
                 // Generate booking_id for new reservations
                 if (!editId) {
-                    const year = new Date().getFullYear().toString().slice(-2); // last two digits of year
-                    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789"; // avoids ambiguous chars
-                    const bytes = crypto.getRandomValues(new Uint8Array(6));    // length of random part
+                    const year = new Date().getFullYear().toString().slice(-2);
+                    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+                    const bytes = crypto.getRandomValues(new Uint8Array(6));
                     let rand = "";
                     for (const b of bytes) {
                         rand += alphabet[b % alphabet.length];
                     }
-                    reservation.booking_id = `HST${year}${rand}`; // e.g. HST25QN0RNM
+                    reservation.booking_id = `HST${year}${rand}`;
                 }
                 
                 if (navigator.onLine) {
-                    // Online: Save directly to Supabase
                     if (editId) {
                         reservation.id = parseInt(editId);
                     }
@@ -2548,19 +3118,16 @@
                     closeReservationModal();
                     await loadReservations();
                     await loadDashboard();
-                    alert(editId ? 'Reservation updated!' : 'Reservation created successfully!');
+                    showToast('Success', editId ? 'Reservation updated!' : 'Reservation created successfully!', '✅');
                 } else {
-                    // Offline: Save to IndexedDB
                     await saveToOfflineDB('pendingReservations', reservation);
-                    await registerBackgroundSync();
                     closeReservationModal();
                     await loadReservations();
-                    showSyncToast('Saved offline. Will sync when online.', '💾');
+                    showToast('Saved Offline', 'Will sync when online', '💾');
                 }
             } catch (error) {
                 console.error('Error saving reservation:', error);
-                console.error('Error details:', error.message, error.details, error.hint);
-                alert('Error saving reservation: ' + error.message + '. Check console for details.');
+                showToast('Error', 'Failed to save reservation: ' + error.message, '❌');
             }
         }
 
@@ -2575,10 +3142,10 @@
                 await db.deleteReservation(booking_id);
                 await loadReservations();
                 await loadDashboard();
-                alert('Reservation deleted');
+                showToast('Deleted', 'Reservation deleted successfully', '✅');
             } catch (error) {
                 console.error('Delete error:', error);
-                alert('Error deleting reservation');
+                showToast('Error', 'Failed to delete reservation', '❌');
             }
         }
 
@@ -2606,7 +3173,7 @@
                 displayPayments(allReservations);
             } catch (error) {
                 console.error('Payments error:', error);
-                alert('Error loading payments');
+                showToast('Error', 'Failed to load payments', '❌');
             }
         }
 
@@ -2664,7 +3231,7 @@
             const reservation = allReservations.find(r => r.booking_id === bookingId);
             
             if (!reservation) {
-                alert('Reservation not found');
+                showToast('Error', 'Reservation not found', '❌');
                 return;
             }
             
@@ -2681,6 +3248,8 @@
             document.getElementById('paymentAmount').value = balance > 0 ? Math.round(balance) : '';
             document.getElementById('paymentDate').value = new Date().toISOString().split('T')[0];
             document.getElementById('paymentMethod').value = '';
+            document.getElementById('paymentRecipient').value = '';
+            document.getElementById('paymentRecipientGroup').style.display = 'none';
             document.getElementById('paymentReference').value = '';
             document.getElementById('paymentNotes').value = '';
             
@@ -2691,6 +3260,21 @@
             document.getElementById('paymentModal').classList.remove('active');
         }
 
+        function toggleRecipientField() {
+            const method = document.getElementById('paymentMethod').value;
+            const recipientGroup = document.getElementById('paymentRecipientGroup');
+            const recipientSelect = document.getElementById('paymentRecipient');
+            
+            if (method === 'cash' || method === 'upi' || method === 'bank_transfer') {
+                recipientGroup.style.display = 'block';
+                recipientSelect.required = true;
+            } else {
+                recipientGroup.style.display = 'none';
+                recipientSelect.required = false;
+                recipientSelect.value = '';
+            }
+        }
+
         async function savePayment() {
             try {
                 const bookingId = document.getElementById('paymentBookingId').value;
@@ -2698,13 +3282,22 @@
                 const method = document.getElementById('paymentMethod').value;
                 
                 if (!amount || amount <= 0) {
-                    alert('Please enter a valid amount');
+                    showToast('Validation Error', 'Please enter a valid amount', '❌');
                     return;
                 }
                 
                 if (!method) {
-                    alert('Please select payment method');
+                    showToast('Validation Error', 'Please select payment method', '❌');
                     return;
+                }
+                
+                const recipientGroup = document.getElementById('paymentRecipientGroup');
+                if (recipientGroup.style.display !== 'none') {
+                    const recipient = document.getElementById('paymentRecipient').value;
+                    if (!recipient) {
+                        showToast('Validation Error', 'Please select payment recipient', '❌');
+                        return;
+                    }
                 }
                 
                 const payment = {
@@ -2712,6 +3305,7 @@
                     payment_date: document.getElementById('paymentDate').value,
                     amount: amount,
                     payment_method: method,
+                    payment_recipient: document.getElementById('paymentRecipient').value || null,
                     reference_number: document.getElementById('paymentReference').value || null,
                     notes: document.getElementById('paymentNotes').value || null,
                     created_by: currentUser?.id || null
@@ -2724,18 +3318,18 @@
                     await loadPayments();
                     await loadReservations();
                     await loadDashboard();
-                    alert('Payment saved successfully!');
+                    showToast('Success', 'Payment saved successfully!', '✅');
                 } else {
                     if (!confirm('You are offline. This payment will be saved locally and synced when you are back online. Continue?')) {
                         return;
                     }
                     await saveToOfflineDB('pendingPayments', payment);
                     closePaymentModal();
-                    alert('Payment saved offline. Will sync when online.');
+                    showToast('Saved Offline', 'Payment will sync when online', '💾');
                 }
             } catch (error) {
                 console.error('Payment error:', error);
-                alert('Error saving payment: ' + error.message);
+                showToast('Error', 'Failed to save payment: ' + error.message, '❌');
             }
         }
 
@@ -2769,7 +3363,7 @@
                 const reservation = allReservations.find(r => r.booking_id === bookingId);
                 
                 if (!reservation) {
-                    alert('Reservation not found');
+                    showToast('Error', 'Reservation not found', '❌');
                     return;
                 }
                 
@@ -2800,6 +3394,7 @@
                                 <tr>
                                     <th>Date</th>
                                     <th>Method</th>
+                                    <th>Recipient</th>
                                     <th>Reference</th>
                                     <th style="text-align: right;">Amount</th>
                                     <th style="text-align: center;">Actions</th>
@@ -2814,6 +3409,13 @@
                                         </td>
                                         <td>
                                             <div style="text-transform: capitalize;">${p.payment_method.replace('_', ' ')}</div>
+                                        </td>
+                                        <td>
+                                            ${p.payment_recipient ? 
+                                                `<span class="badge badge-${p.payment_recipient === 'hostizzy' ? 'confirmed' : 'pending'}" style="text-transform: capitalize;">
+                                                    ${p.payment_recipient === 'hostizzy' ? '🏢 Hostizzy' : '🏠 Owner'}
+                                                </span>` 
+                                                : '<span style="color: var(--text-secondary);">-</span>'}
                                         </td>
                                         <td>
                                             <div style="font-size: 12px; font-family: monospace;">${p.reference_number || '-'}</div>
@@ -2836,7 +3438,7 @@
                 modal.classList.add('active');
             } catch (error) {
                 console.error('Payment history error:', error);
-                alert('Error loading payment history');
+                showToast('Error', 'Failed to load payment history', '❌');
             }
         }
 
@@ -2854,10 +3456,10 @@
                 await loadPayments();
                 await loadReservations();
                 await loadDashboard();
-                alert('Payment deleted');
+                showToast('Deleted', 'Payment deleted successfully', '✅');
             } catch (error) {
                 console.error('Delete payment error:', error);
-                alert('Error deleting payment');
+                showToast('Error', 'Failed to delete payment', '❌');
             }
         }
 
@@ -2885,7 +3487,7 @@
                 }).join('');
             } catch (error) {
                 console.error('Properties error:', error);
-                alert('Error loading properties');
+                showToast('Error', 'Failed to load properties', '❌');
             }
         }
 
@@ -2909,17 +3511,17 @@
                 };
                 
                 if (!property.name || !property.location) {
-                    alert('Please fill in all required fields');
+                    showToast('Validation Error', 'Please fill in all required fields', '❌');
                     return;
                 }
                 
                 await db.saveProperty(property);
                 closePropertyModal();
                 await loadProperties();
-                alert('Property saved!');
+                showToast('Success', 'Property saved!', '✅');
             } catch (error) {
                 console.error('Save property error:', error);
-                alert('Error saving property');
+                showToast('Error', 'Failed to save property', '❌');
             }
         }
 
@@ -2929,10 +3531,10 @@
             try {
                 await db.deleteProperty(id);
                 await loadProperties();
-                alert('Property deleted');
+                showToast('Deleted', 'Property deleted successfully', '✅');
             } catch (error) {
                 console.error('Delete property error:', error);
-                alert('Error deleting property');
+                showToast('Error', 'Failed to delete property', '❌');
             }
         }
 
@@ -2955,7 +3557,7 @@
                 `).join('');
             } catch (error) {
                 console.error('Team error:', error);
-                alert('Error loading team');
+                showToast('Error', 'Failed to load team', '❌');
             }
         }
 
@@ -2981,17 +3583,17 @@
                 };
                 
                 if (!member.name || !member.email || !member.password) {
-                    alert('Please fill in all required fields');
+                    showToast('Validation Error', 'Please fill in all required fields', '❌');
                     return;
                 }
                 
                 await db.saveTeamMember(member);
                 closeTeamModal();
                 await loadTeam();
-                alert('Team member added!');
+                showToast('Success', 'Team member added!', '✅');
             } catch (error) {
                 console.error('Save team member error:', error);
-                alert('Error saving team member');
+                showToast('Error', 'Failed to save team member', '❌');
             }
         }
 
@@ -3001,10 +3603,10 @@
             try {
                 await db.deleteTeamMember(id);
                 await loadTeam();
-                alert('Team member removed');
+                showToast('Removed', 'Team member removed successfully', '✅');
             } catch (error) {
                 console.error('Delete team member error:', error);
-                alert('Error removing team member');
+                showToast('Error', 'Failed to remove team member', '❌');
             }
         }
 
