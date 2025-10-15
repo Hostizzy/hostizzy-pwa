@@ -1001,6 +1001,195 @@
                 max-width: 80px;
             }
         }
+        /* Quick Actions / Command Palette */
+        .quick-actions-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+            animation: fadeIn 0.2s;
+        }
+
+        .quick-actions-overlay.active {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+            padding-top: 15vh;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .quick-actions-panel {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            width: 90%;
+            max-width: 600px;
+            max-height: 70vh;
+            display: flex;
+            flex-direction: column;
+            animation: slideDown 0.3s;
+        }
+
+        @keyframes slideDown {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .quick-actions-search {
+            padding: 20px;
+            border-bottom: 2px solid var(--border);
+        }
+
+        .quick-actions-search input {
+            width: 100%;
+            padding: 12px 16px 12px 45px;
+            border: none;
+            font-size: 16px;
+            outline: none;
+            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>') no-repeat 15px center;
+        }
+
+        .quick-actions-search input::placeholder {
+            color: var(--text-secondary);
+        }
+
+        .quick-actions-list {
+            overflow-y: auto;
+            max-height: 50vh;
+            padding: 8px;
+        }
+
+        .quick-action-item {
+            display: flex;
+            align-items: center;
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 4px;
+        }
+
+        .quick-action-item:hover,
+        .quick-action-item.selected {
+            background: var(--primary);
+            color: white;
+        }
+
+        .quick-action-icon {
+            font-size: 24px;
+            margin-right: 16px;
+            width: 32px;
+            text-align: center;
+        }
+
+        .quick-action-content {
+            flex: 1;
+        }
+
+        .quick-action-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 2px;
+        }
+
+        .quick-action-desc {
+            font-size: 12px;
+            opacity: 0.8;
+        }
+
+        .quick-action-shortcut {
+            font-size: 11px;
+            padding: 4px 8px;
+            background: var(--background);
+            border-radius: 4px;
+            font-family: monospace;
+            color: var(--text-secondary);
+        }
+
+        .quick-action-item:hover .quick-action-shortcut,
+        .quick-action-item.selected .quick-action-shortcut {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+        }
+
+        .quick-actions-footer {
+            padding: 12px 20px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--text-secondary);
+        }
+
+        .quick-actions-footer kbd {
+            padding: 2px 6px;
+            background: var(--background);
+            border-radius: 4px;
+            font-family: monospace;
+            font-size: 11px;
+            border: 1px solid var(--border);
+        }
+
+        /* Floating Quick Action Button */
+        .quick-action-fab {
+            position: fixed;
+            bottom: 100px;
+            right: 24px;
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            color: white;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+            transition: all 0.3s;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .quick-action-fab:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+        }
+
+        .quick-action-fab:active {
+            transform: scale(0.95);
+        }
+
+        @media (max-width: 768px) {
+            .quick-action-fab {
+                bottom: 80px;
+                right: 16px;
+                width: 48px;
+                height: 48px;
+                font-size: 20px;
+            }
+            
+            .quick-actions-panel {
+                width: 95%;
+                max-height: 80vh;
+            }
+        }
+
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -4084,7 +4273,313 @@
         if (installBar) installBar.style.display = 'none';
         console.log('PWA installed');
     });
+    // Quick Actions System
+    let selectedActionIndex = 0;
+    let filteredActions = [];
+
+    const quickActions = [
+        {
+            id: 'new-booking',
+            icon: '📅',
+            title: 'New Reservation',
+            desc: 'Add a new booking',
+            keywords: ['new', 'booking', 'reservation', 'add'],
+            action: () => {
+                closeQuickActions();
+                openReservationModal();
+            }
+        },
+        {
+            id: 'new-payment',
+            icon: '💰',
+            title: 'Add Payment',
+            desc: 'Record a new payment',
+            keywords: ['payment', 'pay', 'money', 'collect'],
+            action: () => {
+                closeQuickActions();
+                const lastBooking = allReservations[0];
+                if (lastBooking) {
+                    openPaymentModal(lastBooking.booking_id);
+                } else {
+                    showToast('No Bookings', 'Create a reservation first', '⚠️');
+                }
+            }
+        },
+        {
+            id: 'search',
+            icon: '🔍',
+            title: 'Search Reservations',
+            desc: 'Find a booking by ID or guest name',
+            keywords: ['search', 'find', 'lookup'],
+            action: () => {
+                closeQuickActions();
+                showView('reservations');
+                document.getElementById('searchReservations').focus();
+            }
+        },
+        {
+            id: 'checkins-today',
+            icon: '🏨',
+            title: 'Check-ins Today',
+            desc: 'View all arrivals for today',
+            keywords: ['checkin', 'arrival', 'today'],
+            action: () => {
+                closeQuickActions();
+                showView('reservations');
+                const today = new Date().toISOString().split('T')[0];
+                const todayCheckIns = allReservations.filter(r => r.check_in === today);
+                displayReservations(todayCheckIns);
+                showToast('Today\'s Check-ins', `${todayCheckIns.length} arrivals`, 'ℹ️');
+            }
+        },
+        {
+            id: 'checkouts-today',
+            icon: '🚪',
+            title: 'Check-outs Today',
+            desc: 'View all departures for today',
+            keywords: ['checkout', 'departure', 'today'],
+            action: () => {
+                closeQuickActions();
+                showView('reservations');
+                const today = new Date().toISOString().split('T')[0];
+                const todayCheckOuts = allReservations.filter(r => r.check_out === today);
+                displayReservations(todayCheckOuts);
+                showToast('Today\'s Check-outs', `${todayCheckOuts.length} departures`, 'ℹ️');
+            }
+        },
+        {
+            id: 'pending-payments',
+            icon: '⚠️',
+            title: 'Pending Payments',
+            desc: 'Show all unpaid bookings',
+            keywords: ['pending', 'unpaid', 'due', 'payment'],
+            action: () => {
+                closeQuickActions();
+                showView('payments');
+                document.getElementById('paymentStatusFilter').value = 'pending';
+                filterPayments();
+            }
+        },
+        {
+            id: 'dashboard',
+            icon: '📊',
+            title: 'Dashboard',
+            desc: 'View analytics and overview',
+            keywords: ['dashboard', 'home', 'overview', 'stats'],
+            action: () => {
+                closeQuickActions();
+                showView('dashboard');
+            }
+        },
+        {
+            id: 'export-csv',
+            icon: '📥',
+            title: 'Export Reservations',
+            desc: 'Download CSV file',
+            keywords: ['export', 'download', 'csv', 'backup'],
+            action: () => {
+                closeQuickActions();
+                exportCSV();
+            }
+        },
+        {
+            id: 'export-payments',
+            icon: '💳',
+            title: 'Export Payments',
+            desc: 'Download payment records',
+            keywords: ['export', 'payment', 'download'],
+            action: () => {
+                closeQuickActions();
+                exportPaymentsCSV();
+            }
+        },
+        {
+            id: 'add-property',
+            icon: '🏠',
+            title: 'Add Property',
+            desc: 'Register a new property',
+            keywords: ['property', 'add', 'new', 'villa'],
+            action: () => {
+                closeQuickActions();
+                showView('properties');
+                openPropertyModal();
+            }
+        },
+        {
+            id: 'sync-data',
+            icon: '🔄',
+            title: 'Sync Offline Data',
+            desc: 'Upload pending changes',
+            keywords: ['sync', 'upload', 'offline'],
+            action: () => {
+                closeQuickActions();
+                manualSync();
+            }
+        },
+        {
+            id: 'calendar',
+            icon: '🗓️',
+            title: 'Availability Calendar',
+            desc: 'View property calendar',
+            keywords: ['calendar', 'availability', 'schedule'],
+            action: () => {
+                closeQuickActions();
+                showView('availability');
+            }
+        }
+    ];
+
+    function openQuickActions() {
+        const overlay = document.getElementById('quickActionsOverlay');
+        overlay.classList.add('active');
+        
+        // Reset and render
+        selectedActionIndex = 0;
+        filteredActions = [...quickActions];
+        renderQuickActions();
+        
+        // Focus search input
+        setTimeout(() => {
+            document.getElementById('quickActionsSearch').focus();
+        }, 100);
+    }
+
+    function closeQuickActions(event) {
+        if (event && event.target !== document.getElementById('quickActionsOverlay')) return;
+        
+        const overlay = document.getElementById('quickActionsOverlay');
+        overlay.classList.remove('active');
+        document.getElementById('quickActionsSearch').value = '';
+    }
+
+    function renderQuickActions() {
+        const list = document.getElementById('quickActionsList');
+        
+        if (filteredActions.length === 0) {
+            list.innerHTML = '<div style="padding: 40px; text-align: center; color: var(--text-secondary);">No actions found</div>';
+            return;
+        }
+        
+        list.innerHTML = filteredActions.map((action, index) => `
+            <div class="quick-action-item ${index === selectedActionIndex ? 'selected' : ''}" onclick="executeQuickAction(${index})" data-index="${index}">
+                <div class="quick-action-icon">${action.icon}</div>
+                <div class="quick-action-content">
+                    <div class="quick-action-title">${action.title}</div>
+                    <div class="quick-action-desc">${action.desc}</div>
+                </div>
+            </div>
+        `).join('');
+    }
+
+    function filterQuickActions(event) {
+        const query = event.target.value.toLowerCase().trim();
+        
+        // Handle keyboard navigation
+        if (event.key === 'ArrowDown') {
+            event.preventDefault();
+            selectedActionIndex = Math.min(selectedActionIndex + 1, filteredActions.length - 1);
+            renderQuickActions();
+            scrollToSelected();
+            return;
+        }
+        
+        if (event.key === 'ArrowUp') {
+            event.preventDefault();
+            selectedActionIndex = Math.max(selectedActionIndex - 1, 0);
+            renderQuickActions();
+            scrollToSelected();
+            return;
+        }
+        
+        if (event.key === 'Enter') {
+            event.preventDefault();
+            executeQuickAction(selectedActionIndex);
+            return;
+        }
+        
+        if (event.key === 'Escape') {
+            closeQuickActions();
+            return;
+        }
+        
+        // Filter actions
+        if (query === '') {
+            filteredActions = [...quickActions];
+        } else {
+            filteredActions = quickActions.filter(action => {
+                const searchText = `${action.title} ${action.desc} ${action.keywords.join(' ')}`.toLowerCase();
+                return searchText.includes(query);
+            });
+        }
+        
+        selectedActionIndex = 0;
+        renderQuickActions();
+    }
+
+    function executeQuickAction(index) {
+        if (filteredActions[index]) {
+            filteredActions[index].action();
+        }
+    }
+
+    function scrollToSelected() {
+        const list = document.getElementById('quickActionsList');
+        const selected = list.querySelector('.quick-action-item.selected');
+        if (selected) {
+            selected.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+        }
+    }
+
+    // Keyboard shortcut: Ctrl+K or Cmd+K
+    document.addEventListener('keydown', (e) => {
+        if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+            e.preventDefault();
+            const overlay = document.getElementById('quickActionsOverlay');
+            if (overlay.classList.contains('active')) {
+                closeQuickActions();
+            } else {
+                openQuickActions();
+            }
+        }
+    });
+
+    // Close on Escape key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            const overlay = document.getElementById('quickActionsOverlay');
+            if (overlay.classList.contains('active')) {
+                closeQuickActions();
+            }
+        }
+    });
+
 </script>
+    <!-- Quick Actions Panel -->
+    <div id="quickActionsOverlay" class="quick-actions-overlay" onclick="closeQuickActions(event)">
+        <div class="quick-actions-panel" onclick="event.stopPropagation()">
+            <div class="quick-actions-search">
+                <input type="text" id="quickActionsSearch" placeholder="Type a command or search..." autocomplete="off" onkeyup="filterQuickActions(event)">
+            </div>
+            
+            <div class="quick-actions-list" id="quickActionsList">
+                <!-- Will be populated by JavaScript -->
+            </div>
+            
+            <div class="quick-actions-footer">
+                <div>
+                    <kbd>↑</kbd> <kbd>↓</kbd> to navigate • <kbd>Enter</kbd> to select
+                </div>
+                <div>
+                    <kbd>Esc</kbd> to close
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Floating Quick Action Button -->
+    <button class="quick-action-fab" onclick="openQuickActions()" title="Quick Actions (Ctrl+K)">
+        ⚡
+    </button>
 
 </body>
 </html>
