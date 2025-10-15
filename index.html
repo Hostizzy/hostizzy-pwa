@@ -1771,6 +1771,13 @@
             </div>
 
             <div class="form-row">
+                    <div class="form-group">
+                        <label>GST Status *</label>
+                        <select id="gstStatus" onchange="calculateTaxes()">
+                            <option value="gst">GST Applicable</option>
+                            <option value="non_gst">Non-GST</option>
+                        </select>
+                    </div>
                 <div class="form-group">
                     <label>Taxes (₹) - Auto-calculated</label>
                     <input type="number" id="taxes" min="0" step="0.01" value="0" readonly style="background: #f1f5f9;">
@@ -1786,7 +1793,7 @@
 
             <div class="form-group">
                 <label>Hostizzy Revenue (₹)</label>
-                <input type="number" id="hostizzyRevenue" min="0" step="0.01" value="0">
+                <input type="number" id="hostizzyRevenue" min="0" step="0.01" value="0" readonly style="background:#f1f5f9;" placeholder="Auto (based on % and stay+extra)">
             </div>
 
             <input type="hidden" id="editReservationId">
@@ -3215,6 +3222,7 @@
                 document.getElementById('taxes').value = r.taxes || 0;
                 document.getElementById('damages').value = r.damages || 0;
                 document.getElementById('hostizzyRevenue').value = r.hostizzy_revenue || 0;
+                document.getElementById('gstStatus').value = r.gst_status || 'gst';
             } else {
                 document.getElementById('reservationModalTitle').textContent = 'New Reservation';
                 document.getElementById('editReservationId').value = '';
@@ -3234,6 +3242,19 @@
 
         // Auto-calculate taxes based on per night rate
         function calculateTaxes() {
+            const gstStatus = document.getElementById('gstStatus').value;
+            const taxesInput = document.getElementById('taxes');
+            
+            // If Non-GST, clear taxes and disable field
+            if (gstStatus === 'non_gst') {
+                taxesInput.value = '0';
+                taxesInput.style.background = '#e2e8f0';
+                return;
+            }
+            
+            // Re-enable and calculate for GST
+            taxesInput.style.background = '#f1f5f9';
+            
             const checkIn = document.getElementById('checkInDate').value;
             const checkOut = document.getElementById('checkOutDate').value;
             
@@ -3244,10 +3265,8 @@
             
             const stayAmount = parseFloat(document.getElementById('stayAmount').value) || 0;
             const extraGuestCharges = parseFloat(document.getElementById('extraGuestCharges').value) || 0;
-            const mealsChef = parseFloat(document.getElementById('mealsChef').value) || 0;
-            const bonfireOther = parseFloat(document.getElementById('bonfireOther').value) || 0;
             
-            const totalAmountPreTax = stayAmount + extraGuestCharges + mealsChef + bonfireOther;
+            const totalAmountPreTax = stayAmount + extraGuestCharges;
             const perNightRate = totalAmountPreTax / nights;
             
             // Tax calculation: 5% if ≤7500/night, 18% if >7500/night
@@ -3259,7 +3278,7 @@
             }
             
             const taxes = totalAmountPreTax * taxRate;
-            document.getElementById('taxes').value = taxes.toFixed(2);
+            taxesInput.value = taxes.toFixed(2);
         }
 
         async function saveReservation() {
@@ -3331,6 +3350,9 @@
                     check_out: checkOut,
                     month: month,
                     nights: nights,
+                    gst_status: document.getElementById('gstStatus').value,
+                    taxes: document.getElementById('gstStatus').value === 'non_gst' ? 0 : 
+                           parseFloat(document.getElementById('taxes').value) || 0,
                     guest_name: document.getElementById('guestName').value,
                     guest_phone: document.getElementById('guestPhone').value,
                     guest_email: document.getElementById('guestEmail').value || null,
