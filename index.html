@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hostizzy - Management System</title>
+    <title>Hostizzy - Reservation Management System</title>
     <link rel="manifest" href="manifest.json">
     <style>
         * {
@@ -949,6 +949,58 @@
             color: var(--text-secondary);
             margin-top: 4px;
         }
+        /* Add these logo styles after the existing CSS rules */
+        .logo-img {
+            max-width: 200px;
+            width: 100%;
+            height: auto;
+            margin-bottom: 12px;
+            display: block;
+            margin: 0 auto 12px;
+        }
+
+        .navbar-logo {
+            max-width: 140px;
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        .mobile-logo {
+            max-width: 120px;
+            width: 100%;
+            height: auto;
+            display: block;
+        }
+
+        /* Logo responsive styles */
+        @media (max-width: 768px) {
+            .logo-img {
+                max-width: 160px;
+            }
+            
+            .navbar-logo {
+                max-width: 120px;
+            }
+            
+            .mobile-logo {
+                max-width: 100px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .logo-img {
+                max-width: 140px;
+            }
+            
+            .navbar-logo {
+                max-width: 100px;
+            }
+            
+            .mobile-logo {
+                max-width: 80px;
+            }
+        }
     </style>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 </head>
@@ -982,7 +1034,7 @@
     <div id="loginScreen" class="login-container">
         <div class="login-card">
             <div class="logo">
-                <h1>🏨 Hostizzy</h1>
+                <img src="assets/logo.png" alt="Hostizzy" class="logo-img">
                 <p>Property Management System</p>
             </div>
             <div class="form-group">
@@ -1003,7 +1055,7 @@
         <div id="mobileHeader" class="mobile-header hidden">
             <div class="mobile-header-content">
                 <button class="mobile-menu-btn" onclick="toggleMobileSidebar()">☰</button>
-                <div style="font-weight: 700; font-size: 18px;">🏨 Hostizzy</div>
+                <img src="assets/logo.png" alt="Hostizzy" class="mobile-logo">
                 <span id="mobileUserEmail" style="font-size: 12px; color: var(--text-secondary);"></span>
             </div>
         </div>
@@ -1011,7 +1063,7 @@
         <!-- Mobile Sidebar -->
         <div id="mobileSidebar" class="mobile-sidebar">
             <div class="mobile-sidebar-header">
-                <div style="font-weight: 700; font-size: 20px; margin-bottom: 4px;">🏨 Hostizzy</div>
+                <img src="assets/logo.png" alt="Hostizzy" class="mobile-logo" style="margin-bottom: 8px;">
                 <div id="sidebarUserEmail" style="font-size: 13px; color: var(--text-secondary);"></div>
             </div>
             <div class="mobile-sidebar-menu">
@@ -1045,7 +1097,9 @@
         <!-- Desktop Navigation -->
         <nav class="navbar">
             <div class="navbar-content">
-                <div class="navbar-brand">🏨 Hostizzy</div>
+                <div class="navbar-brand">
+                    <img src="assets/logo.png" alt="Hostizzy" class="navbar-logo">
+                </div>
                 <div class="navbar-menu">
                     <a class="nav-link active" onclick="showView('dashboard')">Dashboard</a>
                     <a class="nav-link" onclick="showView('reservations')">Reservations</a>
@@ -2670,39 +2724,47 @@
             document.getElementById('paymentReminders').style.display = 'block';
 
             const html = `
-                <table style="width: 100%;">
-                    <thead>
-                        <tr>
-                            <th style="width: 40px;"><input type="checkbox" id="selectAllReminders" onchange="toggleAllReminders(this)"></th>
-                            <th>Booking ID</th>
-                            <th>Guest</th>
-                            <th>Check-in</th>
-                            <th>Due Amount</th>
-                            <th>Status</th>
-                            <th>Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        ${allReminders.map(r => {
-                            const checkInDate = new Date(r.check_in);
-                            const daysUntilCheckIn = Math.ceil((checkInDate - today) / (1000 * 60 * 60 * 24));
-                            const isOverdue = daysUntilCheckIn < 0;
-                            const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
-                            
-                            return `
-                                <tr style="background: ${isOverdue ? '#fee2e2' : '#fef3c7'};">
-                                    <td><input type="checkbox" class="reminder-checkbox" data-booking-id="${r.booking_id}"></td>
-                                    <td><strong>${r.booking_id}</strong></td>
-                                    <td>${r.guest_name}</td>
-                                    <td>${formatDate(r.check_in)} ${isOverdue ? '<span style="color: var(--danger); font-weight: 600;">(OVERDUE)</span>' : `<span style="color: var(--warning);">(${daysUntilCheckIn} days)</span>`}</td>
-                                    <td style="color: var(--danger); font-weight: 700;">₹${Math.round(balance).toLocaleString('en-IN')}</td>
-                                    <td><span class="payment-status ${r.payment_status}">${r.payment_status.toUpperCase()}</span></td>
-                                    <td><button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')">Collect</button></td>
-                                </tr>
-                            `;
-                        }).join('')}
-                    </tbody>
-                </table>
+                <div class="table-container">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th style="width: 40px;"><input type="checkbox" id="selectAllReminders" onchange="toggleAllReminders(this)"></th>
+                                <th>Booking ID</th>
+                                <th class="hide-mobile">Guest</th>
+                                <th class="hide-mobile">Check-in</th>
+                                <th>Due Amount</th>
+                                <th class="hide-mobile">Status</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${allReminders.map(r => {
+                                const checkInDate = new Date(r.check_in);
+                                const daysUntilCheckIn = Math.ceil((checkInDate - today) / (1000 * 60 * 60 * 24));
+                                const isOverdue = daysUntilCheckIn < 0;
+                                const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                                
+                                return `
+                                    <tr style="background: ${isOverdue ? '#fee2e2' : '#fef3c7'};">
+                                        <td><input type="checkbox" class="reminder-checkbox" data-booking-id="${r.booking_id}"></td>
+                                        <td>
+                                            <strong>${r.booking_id}</strong>
+                                            <div class="mobile-only" style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
+                                                ${r.guest_name}<br>
+                                                ${formatDate(r.check_in)} ${isOverdue ? '<span style="color: var(--danger); font-weight: 600;">(OVERDUE)</span>' : `<span style="color: var(--warning);">(${daysUntilCheckIn}d)</span>`}
+                                            </div>
+                                        </td>
+                                        <td class="hide-mobile">${r.guest_name}</td>
+                                        <td class="hide-mobile">${formatDate(r.check_in)} ${isOverdue ? '<span style="color: var(--danger); font-weight: 600;">(OVERDUE)</span>' : `<span style="color: var(--warning);">(${daysUntilCheckIn} days)</span>`}</td>
+                                        <td style="color: var(--danger); font-weight: 700;">₹${Math.round(balance).toLocaleString('en-IN')}</td>
+                                        <td class="hide-mobile"><span class="payment-status ${r.payment_status}">${r.payment_status.toUpperCase()}</span></td>
+                                        <td><button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')">Collect</button></td>
+                                    </tr>
+                                `;
+                            }).join('')}
+                        </tbody>
+                    </table>
+                </div>
             `;
 
             document.getElementById('remindersList').innerHTML = html;
@@ -3525,17 +3587,39 @@
                     showToast('Validation Error', 'Please fill in all required fields', '❌');
                     return;
                 }
-                
-                await db.saveProperty(property);
+
+                // Get all existing properties to determine next ID
+                const { data: existingProperties, error: fetchError } = await supabase
+                    .from('properties')
+                    .select('id')
+                    .order('id', { ascending: false })
+                    .limit(1);
+
+                if (fetchError) throw fetchError;
+
+                // Calculate next available ID
+                const nextId = existingProperties?.length > 0 ? 
+                    (existingProperties[0].id + 1) : 1;
+
+                // Add the ID to property object
+                property.id = nextId;
+
+                // Insert the new property
+                const { data, error } = await supabase
+                    .from('properties')
+                    .insert([property])
+                    .select();
+
+                if (error) throw error;
+
                 closePropertyModal();
-                await loadProperties();
+                await loadProperties(); // Refresh the properties list
                 showToast('Success', 'Property saved!', '✅');
             } catch (error) {
                 console.error('Save property error:', error);
-                showToast('Error', 'Failed to save property', '❌');
+                showToast('Error', 'Failed to save property: ' + error.message, '❌');
             }
         }
-
         async function deleteProperty(id) {
             if (!confirm('Delete this property?')) return;
             
@@ -3548,7 +3632,6 @@
                 showToast('Error', 'Failed to delete property', '❌');
             }
         }
-
         // Team
         async function loadTeam() {
             try {
@@ -3755,7 +3838,7 @@
 
         function openBulkEditModal() {
             if (selectedReservations.size === 0) {
-                alert('Please select at least one item');
+                showToast('No Selection', 'Please select at least one item', '⚠️');
                 return;
             }
             
@@ -3808,12 +3891,12 @@
             const value = document.getElementById('bulkEditValue').value;
             
             if (!field || !value) {
-                alert('Please select both field and value');
+                showToast('Validation Error', 'Please select both field and value', '❌');
                 return;
             }
             
             if (selectedReservations.size === 0) {
-                alert('No items selected');
+                showToast('No Selection', 'No items selected', '⚠️');
                 return;
             }
             
@@ -3831,7 +3914,7 @@
                     clearBulkSelection();
                     await loadReservations();
                     await loadDashboard();
-                    alert(`Successfully updated ${count} reservation(s)!`);
+                    showToast('Success', `Successfully updated ${count} reservation(s)!`, '✅');
                 } else {
                     for (const bookingId of bookingIds) {
                         await saveToOfflineDB('pendingEdits', {
@@ -3842,20 +3925,21 @@
                     }
                     closeBulkEditModal();
                     clearBulkSelection();
-                    alert(`${count} edits saved offline. Will sync when online.`);
+                    showToast('Saved Offline', `${count} edits will sync when online`, '💾');
                 }
             } catch (error) {
                 console.error('Bulk edit error:', error);
-                alert('Error updating reservations: ' + error.message);
+                showToast('Error', 'Failed to update reservations: ' + error.message, '❌');
             }
         }
 
-        // Export Functions
+        // Feature 7: Export Functions with Payment Recipient
         async function exportCSV() {
             const reservations = allReservations;
-            let csv = 'Booking ID,Property,Status,Check-in,Check-out,Nights,Guest,Phone,Email,City,Source,Rooms,Adults,Kids,Stay Amount,Total Amount,Payment Status\n';
+            let csv = 'Booking ID,Property,Status,Check-in,Check-out,Nights,Guest,Phone,Email,City,Source,Rooms,Adults,Kids,Stay Amount,Total Amount,Payment Status,Paid Amount,Balance\n';
             
             reservations.forEach(r => {
+                const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
                 csv += [
                     r.booking_id || '',
                     r.property_name,
@@ -3873,7 +3957,9 @@
                     r.kids || 0,
                     r.stay_amount || 0,
                     r.total_amount || 0,
-                    r.payment_status || 'pending'
+                    r.payment_status || 'pending',
+                    r.paid_amount || 0,
+                    balance
                 ].map(v => `"${v}"`).join(',') + '\n';
             });
             
@@ -3883,26 +3969,28 @@
             a.href = url;
             a.download = `hostizzy-reservations-${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
+            showToast('Exported', 'CSV file downloaded successfully', '📥');
         }
 
-        function exportPaymentsCSV() {
-            let csv = 'Booking ID,Guest,Property,Total,Paid,Balance,Status\n';
+        async function exportPaymentsCSV() {
+            const payments = await db.getAllPayments();
+            let csv = 'Date,Booking ID,Guest,Property,Amount,Method,Recipient,Reference,Status,Notes\n';
             
-            allReservations.forEach(r => {
-                const total = parseFloat(r.total_amount) || 0;
-                const paid = parseFloat(r.paid_amount) || 0;
-                const balance = total - paid;
-                
+            for (const p of payments) {
+                const reservation = allReservations.find(r => r.booking_id === p.booking_id);
                 csv += [
-                    r.booking_id || '',
-                    r.guest_name,
-                    r.property_name,
-                    total,
-                    paid,
-                    balance,
-                    r.payment_status || 'pending'
+                    p.payment_date,
+                    p.booking_id || '',
+                    reservation?.guest_name || '',
+                    reservation?.property_name || '',
+                    p.amount || 0,
+                    p.payment_method || '',
+                    p.payment_recipient || '',
+                    p.reference_number || '',
+                    reservation?.payment_status || '',
+                    p.notes || ''
                 ].map(v => `"${v}"`).join(',') + '\n';
-            });
+            }
             
             const blob = new Blob([csv], { type: 'text/csv' });
             const url = URL.createObjectURL(blob);
@@ -3910,6 +3998,7 @@
             a.href = url;
             a.download = `hostizzy-payments-${new Date().toISOString().split('T')[0]}.csv`;
             a.click();
+            showToast('Exported', 'Payment CSV downloaded successfully', '📥');
         }
 
         // Utilities
