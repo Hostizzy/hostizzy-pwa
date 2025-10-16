@@ -1665,7 +1665,7 @@
             <div class="form-row">
                 <div class="form-group">
                     <label>Property *</label>
-                    <select id="propertySelect" required>
+                    <select id="propertySelect" required onchange="calculateTaxes()">
                         <option value="">Select Property</option>
                     </select>
                 </div>
@@ -1793,7 +1793,10 @@
 
             <div class="form-group">
                 <label>Hostizzy Revenue (₹)</label>
-                <input type="number" id="hostizzyRevenue" min="0" step="0.01" value="0" readonly style="background:#f1f5f9;" placeholder="Auto (based on % and stay+extra)">
+                <input type="number" id="hostizzyRevenue" min="0" step="0.01" value="0" readonly style="background: var(--background);">
+                <small style="font-size: 12px; color: var(--text-secondary); display: block; margin-top: 4px;">
+                    Auto-calculated based on property's revenue share %
+                </small>
             </div>
 
             <input type="hidden" id="editReservationId">
@@ -2417,6 +2420,15 @@
                 if (error) throw error;
                 return data;
             },
+            async getRevenueSharePercent(propertyId) {
+                const { data, error } = await supabase
+                .from('properties')
+                .select('revenue_share_percent')
+                .eq('id', propertyId)
+                .single();
+            return data?.revenue_share_percent || 20; // Default 20% if not set
+            },
+
             async saveReservation(reservation) {
                 if (reservation.id) {
                     const { data, error } = await supabase
@@ -3222,6 +3234,10 @@
                 document.getElementById('taxes').value = r.taxes || 0;
                 document.getElementById('damages').value = r.damages || 0;
                 document.getElementById('hostizzyRevenue').value = r.hostizzy_revenue || 0;
+                //Recalculate Hostizzy Revenue for edits
+                setTimeout(() => {
+                    calculateHostizzyRevenue(parseFloat(r.stay_amount) || 0, parseFloat(r.extra_guest_charges) || 0);
+                }, 100);
                 document.getElementById('gstStatus').value = r.gst_status || 'gst';
             } else {
                 document.getElementById('reservationModalTitle').textContent = 'New Reservation';
@@ -3279,6 +3295,28 @@
             
             const taxes = totalAmountPreTax * taxRate;
             taxesInput.value = taxes.toFixed(2);
+        
+            // Auto-calculate Hostizzy Revenue
+            calculateHostizzyRevenue(stayAmount, extraGuestCharges);
+        }
+
+        async function calculateHostizzyRevenue(stayAmount, extraGuestCharges) {
+            try {
+                const propertyId = parseInt(document.getElementById('propertySelect').value);
+                if (!propertyId) {
+                    document.getElementById('hostizzyRevenue').value = '0';
+                    return;
+                }
+                
+                const revenueSharePercent = await db.getRevenueSharePercent(propertyId);
+                const applicableAmount = stayAmount + extraGuestCharges;
+                const hostizzyRevenue = (applicableAmount * revenueSharePercent) / 100;
+                
+                document.getElementById('hostizzyRevenue').value = hostizzyRevenue.toFixed(2);
+            } catch (error) {
+                console.error('Error calculating Hostizzy Revenue:', error);
+                document.getElementById('hostizzyRevenue').value = '0';
+            }
         }
 
         async function saveReservation() {
