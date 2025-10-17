@@ -949,6 +949,104 @@
             color: var(--text-secondary);
             margin-top: 4px;
         }
+
+        /* Action Center Styles */
+        .action-tab-content {
+            margin-top: 16px;
+        }
+
+        .action-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px;
+            margin-bottom: 12px;
+            background: var(--background);
+            border-radius: 8px;
+            border-left: 4px solid var(--primary);
+            transition: all 0.2s;
+        }
+
+        .action-item:hover {
+            background: #f1f5f9;
+            transform: translateX(4px);
+        }
+
+        .action-item.urgent {
+            border-left-color: var(--danger);
+            background: #fef2f2;
+        }
+
+        .action-item.today {
+            border-left-color: var(--warning);
+            background: #fffbeb;
+        }
+
+        .action-item.upcoming {
+            border-left-color: var(--success);
+            background: #f0fdf4;
+        }
+
+        .action-info {
+            flex: 1;
+        }
+
+        .action-title {
+            font-weight: 600;
+            font-size: 15px;
+            margin-bottom: 4px;
+        }
+
+        .action-details {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .action-badge {
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .action-badge.overdue {
+            background: #fee2e2;
+            color: #991b1b;
+        }
+
+        .action-badge.due-today {
+            background: #fef3c7;
+            color: #92400e;
+        }
+
+        .action-badge.due-soon {
+            background: #dbeafe;
+            color: #1e40af;
+        }
+
+        @media (max-width: 768px) {
+            .action-item {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 12px;
+            }
+            
+            .action-buttons {
+                width: 100%;
+            }
+            
+            .action-buttons .btn {
+                flex: 1;
+            }
+        }
+
         /* Add these logo styles after the existing CSS rules */
         .logo-img {
             max-width: 200px;
@@ -1450,13 +1548,37 @@
                 <div id="monthlyTrends" style="max-height: 300px; overflow-y: auto;"></div>
             </div>
 
-            <!-- Payment Reminders -->
-            <div class="card" id="paymentReminders" style="display: none;">
+            <!-- Action Center -->
+            <div class="card" id="actionCenterCard" style="display: none;">
                 <div class="card-header">
-                    <h3 class="card-title">⚠️ Payment Reminders</h3>
-                    <button class="btn btn-primary btn-sm" onclick="openBulkPaymentModal()">Collect Payments</button>
+                    <h3 class="card-title">⚡ Action Center</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-sm" id="urgentTab" onclick="switchActionTab('urgent')" style="background: var(--danger); color: white;">
+                            🔴 Urgent (<span id="urgentCount">0</span>)
+                        </button>
+                        <button class="btn btn-sm" id="todayTab" onclick="switchActionTab('today')" style="background: var(--warning); color: white;">
+                            🟡 Today (<span id="todayCount">0</span>)
+                        </button>
+                        <button class="btn btn-sm" id="upcomingTab" onclick="switchActionTab('upcoming')" style="background: var(--success); color: white;">
+                            🟢 Upcoming (<span id="upcomingCount">0</span>)
+                        </button>
+                    </div>
                 </div>
-                <div id="remindersList"></div>
+                
+                <!-- Urgent Actions -->
+                <div id="urgentActions" class="action-tab-content">
+                    <div id="urgentActionsList"></div>
+                </div>
+                
+                <!-- Today Actions -->
+                <div id="todayActions" class="action-tab-content" style="display: none;">
+                    <div id="todayActionsList"></div>
+                </div>
+                
+                <!-- Upcoming Actions -->
+                <div id="upcomingActions" class="action-tab-content" style="display: none;">
+                    <div id="upcomingActionsList"></div>
+                </div>
             </div>
 
             <!-- Recent Reservations -->
@@ -1550,7 +1672,7 @@
 
         <!-- Payments View -->
         <div id="paymentsView" class="container hidden">
-            <h2 style="margin-bottom: 24px;">Payments</h2>
+            <h2 style="margin-bottom: 24px;">💰 Payments Management</h2>
             
             <div class="stats-grid">
                 <div class="stat-card" style="border-left-color: var(--success);">
@@ -1567,6 +1689,16 @@
                 </div>
             </div>
 
+            <!-- Payment Reminders -->
+            <div class="card" id="paymentRemindersCard" style="display: none;">
+                <div class="card-header">
+                    <h3 class="card-title">⚠️ Payment Reminders</h3>
+                    <button class="btn btn-primary btn-sm" onclick="openBulkPaymentModal()">💰 Collect Selected</button>
+                </div>
+                <div id="paymentRemindersList"></div>
+            </div>
+
+            <!-- Payment Records -->
             <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Payment Records</h3>
@@ -1856,9 +1988,8 @@
                     <select id="bookingSource">
                         <option value="DIRECT">Direct</option>
                         <option value="AIRBNB">Airbnb</option>
-                        <option value="BOOKING.COM">Booking.com</option>
-                        <option value="GOIBIBO">Goibibo</option>
-                        <option value="MAKEMYTRIP">MakeMyTrip</option>
+                        <option value="AGODA/BOOKING.COM">Agoda/Booking.com</option>
+                        <option value="MMT/GOIBIBO">MMT/Goibibo</option>
                         <option value="OTHER">Other</option>
                     </select>
                 </div>
@@ -2892,9 +3023,9 @@
                 
                 // Monthly Trends
                 renderMonthlyTrends(confirmedReservations);
-                
-                // Payment Reminders
-                renderPaymentReminders(confirmedReservations);
+
+                // Action Center
+                renderActionCenter(confirmedReservations);
                 
                 // Recent reservations
                 const recent = allReservations.slice(0, 10);
@@ -3137,7 +3268,7 @@
             document.getElementById('monthlyTrends').innerHTML = html || '<div style="text-align: center; color: var(--text-secondary);">No data available</div>';
         }
 
-        // Feature 6: Payment Reminders
+        // Payment Reminders
         function renderPaymentReminders(reservations) {
             const today = new Date();
             const upcomingCheckIns = reservations.filter(r => {
@@ -3153,25 +3284,49 @@
 
             const allReminders = [...overduePayments, ...upcomingCheckIns];
 
+            const reminderCard = document.getElementById('paymentRemindersCard');
+            
             if (allReminders.length === 0) {
-                document.getElementById('paymentReminders').style.display = 'none';
+                reminderCard.style.display = 'none';
                 return;
             }
 
-            document.getElementById('paymentReminders').style.display = 'block';
+            reminderCard.style.display = 'block';
 
             const html = `
+                <div style="background: var(--background); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                        <div>
+                            <strong style="font-size: 16px;">
+                                ${overduePayments.length > 0 ? `🔴 ${overduePayments.length} Overdue` : ''}
+                                ${overduePayments.length > 0 && upcomingCheckIns.length > 0 ? ' • ' : ''}
+                                ${upcomingCheckIns.length > 0 ? `🟡 ${upcomingCheckIns.length} Due Soon` : ''}
+                            </strong>
+                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                                Total pending: ₹${Math.round(allReminders.reduce((sum, r) => 
+                                    sum + ((parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0)), 0
+                                )).toLocaleString('en-IN')}
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 8px;">
+                            <input type="checkbox" id="selectAllPaymentReminders" onchange="toggleAllPaymentReminders(this)" style="width: 20px; height: 20px;">
+                            <label for="selectAllPaymentReminders" style="font-size: 13px; margin: 0;">Select All</label>
+                        </div>
+                    </div>
+                </div>
+                
                 <div class="table-container">
                     <table>
                         <thead>
                             <tr>
-                                <th style="width: 40px;"><input type="checkbox" id="selectAllReminders" onchange="toggleAllReminders(this)"></th>
+                                <th style="width: 40px;"><input type="checkbox" id="selectAllRemindersHeader" onchange="toggleAllPaymentReminders(this)"></th>
+                                <th>Priority</th>
                                 <th>Booking ID</th>
-                                <th class="hide-mobile">Guest</th>
-                                <th class="hide-mobile">Check-in</th>
+                                <th>Guest</th>
+                                <th>Property</th>
+                                <th>Check-in</th>
                                 <th>Due Amount</th>
-                                <th class="hide-mobile">Status</th>
-                                <th>Action</th>
+                                <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -3185,17 +3340,26 @@
                                     <tr style="background: ${isOverdue ? '#fee2e2' : '#fef3c7'};">
                                         <td><input type="checkbox" class="reminder-checkbox" data-booking-id="${r.booking_id}"></td>
                                         <td>
-                                            <strong>${r.booking_id}</strong>
-                                            <div class="mobile-only" style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">
-                                                ${r.guest_name}<br>
-                                                ${formatDate(r.check_in)} ${isOverdue ? '<span style="color: var(--danger); font-weight: 600;">(OVERDUE)</span>' : `<span style="color: var(--warning);">(${daysUntilCheckIn}d)</span>`}
+                                            ${isOverdue ? 
+                                                '<span style="background: var(--danger); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">🔴 OVERDUE</span>' : 
+                                                '<span style="background: var(--warning); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">🟡 DUE SOON</span>'
+                                            }
+                                        </td>
+                                        <td><strong>${r.booking_id}</strong></td>
+                                        <td>${r.guest_name}</td>
+                                        <td>${r.property_name}</td>
+                                        <td>
+                                            ${formatDate(r.check_in)}
+                                            <div style="font-size: 11px; color: var(--text-secondary);">
+                                                ${isOverdue ? `${Math.abs(daysUntilCheckIn)} days overdue` : `in ${daysUntilCheckIn} days`}
                                             </div>
                                         </td>
-                                        <td class="hide-mobile">${r.guest_name}</td>
-                                        <td class="hide-mobile">${formatDate(r.check_in)} ${isOverdue ? '<span style="color: var(--danger); font-weight: 600;">(OVERDUE)</span>' : `<span style="color: var(--warning);">(${daysUntilCheckIn} days)</span>`}</td>
                                         <td style="color: var(--danger); font-weight: 700;">₹${Math.round(balance).toLocaleString('en-IN')}</td>
-                                        <td class="hide-mobile"><span class="payment-status ${r.payment_status}">${r.payment_status.toUpperCase()}</span></td>
-                                        <td><button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')">Collect</button></td>
+                                        <td>
+                                            <button class="btn btn-success btn-sm" onclick="openPaymentModal('${r.booking_id}')" title="Collect Payment">💰</button>
+                                            <button class="btn btn-primary btn-sm" onclick="sendWhatsAppReminder('${r.booking_id}')" title="Send Reminder">📱</button>
+                                            <button class="btn btn-secondary btn-sm" onclick="viewBookingDetails('${r.booking_id}')" title="View Details">👁️</button>
+                                        </td>
                                     </tr>
                                 `;
                             }).join('')}
@@ -3204,16 +3368,234 @@
                 </div>
             `;
 
-            document.getElementById('remindersList').innerHTML = html;
+            document.getElementById('paymentRemindersList').innerHTML = html;
         }
 
-        function toggleAllReminders(checkbox) {
+        function toggleAllPaymentReminders(checkbox) {
             document.querySelectorAll('.reminder-checkbox').forEach(cb => {
                 cb.checked = checkbox.checked;
             });
+            
+            // Sync both checkboxes
+            const headerCheckbox = document.getElementById('selectAllRemindersHeader');
+            const summaryCheckbox = document.getElementById('selectAllPaymentReminders');
+            if (headerCheckbox && summaryCheckbox) {
+                headerCheckbox.checked = checkbox.checked;
+                summaryCheckbox.checked = checkbox.checked;
+            }
         }
 
-        // Feature 2: Bulk Payment Collection
+        // Action Center Functions
+        let currentActionTab = 'urgent';
+
+        function switchActionTab(tab) {
+            currentActionTab = tab;
+            
+            // Update tab buttons
+            document.getElementById('urgentTab').style.background = tab === 'urgent' ? 'var(--danger)' : 'var(--secondary)';
+            document.getElementById('todayTab').style.background = tab === 'today' ? 'var(--warning)' : 'var(--secondary)';
+            document.getElementById('upcomingTab').style.background = tab === 'upcoming' ? 'var(--success)' : 'var(--secondary)';
+            
+            // Show/hide content
+            document.getElementById('urgentActions').style.display = tab === 'urgent' ? 'block' : 'none';
+            document.getElementById('todayActions').style.display = tab === 'today' ? 'block' : 'none';
+            document.getElementById('upcomingActions').style.display = tab === 'upcoming' ? 'block' : 'none';
+        }
+
+        function renderActionCenter(reservations) {
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            
+            const nextWeek = new Date(today);
+            nextWeek.setDate(nextWeek.getDate() + 7);
+            
+            // Categorize actions
+            const urgentActions = [];
+            const todayActions = [];
+            const upcomingActions = [];
+            
+            reservations.forEach(r => {
+                if (r.status === 'cancelled') return;
+                
+                const checkInDate = new Date(r.check_in);
+                checkInDate.setHours(0, 0, 0, 0);
+                
+                const checkOutDate = new Date(r.check_out);
+                checkOutDate.setHours(0, 0, 0, 0);
+                
+                const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                
+                // URGENT: Overdue payments
+                if (balance > 0 && checkInDate < today) {
+                    urgentActions.push({
+                        type: 'overdue_payment',
+                        priority: 1,
+                        reservation: r,
+                        title: `💸 Overdue Payment - ${r.guest_name}`,
+                        details: `₹${Math.round(balance).toLocaleString('en-IN')} pending • Check-in was ${formatDate(r.check_in)}`,
+                        badge: 'overdue',
+                        bookingId: r.booking_id
+                    });
+                }
+                
+                // URGENT: Check-ins today with pending payment
+                if (checkInDate.getTime() === today.getTime() && balance > 0) {
+                    urgentActions.push({
+                        type: 'checkin_payment',
+                        priority: 2,
+                        reservation: r,
+                        title: `🏨 Check-in Today - Payment Due`,
+                        details: `${r.guest_name} • ${r.property_name} • ₹${Math.round(balance).toLocaleString('en-IN')} pending`,
+                        badge: 'due-today',
+                        bookingId: r.booking_id
+                    });
+                }
+                
+                // TODAY: Check-ins
+                if (checkInDate.getTime() === today.getTime()) {
+                    todayActions.push({
+                        type: 'checkin',
+                        reservation: r,
+                        title: `🏨 Check-in: ${r.guest_name}`,
+                        details: `${r.property_name} • ${r.adults + r.kids} guests • ${r.nights} nights`,
+                        badge: r.payment_status === 'paid' ? 'paid' : 'due-today',
+                        bookingId: r.booking_id
+                    });
+                }
+                
+                // TODAY: Check-outs
+                if (checkOutDate.getTime() === today.getTime()) {
+                    todayActions.push({
+                        type: 'checkout',
+                        reservation: r,
+                        title: `🚪 Check-out: ${r.guest_name}`,
+                        details: `${r.property_name} • Final amount: ₹${Math.round(r.total_amount).toLocaleString('en-IN')}`,
+                        badge: r.payment_status === 'paid' ? 'paid' : 'due-today',
+                        bookingId: r.booking_id
+                    });
+                }
+                
+                // UPCOMING: Check-ins in next 7 days
+                if (checkInDate > today && checkInDate <= nextWeek) {
+                    const daysUntil = Math.ceil((checkInDate - today) / (1000 * 60 * 60 * 24));
+                    upcomingActions.push({
+                        type: 'upcoming_checkin',
+                        reservation: r,
+                        title: `📅 Check-in in ${daysUntil} day${daysUntil > 1 ? 's' : ''}: ${r.guest_name}`,
+                        details: `${r.property_name} • ${formatDate(r.check_in)} • ${r.payment_status === 'paid' ? '✅ Paid' : '⏳ Payment pending'}`,
+                        badge: 'due-soon',
+                        bookingId: r.booking_id,
+                        daysUntil: daysUntil
+                    });
+                }
+            });
+            
+            // Sort by priority
+            urgentActions.sort((a, b) => a.priority - b.priority);
+            upcomingActions.sort((a, b) => a.daysUntil - b.daysUntil);
+            
+            // Update counts
+            document.getElementById('urgentCount').textContent = urgentActions.length;
+            document.getElementById('todayCount').textContent = todayActions.length;
+            document.getElementById('upcomingCount').textContent = upcomingActions.length;
+            
+            // Show/hide Action Center
+            const totalActions = urgentActions.length + todayActions.length + upcomingActions.length;
+            const actionCenterCard = document.getElementById('actionCenterCard');
+            if (totalActions > 0) {
+                actionCenterCard.style.display = 'block';
+            } else {
+                actionCenterCard.style.display = 'none';
+            }
+            
+            // Render each tab
+                renderActionList('urgentActionsList', urgentActions, 'urgent');
+                renderActionList('todayActionsList', todayActions, 'today');
+                renderActionList('upcomingActionsList', upcomingActions, 'upcoming');
+            }
+
+            function renderActionList(elementId, actions, type) {
+                const element = document.getElementById(elementId);
+                
+                if (actions.length === 0) {
+                    element.innerHTML = `
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            ${type === 'urgent' ? '✅ No urgent actions!' : 
+                            type === 'today' ? '📅 No activities today' : 
+                            '🎯 Nothing scheduled for next 7 days'}
+                        </div>
+                    `;
+                    return;
+                }
+                
+                element.innerHTML = actions.map(action => `
+                    <div class="action-item ${type}">
+                        <div class="action-info">
+                            <div class="action-title">${action.title}</div>
+                            <div class="action-details">
+                                ${action.details}
+                                ${action.badge ? `<span class="action-badge ${action.badge}" style="margin-left: 8px;">${action.badge.replace('_', ' ')}</span>` : ''}
+                            </div>
+                        </div>
+                        <div class="action-buttons">
+                            ${action.type.includes('payment') || action.type === 'checkin_payment' || action.type === 'overdue_payment' ? 
+                                `<button class="btn btn-success btn-sm" onclick="openPaymentModal('${action.bookingId}')" title="Collect Payment">
+                                    💰 Collect
+                                </button>` : ''}
+                            <button class="btn btn-primary btn-sm" onclick="sendWhatsAppReminder('${action.bookingId}')" title="Send WhatsApp">
+                                📱 WhatsApp
+                            </button>
+                            <button class="btn btn-secondary btn-sm" onclick="viewBookingDetails('${action.bookingId}')" title="View Details">
+                                👁️ View
+                            </button>
+                        </div>
+                    </div>
+                `).join('');
+            }
+
+            function sendWhatsAppReminder(bookingId) {
+                const reservation = allReservations.find(r => r.booking_id === bookingId);
+                if (!reservation) {
+                    showToast('Error', 'Reservation not found', '❌');
+                    return;
+                }
+                
+                const balance = (parseFloat(reservation.total_amount) || 0) - (parseFloat(reservation.paid_amount) || 0);
+                const phone = reservation.guest_phone.replace(/[^0-9]/g, '');
+                
+                let message = `Hello ${reservation.guest_name}!\n\n`;
+                message += `This is a reminder for your booking at ${reservation.property_name}\n`;
+                message += `Booking ID: ${reservation.booking_id}\n`;
+                message += `Check-in: ${formatDate(reservation.check_in)}\n`;
+                message += `Check-out: ${formatDate(reservation.check_out)}\n\n`;
+                
+                if (balance > 0) {
+                    message += `Pending Payment: ₹${Math.round(balance).toLocaleString('en-IN')}\n\n`;
+                }
+                
+                message += `Looking forward to hosting you!\n- Hostizzy Team`;
+                
+                const whatsappUrl = `https://wa.me/91${phone}?text=${encodeURIComponent(message)}`;
+                window.open(whatsappUrl, '_blank');
+                
+                showToast('WhatsApp Opened', 'Message template ready to send', '✅');
+            }
+
+            function viewBookingDetails(bookingId) {
+                showView('reservations');
+                
+                // Filter to show only this booking
+                const searchInput = document.getElementById('searchReservations');
+                searchInput.value = bookingId;
+                filterReservations();
+                
+                showToast('Booking Found', `Showing details for ${bookingId}`, '👁️');
+            }
+
+        // Bulk Payment Collection
         function openBulkPaymentModal() {
             const selectedCheckboxes = document.querySelectorAll('.reminder-checkbox:checked');
             if (selectedCheckboxes.length === 0) {
@@ -3725,6 +4107,10 @@
                 document.getElementById('totalPaid').textContent = Math.round(totalPaid).toLocaleString('en-IN');
                 document.getElementById('totalPending').textContent = Math.round(totalPending).toLocaleString('en-IN');
                 document.getElementById('totalPartial').textContent = Math.round(totalPartial).toLocaleString('en-IN');
+                
+                // Render payment reminders
+                const confirmedReservations = allReservations.filter(r => r.status !== 'cancelled');
+                renderPaymentReminders(confirmedReservations);
                 
                 displayPayments(allReservations);
             } catch (error) {
@@ -4539,9 +4925,8 @@
             const channelColors = {
                 'DIRECT': '#2563eb',
                 'AIRBNB': '#ff5a5f',
-                'BOOKING.COM': '#003580',
-                'GOIBIBO': '#f15b2a',
-                'MAKEMYTRIP': '#e7352b',
+                'AGODA/BOOKING.COM': '#003580',
+                'MMT/GOIBIBO': '#f15b2a',
                 'OTHER': '#6b7280'
             };
             
