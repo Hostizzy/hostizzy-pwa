@@ -796,7 +796,65 @@
                 padding: 16px;
                 padding-bottom: 80px;
             }
-            
+
+            /* Quick Filters */
+            .quick-filters-container {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+            }
+
+            .quick-filters {
+                display: flex;
+                gap: 8px;
+                flex-wrap: nowrap;
+                padding: 4px 0;
+                min-width: min-content;
+            }
+
+            .filter-chip {
+                display: inline-flex;
+                align-items: center;
+                gap: 6px;
+                padding: 8px 16px;
+                background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+                border: 2px solid var(--border);
+                border-radius: 20px;
+                font-size: 13px;
+                font-weight: 600;
+                color: var(--text-primary);
+                cursor: pointer;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                user-select: none;
+                box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            }
+
+            .filter-chip:hover {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.15);
+                border-color: var(--primary);
+            }
+
+            .filter-chip.active {
+                background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+                color: white;
+                border-color: var(--primary);
+                box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+            }
+
+            .filter-chip.active:hover {
+                transform: translateY(-2px) scale(1.02);
+            }
+
+            /* Add animation on click */
+            .filter-chip:active {
+                transform: scale(0.95);
+            }
+
+            @media (max-width: 768px) {
+                .quick-filters {
+                    padding-bottom: 8px;
+                }
+            }
             .stats-grid {
                 grid-template-columns: 1fr;
             }
@@ -1434,6 +1492,27 @@
         <!-- Dashboard View -->
         <div id="dashboardView" class="container">
             <h2 style="margin-bottom: 24px;">Dashboard Overview</h2>
+
+            <!-- Quick Filters -->
+            <div class="quick-filters-container" style="margin-bottom: 24px;">
+                <div class="quick-filters">
+                    <button class="filter-chip active" data-filter="all" onclick="applyQuickFilter('all')">
+                        📊 All Data
+                    </button>
+                    <button class="filter-chip" data-filter="this-month" onclick="applyQuickFilter('this-month')">
+                        📅 This Month
+                    </button>
+                    <button class="filter-chip" data-filter="pending-payments" onclick="applyQuickFilter('pending-payments')">
+                        💰 Pending Payments
+                    </button>
+                    <button class="filter-chip" data-filter="active-only" onclick="applyQuickFilter('active-only')">
+                        🔄 Active Only
+                    </button>
+                    <button class="filter-chip" data-filter="urgent" onclick="applyQuickFilter('urgent')">
+                        🔴 Urgent Actions
+                    </button>
+                </div>
+            </div>
             
             <!-- Primary Stats -->
             <div class="stats-grid">
@@ -1550,35 +1629,39 @@
 
             <!-- Action Center -->
             <div class="card" id="actionCenterCard" style="display: none;">
-                <div class="card-header">
-                    <h3 class="card-title">⚡ Action Center</h3>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-sm" id="urgentTab" onclick="switchActionTab('urgent')" style="background: var(--danger); color: white;">
-                            🔴 Urgent (<span id="urgentCount">0</span>)
-                        </button>
-                        <button class="btn btn-sm" id="todayTab" onclick="switchActionTab('today')" style="background: var(--warning); color: white;">
-                            🟡 Today (<span id="todayCount">0</span>)
-                        </button>
-                        <button class="btn btn-sm" id="upcomingTab" onclick="switchActionTab('upcoming')" style="background: var(--success); color: white;">
-                            🟢 Upcoming (<span id="upcomingCount">0</span>)
-                        </button>
-                    </div>
+            <div class="card-header" onclick="toggleCollapse('actionCenterContent','actionCenterIcon')" style="cursor: pointer;">
+                <h3 class="card-title">⚡ Action Center <span id="actionCenterIcon">🔽</span></h3>
+            </div>
+
+            <!-- NEW WRAPPER that gets collapsed -->
+            <div id="actionCenterContent">
+                <div id="actionCenterBody">
+                <div style="display: flex; gap: 8px; margin-bottom: 16px;">
+                    <button class="btn btn-sm" id="urgentTab" onclick="switchActionTab('urgent')" style="background: var(--danger); color: white;">
+                    🔴 Urgent (<span id="urgentCount">0</span>)
+                    </button>
+                    <button class="btn btn-sm" id="todayTab" onclick="switchActionTab('today')" style="background: var(--warning); color: white;">
+                    🟡 Today (<span id="todayCount">0</span>)
+                    </button>
+                    <button class="btn btn-sm" id="upcomingTab" onclick="switchActionTab('upcoming')" style="background: var(--success); color: white;">
+                    🟢 Upcoming (<span id="upcomingCount">0</span>)
+                    </button>
                 </div>
-                
-                <!-- Urgent Actions -->
+                </div>
+
+                <!-- Urgent / Today / Upcoming lists stay the same -->
                 <div id="urgentActions" class="action-tab-content">
-                    <div id="urgentActionsList"></div>
+                <div id="urgentActionsList"></div>
                 </div>
-                
-                <!-- Today Actions -->
+
                 <div id="todayActions" class="action-tab-content" style="display: none;">
-                    <div id="todayActionsList"></div>
+                <div id="todayActionsList"></div>
                 </div>
-                
-                <!-- Upcoming Actions -->
+
                 <div id="upcomingActions" class="action-tab-content" style="display: none;">
-                    <div id="upcomingActionsList"></div>
+                <div id="upcomingActionsList"></div>
                 </div>
+            </div>
             </div>
 
             <!-- Recent Reservations -->
@@ -2093,7 +2176,12 @@
 
             <div class="form-group">
                 <label>Amount (₹) *</label>
-                <input type="number" id="paymentAmount" min="0" step="0.01" required>
+                <div style="display: flex; gap: 8px;">
+                    <input type="number" id="paymentAmount" min="0" step="0.01" required style="flex: 1;">
+                    <button type="button" class="btn btn-secondary" onclick="startVoicePayment()" title="Voice Input">
+                        🎤
+                    </button>
+                </div>
             </div>
 
             <div class="form-group">
@@ -2825,8 +2913,18 @@
                 const user = users.find(u => u.email === email && u.password === password);
                 
                 if (user) {
+                    if (!user.is_active) {
+                        showToast('Account Inactive', 'Your account has been deactivated', '❌');
+                        return;
+                    }
+                    
                     currentUser = user;
-                    sessionStorage.setItem('currentUser', JSON.stringify(user));
+                    
+                    // Store in localStorage for persistence
+                    localStorage.setItem('currentUser', JSON.stringify(user));
+                    
+                    // Set user context for RLS
+                    await supabase.rpc('set_user_context', { user_email: email });
                     
                     document.getElementById('loginScreen').classList.add('hidden');
                     document.getElementById('mainApp').classList.remove('hidden');
@@ -2835,6 +2933,11 @@
                     document.getElementById('mobileHeader').classList.remove('hidden');
                     document.getElementById('mobileUserEmail').textContent = user.email;
                     document.getElementById('sidebarUserEmail').textContent = user.email;
+                    
+                    // Hide Performance view for staff
+                    if (user.role === 'staff') {
+                        hidePerformanceForStaff();
+                    }
                     
                     await loadDashboard();
                     showToast('Welcome!', `Logged in as ${user.name}`, '👋');
@@ -2847,8 +2950,31 @@
             }
         }
 
+        function hidePerformanceForStaff() {
+            // Hide from desktop navigation
+            document.querySelectorAll('.nav-link').forEach(link => {
+                if (link.textContent.includes('Performance') || link.onclick?.toString().includes('performance')) {
+                    link.style.display = 'none';
+                }
+            });
+            
+            // Hide from mobile navigation
+            document.querySelectorAll('.mobile-nav-item').forEach(link => {
+                if (link.textContent.includes('Performance') || link.onclick?.toString().includes('performance')) {
+                    link.style.display = 'none';
+                }
+            });
+            
+            // Hide from mobile sidebar
+            document.querySelectorAll('.mobile-sidebar-link').forEach(link => {
+                if (link.textContent.includes('Performance') || link.onclick?.toString().includes('performance')) {
+                    link.style.display = 'none';
+                }
+            });
+        }
+
         function logout() {
-            sessionStorage.removeItem('currentUser');
+            localStorage.removeItem('currentUser');
             currentUser = null;
             document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
@@ -2949,6 +3075,7 @@
 
         target.innerHTML = html;
         }
+
         // Dashboard
         async function loadDashboard() {
             try {
@@ -3045,7 +3172,105 @@
             }
         }
 
-        // Feature 1: Payment Analytics - Revenue Split
+        // Quick Filter State
+        let currentQuickFilter = 'all';
+
+        async function applyQuickFilter(filter) {
+            currentQuickFilter = filter;
+            
+            // Update UI
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+            });
+            document.querySelector(`[data-filter="${filter}"]`).classList.add('active');
+            
+            // Get all reservations
+            let filteredReservations = [...allReservations];
+            
+            const today = new Date();
+            const startOfMonth = new Date(today.getFullYear(), today.getMonth(), 1);
+            const endOfMonth = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+            
+            // Apply filter logic
+            switch(filter) {
+                case 'this-month':
+                    filteredReservations = filteredReservations.filter(r => {
+                        const checkIn = new Date(r.check_in);
+                        return checkIn >= startOfMonth && checkIn <= endOfMonth;
+                    });
+                    showToast('Filtered', `Showing ${filteredReservations.length} bookings this month`, 'ℹ️');
+                    break;
+                    
+                case 'pending-payments':
+                    filteredReservations = filteredReservations.filter(r => 
+                        r.payment_status !== 'paid' && r.status !== 'cancelled'
+                    );
+                    showToast('Filtered', `Showing ${filteredReservations.length} with pending payments`, 'ℹ️');
+                    break;
+                    
+                case 'active-only':
+                    filteredReservations = filteredReservations.filter(r => 
+                        r.status === 'confirmed' || r.status === 'checked-in'
+                    );
+                    showToast('Filtered', `Showing ${filteredReservations.length} active bookings`, 'ℹ️');
+                    break;
+                    
+                case 'urgent':
+                    const urgentReservations = filteredReservations.filter(r => {
+                        if (r.status === 'cancelled') return false;
+                        
+                        const checkInDate = new Date(r.check_in);
+                        checkInDate.setHours(0, 0, 0, 0);
+                        const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                        
+                        // Overdue payments or today's check-in with pending payment
+                        return (balance > 0 && checkInDate < today) || 
+                            (checkInDate.getTime() === today.getTime() && balance > 0);
+                    });
+                    filteredReservations = urgentReservations;
+                    showToast('Filtered', `Showing ${filteredReservations.length} urgent actions`, 'ℹ️');
+                    break;
+                    
+                case 'all':
+                default:
+                    showToast('Filter Reset', 'Showing all data', 'ℹ️');
+                    break;
+            }
+            
+            // Re-render dashboard with filtered data
+            const confirmedReservations = filteredReservations.filter(r => r.status !== 'cancelled');
+            
+            // Update metrics
+            const totalRevenue = confirmedReservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0);
+            const activeBookings = filteredReservations.filter(r => r.status === 'checked-in').length;
+            const upcomingBookings = filteredReservations.filter(r => r.status === 'confirmed').length;
+            
+            document.getElementById('totalReservations').textContent = filteredReservations.length;
+            document.getElementById('activeReservations').textContent = activeBookings;
+            document.getElementById('upcomingReservations').textContent = upcomingBookings;
+            
+            // Re-render components
+            renderTopProperties(confirmedReservations, await db.getProperties());
+            renderBookingTypeBreakdown(confirmedReservations);
+            renderChannelDistribution(confirmedReservations);
+            await renderMonthlyTrends(confirmedReservations);
+            renderActionCenter(filteredReservations);
+            
+            // Update recent reservations table
+            const recent = filteredReservations.slice(0, 10);
+            document.getElementById('recentReservationsTable').innerHTML = recent.map(r => `
+                <tr>
+                    <td><strong>${r.booking_id || 'N/A'}</strong></td>
+                    <td>${r.guest_name}</td>
+                    <td>${r.property_name}</td>
+                    <td>${formatDate(r.check_in)}</td>
+                    <td>₹${Math.round(r.total_amount || 0).toLocaleString('en-IN')}</td>
+                    <td><span class="badge badge-${r.status}">${r.status}</span></td>
+                </tr>
+            `).join('') || '<tr><td colspan="6" class="text-center">No reservations found</td></tr>';
+        }
+
+        // Payment Analytics - Revenue Split
         function renderRevenueSplit(payments, reservations) {
             // Calculate Hostizzy vs Owner Revenue (from reservations, not payments)
             const hostizzyRevenue = reservations.reduce((sum, r) => 
@@ -3534,7 +3759,10 @@
                 element.innerHTML = actions.map(action => `
                     <div class="action-item ${type}">
                         <div class="action-info">
-                            <div class="action-title">${action.title}</div>
+                            <div class="action-title">
+                                ${action.title}
+                                <span style="background: var(--background); padding: 2px 8px; border-radius: 4px; font-size: 11px; margin-left: 8px; font-weight: 500;">${action.bookingId}</span>
+                            </div>
                             <div class="action-details">
                                 ${action.details}
                                 ${action.badge ? `<span class="action-badge ${action.badge}" style="margin-left: 8px;">${action.badge.replace('_', ' ')}</span>` : ''}
@@ -4165,6 +4393,99 @@
             });
             
             displayPayments(filtered);
+        }
+
+        // Voice Input for Payments
+        let voiceRecognition = null;
+
+        function initVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                voiceRecognition = new SpeechRecognition();
+                voiceRecognition.continuous = false;
+                voiceRecognition.interimResults = false;
+                voiceRecognition.lang = 'en-IN';
+            } else {
+                console.warn('Speech recognition not supported');
+            }
+        }
+
+        function startVoicePayment() {
+            if (!voiceRecognition) {
+                initVoiceRecognition();
+            }
+            
+            if (!voiceRecognition) {
+                showToast('Not Supported', 'Voice input not available on this device', '❌');
+                return;
+            }
+            
+            showToast('Listening...', 'Say the payment amount', '🎤');
+            
+            voiceRecognition.onresult = (event) => {
+                const transcript = event.results[0][0].transcript.toLowerCase();
+                console.log('Voice input:', transcript);
+                
+                // Parse numbers from speech
+                const amount = parseVoiceAmount(transcript);
+                
+                if (amount > 0) {
+                    document.getElementById('paymentAmount').value = amount;
+                    showToast('Amount Set', `₹${amount.toLocaleString('en-IN')}`, '✅');
+                } else {
+                    showToast('Try Again', 'Could not understand amount', '❌');
+                }
+            };
+            
+            voiceRecognition.onerror = (event) => {
+                console.error('Voice recognition error:', event.error);
+                showToast('Error', 'Voice input failed', '❌');
+            };
+            
+            voiceRecognition.start();
+        }
+
+        function parseVoiceAmount(text) {
+            // Remove common words
+            text = text.replace(/rupees?|rs\.?|inr|dollars?/gi, '').trim();
+            
+            // Handle spoken numbers
+            const numberWords = {
+                'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
+                'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
+                'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
+                'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
+                'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70,
+                'eighty': 80, 'ninety': 90, 'hundred': 100, 'thousand': 1000,
+                'lakh': 100000, 'lac': 100000, 'lakhs': 100000, 'lacs': 100000
+            };
+            
+            let amount = 0;
+            const words = text.split(/\s+/);
+            
+            for (let i = 0; i < words.length; i++) {
+                const word = words[i].toLowerCase();
+                
+                // Direct number
+                if (!isNaN(word)) {
+                    amount = parseFloat(word);
+                    continue;
+                }
+                
+                // Number word
+                if (numberWords[word] !== undefined) {
+                    const value = numberWords[word];
+                    
+                    if (value >= 100) {
+                        if (amount === 0) amount = 1;
+                        amount *= value;
+                    } else {
+                        amount += value;
+                    }
+                }
+            }
+            
+            return amount;
         }
 
         // Payment Modal Functions
@@ -5321,6 +5642,42 @@
             loadAvailabilityCalendar();
         }
 
+        // Collapsible Sections
+        function toggleCollapse(elementId, iconId) {
+            const element = document.getElementById(elementId);
+            const icon = document.getElementById(iconId);
+            
+            if (element.style.display === 'none') {
+                element.style.display = 'block';
+                icon.textContent = '🔽';
+                localStorage.setItem(`collapse_${elementId}`, 'open');
+            } else {
+                element.style.display = 'none';
+                icon.textContent = '▶️';
+                localStorage.setItem(`collapse_${elementId}`, 'closed');
+            }
+        }
+
+        function toggleCollapse(elementId, iconId) {
+            const element = document.getElementById(elementId);
+            const icon = document.getElementById(iconId);
+            
+            if (!element || !icon) return;
+            
+            const isCollapsed = element.style.display === 'none';
+            
+            if (isCollapsed) {
+                element.style.display = 'block';
+                icon.textContent = '🔽';
+            } else {
+                element.style.display = 'none';
+                icon.textContent = '▶️';
+            }
+            
+            // Save state
+            saveCollapseState(elementId, !isCollapsed);
+        }
+        
         // Bulk Edit Functions
         function toggleRowSelection(checkbox, bookingId) {
             if (checkbox.checked) {
@@ -5461,7 +5818,7 @@
             }
         }
 
-        // Feature 7: Export Functions with Payment Recipient
+        // Export Functions with Payment Recipient
         async function exportCSV() {
             const reservations = allReservations;
             let csv = 'Booking ID,Property,Status,Check-in,Check-out,Nights,Guest,Phone,Email,City,Source,Rooms,Adults,Kids,Stay Amount,Total Amount,Payment Status,Paid Amount,Balance\n';
@@ -5548,23 +5905,128 @@
             isOnline = navigator.onLine;
             updateSyncIndicator();
             
-            const user = sessionStorage.getItem('currentUser');
-            if (user) {
-                currentUser = JSON.parse(user);
-                document.getElementById('loginScreen').classList.add('hidden');
-                document.getElementById('mainApp').classList.remove('hidden');
-                document.getElementById('userEmail').textContent = currentUser.email;
-                document.querySelector('.mobile-nav').classList.remove('hidden');
-                document.getElementById('mobileHeader').classList.remove('hidden');
-                document.getElementById('mobileUserEmail').textContent = currentUser.email;
-                document.getElementById('sidebarUserEmail').textContent = currentUser.email;
-                
-                await loadDashboard();
-                
-                if (navigator.onLine) {
-                    setTimeout(autoSync, 2000);
+            // Check localStorage for persistent session
+            const storedUser = localStorage.getItem('currentUser');
+            
+            if (storedUser) {
+                try {
+                    currentUser = JSON.parse(storedUser);
+                    
+                    // Set user context for RLS
+                    await supabase.rpc('set_user_context', { user_email: currentUser.email });
+                    
+                    document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('mainApp').classList.remove('hidden');
+                    document.getElementById('userEmail').textContent = currentUser.email;
+                    document.querySelector('.mobile-nav').classList.remove('hidden');
+                    document.getElementById('mobileHeader').classList.remove('hidden');
+                    document.getElementById('mobileUserEmail').textContent = currentUser.email;
+                    document.getElementById('sidebarUserEmail').textContent = currentUser.email;
+                    
+                    // Hide Performance for staff
+                    if (currentUser.role === 'staff') {
+                        hidePerformanceForStaff();
+                    }
+                    
+                    await loadDashboard();
+                    
+                    if (navigator.onLine) {
+                        setTimeout(autoSync, 2000);
+                    }
+                } catch (error) {
+                    console.error('Session restore error:', error);
+                    localStorage.removeItem('currentUser');
                 }
             }
+
+        // Push Notifications
+        async function requestNotificationPermission() {
+            if (!('Notification' in window)) {
+                console.log('Notifications not supported');
+                return false;
+            }
+            
+            if (Notification.permission === 'granted') {
+                return true;
+            }
+            
+            if (Notification.permission !== 'denied') {
+                const permission = await Notification.requestPermission();
+                return permission === 'granted';
+            }
+            
+            return false;
+        }
+
+        function sendNotification(title, body, data = {}) {
+            if (Notification.permission === 'granted') {
+                const notification = new Notification(title, {
+                    body: body,
+                    icon: 'assets/logo.png',
+                    badge: 'assets/logo.png',
+                    tag: data.tag || 'resiq-notification',
+                    requireInteraction: data.requireInteraction || false,
+                    data: data
+                });
+                
+                notification.onclick = () => {
+                    window.focus();
+                    if (data.action) {
+                        eval(data.action);
+                    }
+                    notification.close();
+                };
+            }
+        }
+
+        // Check for urgent notifications
+        async function checkUrgentNotifications() {
+            const hasPermission = await requestNotificationPermission();
+            if (!hasPermission) return;
+            
+            const reservations = await db.getReservations();
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            
+            // Overdue payments
+            const overdue = reservations.filter(r => {
+                if (r.status === 'cancelled') return false;
+                const checkIn = new Date(r.check_in);
+                checkIn.setHours(0, 0, 0, 0);
+                const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                return balance > 0 && checkIn < today;
+            });
+            
+            if (overdue.length > 0) {
+                sendNotification(
+                    '🔴 Overdue Payments',
+                    `${overdue.length} booking(s) have overdue payments`,
+                    { 
+                        tag: 'overdue-payments',
+                        requireInteraction: true,
+                        action: "showView('payments')"
+                    }
+                );
+            }
+            
+            // Today's check-ins
+            const todayCheckIns = reservations.filter(r => {
+                const checkIn = new Date(r.check_in);
+                checkIn.setHours(0, 0, 0, 0);
+                return checkIn.getTime() === today.getTime() && r.status !== 'cancelled';
+            });
+            
+            if (todayCheckIns.length > 0) {
+                sendNotification(
+                    '🏨 Check-ins Today',
+                    `${todayCheckIns.length} guest(s) checking in today`,
+                    { 
+                        tag: 'today-checkins',
+                        action: "applyQuickFilter('urgent')"
+                    }
+                );
+            }
+        }    
         });
     </script>
     
