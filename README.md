@@ -1,17 +1,75 @@
-# Hostizzy -  Reservation Management System
+# 🧠 ResIQ by Hostizzy
 
-A comprehensive Progressive Web App (PWA) for managing property reservations for Hostizzy, built by Hostsphere India Private Limited.
+⚠️ **NOTICE:** This is proprietary software owned by Hostizzy.  
+Viewing the source code does **not** grant any rights to use, copy, modify, or redistribute it.  
+Commercial usage requires a licensing agreement with Hostizzy.
 
-## 🌟 Features
+ResIQ is a proprietary property operations dashboard designed for vacation rentals, homestays, and boutique stays.  
+It helps teams centralize **reservations**, **calendar sync**, and **performance insights** in a clean, mobile-ready interface.
 
-### Core Functionality
-- **Team Authentication**: Multi-user login system with role-based access
-- **Reservation Management**: Create, view, edit, and cancel reservations
-- **Dashboard Analytics**: Visual insights into bookings and revenue
-- **Property Management**: Manage multiple properties and their availability
-- **Historical Data**: View all reservation data from the current year
-- **Offline Support**: Works without internet connection
-- **Mobile-First Design**: Optimized for all devices
+---
+
+## 📌 Overview
+
+ResIQ is a **PWA-ready** (Progressive Web App) operations tool built for daily use by on-ground property teams and central reservation teams.
+
+It combines:
+- 📅 Reservation & iCal sync  
+- 🏡 Property management & settings  
+- 📊 Performance dashboards  
+- ⚡ Action center for daily ops  
+- 🧭 Mobile-friendly UI with persistent login
+
+---
+
+## 🚀 Features
+
+### 🔐 Authentication
+- Email & password based login
+- **Persistent sessions using `localStorage`** (users stay logged in across browser restarts)
+- Clean logout state management
+
+### 🧭 Navigation
+- Single-page layout with multiple **container views** (`dashboard`, `reservations`, `payments`, `availability`, `properties`, `performance`, `team`)
+- Sidebar for desktop  
+- Mobile header + slide-out navigation for smaller screens
+
+### 🏡 Property Management
+- Property settings modal with:
+  - iCal link management
+  - Last sync timestamp display (`formatTimeAgo` function with tolerant parsing)
+  - Editable property details
+- Calendar sync indicators
+- Inline sync metadata updates
+
+### 📅 Reservations & Calendar
+- iCal integration (imports bookings from external calendars)
+- Displays reservation data in unified dashboard
+- Can be extended to support multiple sources
+
+### 📊 Performance Dashboard
+- Real-time breakdown of bookings by type
+- **Shared rendering function** for both dashboard and performance view
+- Percentage revenue breakdown and progress bars
+- Aggregated metrics (revenue, booking count, nights)
+
+### ⚡ Action Center
+- Collapsible card with state persistence
+- Urgent / Today / Upcoming tabbed tasks
+- Mobile-friendly segmented button UI
+- Empty states supported
+
+### 🧠 UI/UX Utilities
+- **Collapsible sections** with saved states (`localStorage`)
+- **Toast notifications** for key actions (login/logout/sync/errors)
+- Persistent offline banner
+- Mobile quick action FAB
+- Sync indicator with status & manual trigger
+
+### 📲 PWA Support
+- Service Worker registration
+- `beforeinstallprompt` handling
+- Install bar prompt for mobile devices
 
 ### User Roles
 - **Admin**: Full access to all features
@@ -70,42 +128,6 @@ A comprehensive Progressive Web App (PWA) for managing property reservations for
 3. Tap "Install app" or "Add to Home Screen"
 4. Tap "Install"
 
-## 🔐 Default Login Credentials
-
-```
-Email: admin@hostizzy.com
-Password: admin123
-```
-
-**Important**: Change these credentials after first login by adding new team members.
-
-## 📊 Features Walkthrough
-
-### Dashboard
-- **Total Reservations**: Count of all bookings this year
-- **Active Reservations**: Currently checked-in guests
-- **Properties**: Number of managed properties
-- **Revenue**: Total earnings (in INR)
-- **Recent Reservations**: Latest 5 bookings
-- **Monthly Overview**: Revenue trends
-
-### Reservations Management
-- **Create New**: Add reservations with guest details
-- **Search & Filter**: By name, booking ID, property, status, or date
-- **Edit/Delete**: Modify or remove existing bookings
-- **Status Tracking**: Pending, Confirmed, Checked-in, Checked-out, Cancelled
-
-### Property Management
-- View all properties
-- Add new properties
-- Track active bookings per property
-- Manage capacity and details
-
-### Team Management
-- Add team members
-- Assign roles (Admin/Manager/Staff)
-- Remove team members (except primary admin)
-
 ## 🎨 Design System
 
 ### Colors
@@ -121,24 +143,38 @@ Password: admin123
 - Mobile-first responsive design
 - 20px consistent spacing
 
-## 💾 Data Storage
+---
 
-The application uses **browser LocalStorage** for data persistence:
-- All data is stored locally in the browser
-- No external database required
-- Data persists between sessions
-- Works offline
+## 🧰 Tech Stack
 
-### Data Structure
-- **Users/Team**: Login credentials and roles
-- **Properties**: Hotel/property information
-- **Reservations**: Booking details and history
+- **Frontend:** HTML, vanilla JS, CSS  
+- **Storage:** LocalStorage (session persistence), IndexedDB (offline layer)  
+- **PWA:** Service Worker, install prompt, offline banner  
+- **Integrations:** iCal feed import  
+- **No Frameworks:** Runs standalone in browser without React/Vue
 
-### Pre-loaded Data
-The system comes with:
-- 1 admin account
-- 3 sample properties (Delhi, Goa, Mumbai)
-- 60 sample reservations (5 per month for 2025)
+---
+
+## 🧪 Development Setup
+
+### Prerequisites
+- Any modern browser (Chrome, Edge, Safari, Firefox)
+- A basic static server (e.g. `live-server`, `http-server`, or VS Code Live Preview)
+
+### Run locally
+```bash
+# 1. Clone the repository
+git clone https://github.com/<your-org>/resiq.git
+cd resiq
+
+# 2. Start a local server
+npx live-server .
+# or
+python3 -m http.server 8080
+
+# 3. Open the app
+http://localhost:8080
+
 
 ## 🔧 Customization
 
@@ -164,38 +200,6 @@ To customize colors, edit the CSS variables in `hostizzy-pwa.html`:
     /* ... other colors ... */
 }
 ```
-
-## 📈 Scalability
-
-### Current Limitations
-- LocalStorage capacity: ~5-10MB
-- Recommended max: 1000-2000 reservations
-- Single device storage (not cloud-synced)
-
-### For Larger Scale
-Consider migrating to:
-- Backend database (MongoDB, PostgreSQL)
-- Cloud hosting (AWS, Google Cloud)
-- Real-time sync across devices
-- Advanced analytics and reporting
-
-## 🔒 Security Considerations
-
-**Important**: This is a client-side application with local storage.
-
-### For Production Use:
-1. Implement backend authentication
-2. Add HTTPS encryption
-3. Use secure password hashing
-4. Add API for data sync
-5. Implement role-based access control server-side
-6. Regular backups
-
-### Current Security:
-- Passwords stored in plain text (LocalStorage)
-- No encryption
-- Suitable for internal team use only
-- Not recommended for public internet without backend
 
 ## 🌐 Browser Compatibility
 
@@ -247,15 +251,10 @@ For issues with:
 ## 🚀 Future Enhancements
 
 Potential additions:
-- [ ] Export data to Excel/CSV
 - [ ] Email notifications for bookings
-- [ ] SMS integration
 - [ ] Payment gateway integration
-- [ ] Calendar view for reservations
 - [ ] Guest portal for self check-in
 - [ ] Multi-language support
-- [ ] Advanced analytics and reports
-- [ ] Cloud backup and sync
 - [ ] Mobile app (React Native)
 
 ## 📄 License
