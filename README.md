@@ -248,7 +248,7 @@ For issues with:
 - **Technical setup**: Check browser console for errors
 - **Feature requests**: Document for future development
 
-## 🚀 Future Enhancements
+## 🧭 Roadmap
 
 Potential additions:
 - [ ] Email notifications for bookings
@@ -261,12 +261,18 @@ Potential additions:
 
 Proprietary software for Hostizzy by Hostsphere India Private Limited.
 
-## 🏢 About Hostizzy
+## 🏷️ About Hostizzy
 
-Hostizzy is a hospitality brand in India operated by Hostsphere India Private Limited, dedicated to providing exceptional accommodation experiences.
+ResIQ is built by the team behind Hostizzy, a vacation rental company empowering independent hosts across India.
 
----
+🌐 www.hostizzy.com
 
 **Built with ❤️ for Hostizzy**
 
-Version 1.0 | Last Updated: October 2025
+Version 2.0 | Last Updated: October 2025
+
+🧾 License
+
+© 2025 Hostizzy.
+All rights reserved.
+Use of this software requires a commercial license.
