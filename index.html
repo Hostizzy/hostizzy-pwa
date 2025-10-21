@@ -138,9 +138,27 @@
             color: white;
         }
 
-        .btn-warning {
+.btn-warning {
             background: var(--warning);
             color: white;
+        }
+
+        #globalVoiceBtn {
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        #globalVoiceBtn:hover {
+            transform: scale(1.05);
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        #globalVoiceBtn.listening {
+            animation: pulse 1.5s ease-in-out infinite;
         }
 
         .btn-sm {
@@ -269,6 +287,89 @@
             font-size: 32px;
             font-weight: 700;
             color: var(--text-primary);
+        }
+        
+        /* Property Cards */
+        .property-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+            overflow: hidden;
+            transition: all 0.2s;
+        }
+
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-lg);
+            border-color: var(--primary);
+        }
+
+        .property-card-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .btn-icon {
+            background: rgba(255, 255, 255, 0.2);
+            border: none;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 18px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .btn-icon:hover {
+            background: rgba(255, 255, 255, 0.3);
+            transform: scale(1.1);
+        }
+
+        .property-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1px;
+            background: var(--border);
+            border-top: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+        }
+
+         .property-stat {
+            background: white;
+            padding: 12px 8px;
+            text-align: center;
+            min-width: 0;
+        }
+
+         .property-stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+            word-break: break-word;
+        }
+
+        .property-stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.3px;
+            font-weight: 600;
+        }
+
+        .property-sync {
+            padding: 16px 20px;
+            background: var(--background);
+        }
+
+        .property-actions {
+            padding: 16px 20px;
+            display: flex;
+            gap: 8px;
         }
 
         /* Enhanced Dashboard Cards */
@@ -891,6 +992,36 @@
             }
         }
 
+        /* Property Settings Modal */
+        #propertySettingsModal .modal-content {
+            animation: slideDown 0.3s ease-out;
+        }
+
+        #icalUrlInput:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+
+        details[open] summary {
+            margin-bottom: 12px;
+        }
+
+        details summary::-webkit-details-marker {
+            display: none;
+        }
+
+        details summary::before {
+            content: '▶';
+            display: inline-block;
+            margin-right: 8px;
+            transition: transform 0.3s;
+        }
+
+        details[open] summary::before {
+            transform: rotate(90deg);
+        }
+
         /* Calendar Styles */
         .calendar-container {
             background: white;
@@ -1209,15 +1340,44 @@
         .quick-actions-search {
             padding: 20px;
             border-bottom: 2px solid var(--border);
+            display: flex;
+            gap: 8px;
+            align-items: center;
         }
 
         .quick-actions-search input {
-            width: 100%;
-            padding: 12px 16px 12px 45px;
+            flex: 1;
             border: none;
-            font-size: 16px;
             outline: none;
-            background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="%23666" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.35-4.35"/></svg>') no-repeat 15px center;
+            font-size: 16px;
+            background: transparent;
+        }
+
+        .quick-actions-voice-btn {
+            background: var(--primary);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-size: 20px;
+            cursor: pointer;
+            transition: all 0.2s;
+            flex-shrink: 0;
+        }
+
+        .quick-actions-voice-btn:hover {
+            background: var(--primary-dark);
+            transform: scale(1.05);
+        }
+
+        .quick-actions-voice-btn.listening {
+            background: var(--danger);
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.6; }
         }
 
         .quick-actions-search input::placeholder {
@@ -1695,6 +1855,7 @@
             <div class="card-header">
                 <h2>Reservations</h2>
                 <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-success btn-sm" onclick="openImportModal()">📤 Import CSV</button>
                     <button class="btn btn-secondary btn-sm" onclick="exportCSV()">📥 Export CSV</button>
                     <button class="btn btn-primary" onclick="openReservationModal()">+ New Reservation</button>
                 </div>
@@ -1782,10 +1943,11 @@
             </div>
 
             <!-- Payment Records -->
-            <div class="card">
                 <div class="card-header">
                     <h3 class="card-title">Payment Records</h3>
-                    <button class="btn btn-secondary btn-sm" onclick="exportPaymentsCSV()">📥 Export</button>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary btn-sm" onclick="exportPaymentsCSV()">📥 Export</button>
+                    </div>
                 </div>
 
                 <div class="filters">
@@ -1844,10 +2006,21 @@
                 <div id="calendarContainer" class="calendar-container">
                     <div class="calendar-header">
                         <h3 id="calendarMonthYear" style="margin: 0;"></h3>
-                        <div style="font-size: 13px; color: var(--text-secondary);">
-                            <span style="margin-right: 16px;">⚪ Available</span>
-                            <span style="color: var(--danger);">🔴 Booked</span>
-                        </div>
+                        <div style="display: flex; gap: 20px; font-size: 13px; flex-wrap: wrap;">
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <div style="width: 14px; height: 14px; background: white; border: 2px solid #e2e8f0; border-radius: 3px;"></div>
+                                        <span>🟢 Available</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <div style="width: 14px; height: 14px; background: #fee2e2; border-left: 3px solid #dc2626; border-radius: 3px;"></div>
+                                        <span>🔴 Direct Booking</span>
+                                    </div>
+                                    <div style="display: flex; align-items: center; gap: 6px;">
+                                        <div style="width: 14px; height: 14px; background: #fef3c7; border-left: 3px solid #f59e0b; border-radius: 3px;"></div>
+                                        <span>🟡 OTA Blocked</span>
+                                    </div>
+                                </div>
+                            </div>    
                     </div>
                     <div class="calendar-grid" id="calendarGrid"></div>
                     <div id="calendarLegend" style="margin-top: 20px; padding: 16px; background: var(--background); border-radius: 6px;">
@@ -2415,6 +2588,219 @@
             </button>
         </div>
     </div>
+
+    <!-- CSV Import Modal -->
+    <div id="importModal" class="modal">
+        <div class="modal-content" style="max-width: 700px;">
+            <div class="modal-header">
+                <h3 class="modal-title">📤 Import Reservations</h3>
+                <button class="close-btn" onclick="closeImportModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <!-- Step 1: Upload -->
+                <div id="importStep1" class="import-step">
+                    <!-- Upload Area -->
+                    <div style="border: 2px dashed #cbd5e1; border-radius: 12px; padding: 48px 24px; text-align: center; background: #f8fafc; cursor: pointer; transition: all 0.2s;" 
+                         onclick="document.getElementById('csvFileInput').click()"
+                         onmouseover="this.style.borderColor='#2563eb'; this.style.background='#eff6ff'"
+                         onmouseout="this.style.borderColor='#cbd5e1'; this.style.background='#f8fafc'">
+                        <div style="font-size: 40px; margin-bottom: 12px;">📁</div>
+                        <div style="font-size: 16px; font-weight: 600; color: #0f172a; margin-bottom: 4px;">
+                            Drop CSV file here or click to browse
+                        </div>
+                        <div style="font-size: 13px; color: #64748b;">
+                            Maximum file size: 10MB
+                        </div>
+                        <input type="file" id="csvFileInput" accept=".csv" style="display: none;" onchange="handleCSVUpload(event)">
+                    </div>
+
+                    <!-- Collapsible Format Guide -->
+                    <div style="margin-top: 20px;">
+                        <button onclick="toggleFormatGuide()" 
+                                style="width: 100%; padding: 12px 16px; background: white; border: 1px solid var(--border); border-radius: 8px; text-align: left; cursor: pointer; display: flex; justify-content: space-between; align-items: center; font-size: 14px; font-weight: 600;">
+                            <span>📋 CSV Format Requirements</span>
+                            <span id="formatGuideIcon">▼</span>
+                        </button>
+                        <div id="formatGuide" style="display: none; margin-top: 12px; padding: 16px; background: #fffbeb; border: 1px solid #fbbf24; border-radius: 8px; font-size: 13px; line-height: 1.7;">
+                            <div style="margin-bottom: 12px;"><strong>Required columns:</strong></div>
+                            <div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 4px; margin-bottom: 12px;">
+                                <code style="background: white; padding: 2px 6px; border-radius: 4px;">booking_id</code>
+                                <code style="background: white; padding: 2px 6px; border-radius: 4px;">property_name</code>
+                                <code style="background: white; padding: 2px 6px; border-radius: 4px;">check_in</code>
+                                <code style="background: white; padding: 2px 6px; border-radius: 4px;">check_out</code>
+                                <code style="background: white; padding: 2px 6px; border-radius: 4px;">guest_name</code>
+                                <code style="background: white; padding: 2px 6px; border-radius: 4px;">guest_phone</code>
+                                <code style="background: white; padding: 2px 6px; border-radius: 4px;">status</code>
+                                <code style="background: white; padding: 2px 6px; border-radius: 4px;">total_amount</code>
+                            </div>
+                            <div style="font-size: 12px; color: #92400e;">
+                                💡 Dates must be YYYY-MM-DD format • Amounts must be numbers only
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Options -->
+                    <div style="margin-top: 20px; display: flex; gap: 16px; padding: 16px; background: white; border: 1px solid var(--border); border-radius: 8px;">
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; flex: 1;">
+                            <input type="checkbox" id="excludeFY2526" checked style="width: 18px; height: 18px;">
+                            <span style="font-size: 14px;">Exclude FY 2025-26</span>
+                        </label>
+                        <label style="display: flex; align-items: center; gap: 8px; cursor: pointer; flex: 1;">
+                            <input type="checkbox" id="skipDuplicates" checked style="width: 18px; height: 18px;">
+                            <span style="font-size: 14px;">Skip duplicates</span>
+                        </label>
+                    </div>
+                </div>
+
+                <!-- Step 2: Preview -->
+                <div id="importStep2" class="import-step" style="display: none;">
+                    <!-- Stats -->
+                    <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 20px;">
+                        <div style="padding: 16px; background: #f8fafc; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700;" id="totalRows">0</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Total Rows</div>
+                        </div>
+                        <div style="padding: 16px; background: #f0fdf4; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--success);" id="validRows">0</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Will Import</div>
+                        </div>
+                        <div style="padding: 16px; background: #fef2f2; border-radius: 8px; text-align: center;">
+                            <div style="font-size: 24px; font-weight: 700; color: var(--danger);" id="skippedRows">0</div>
+                            <div style="font-size: 12px; color: var(--text-secondary);">Will Skip</div>
+                        </div>
+                    </div>
+
+                    <!-- Preview Table -->
+                    <div style="max-height: 280px; overflow-y: auto; border: 1px solid var(--border); border-radius: 8px; margin-bottom: 16px;">
+                        <table style="width: 100%; font-size: 12px;">
+                            <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 1;">
+                                <tr>
+                                    <th style="padding: 10px 8px; border-bottom: 2px solid var(--border); text-align: left; font-weight: 600;">Property</th>
+                                    <th style="padding: 10px 8px; border-bottom: 2px solid var(--border); text-align: left; font-weight: 600;">Guest</th>
+                                    <th style="padding: 10px 8px; border-bottom: 2px solid var(--border); text-align: left; font-weight: 600;">Check-in</th>
+                                    <th style="padding: 10px 8px; border-bottom: 2px solid var(--border); text-align: left; font-weight: 600;">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="previewTableBody"></tbody>
+                        </table>
+                    </div>
+
+                    <!-- Actions -->
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-secondary" onclick="resetImport()">← Back</button>
+                        <button class="btn btn-success" onclick="startImport()" style="flex: 1;" id="startImportBtn">
+                            Import <span id="importCount">0</span> Reservations
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Step 3: Progress -->
+                <div id="importStep3" class="import-step" style="display: none;">
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 48px; margin-bottom: 16px;">⏳</div>
+                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 16px;">Importing...</div>
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 20px;">
+                            <span id="importProgress">0</span> / <span id="importTotal">0</span> completed
+                        </div>
+                        <div style="background: #e2e8f0; border-radius: 8px; height: 8px; overflow: hidden;">
+                            <div id="importProgressBar" style="background: var(--success); height: 100%; width: 0%; transition: width 0.3s;"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Step 4: Complete -->
+                <div id="importStep4" class="import-step" style="display: none;">
+                    <div style="text-align: center; padding: 40px 20px;">
+                        <div style="font-size: 56px; margin-bottom: 16px;">✅</div>
+                        <div style="font-size: 20px; font-weight: 600; margin-bottom: 8px;">Import Complete!</div>
+                        <div style="font-size: 14px; color: var(--text-secondary); margin-bottom: 24px;">
+                            Successfully imported <span id="importedCount" style="color: var(--success); font-weight: 700;">0</span> reservations
+                        </div>
+                        <button class="btn btn-primary" onclick="closeImportModal()">Done</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+ </div>
+
+<!-- Property Settings Modal -->
+<div id="propertySettingsModal" class="modal" style="display: none;">
+    <div class="modal-content" style="max-width: 600px;">
+        <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; border-radius: 12px 12px 0 0;">
+            <h2 style="margin: 0; font-size: 24px; display: flex; align-items: center; gap: 12px;">
+                <span>⚙️</span>
+                <span id="settingsModalTitle">Property Settings</span>
+            </h2>
+            <button class="modal-close" onclick="closePropertySettings()" style="color: white; font-size: 28px;">&times;</button>
+        </div>
+        <div class="modal-body" style="padding: 32px;">
+            <input type="hidden" id="settingsPropertyId">
+            
+            <!-- Property Info -->
+            <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                    <span style="font-size: 24px;" id="settingsPropertyIcon">🏠</span>
+                    <div>
+                        <div style="font-weight: 600; font-size: 16px; color: #1e293b;" id="settingsPropertyName">Property Name</div>
+                        <div style="font-size: 14px; color: #64748b;" id="settingsPropertyLocation">Location</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- iCal Sync Configuration -->
+            <div style="margin-bottom: 24px;">
+                <label style="display: block; font-weight: 600; color: #1e293b; margin-bottom: 8px; font-size: 14px;">
+                    📅 iCal Sync URL (Airbnb/OTA)
+                </label>
+                <input type="url" id="icalUrlInput" placeholder="https://www.airbnb.com/calendar/ical/..." 
+                    style="width: 100%; padding: 12px; border: 2px solid #e2e8f0; border-radius: 8px; font-size: 14px; transition: all 0.3s;">
+                <div style="margin-top: 8px; font-size: 13px; color: #64748b;">
+                    💡 Paste your Airbnb or OTA calendar export link here to sync availability
+                </div>
+            </div>
+
+            <!-- Current Sync Status -->
+            <div id="currentSyncStatus" style="display: none; background: #f1f5f9; padding: 16px; border-radius: 8px; margin-bottom: 24px;">
+                <div style="font-weight: 600; font-size: 13px; color: #475569; margin-bottom: 8px;">Current Status:</div>
+                <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 4px;">
+                    <span id="currentStatusBadge"></span>
+                </div>
+                <div style="font-size: 13px; color: #64748b;" id="currentLastSync"></div>
+                <div id="currentSyncError" style="display: none; margin-top: 8px; padding: 12px; background: #fef2f2; border-left: 3px solid #ef4444; border-radius: 4px; font-size: 13px; color: #dc2626;"></div>
+            </div>
+
+            <!-- How to Get iCal URL -->
+            <details style="margin-bottom: 24px; border: 1px solid #e2e8f0; border-radius: 8px; padding: 16px;">
+                <summary style="cursor: pointer; font-weight: 600; color: #475569; font-size: 14px;">
+                    ℹ️ How to get iCal URL from Airbnb/OTAs
+                </summary>
+                <div style="margin-top: 12px; font-size: 13px; color: #64748b; line-height: 1.6;">
+                    <strong style="color: #1e293b;">Airbnb:</strong><br>
+                    Go to Listing → Availability → Export Calendar → Copy iCal Link<br><br>
+                    <strong style="color: #1e293b;">Booking.com:</strong><br>
+                    Extranet → Calendar → Sync Calendar → Copy iCal URL<br><br>
+                    <strong style="color: #1e293b;">Other OTAs:</strong><br>
+                    Look for "Calendar Export", "iCal Sync", or "Calendar URL" in settings
+                </div>
+            </details>
+
+            <!-- Action Buttons -->
+            <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <button onclick="closePropertySettings()" 
+                    style="padding: 12px 24px; background: #f1f5f9; color: #475569; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s;">
+                    Cancel
+                </button>
+                <button onclick="savePropertySettings()" 
+                    style="padding: 12px 24px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border: none; border-radius: 8px; font-weight: 600; cursor: pointer; transition: all 0.3s; box-shadow: 0 4px 6px rgba(102, 126, 234, 0.3);">
+                    💾 Save Settings
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- End of modals section -->
 
     <!-- Bulk Actions Bar -->
     <div id="bulkActionsBar" class="bulk-actions-bar">
@@ -4395,98 +4781,6 @@
             displayPayments(filtered);
         }
 
-        // Voice Input for Payments
-        let voiceRecognition = null;
-
-        function initVoiceRecognition() {
-            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-                const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-                voiceRecognition = new SpeechRecognition();
-                voiceRecognition.continuous = false;
-                voiceRecognition.interimResults = false;
-                voiceRecognition.lang = 'en-IN';
-            } else {
-                console.warn('Speech recognition not supported');
-            }
-        }
-
-        function startVoicePayment() {
-            if (!voiceRecognition) {
-                initVoiceRecognition();
-            }
-            
-            if (!voiceRecognition) {
-                showToast('Not Supported', 'Voice input not available on this device', '❌');
-                return;
-            }
-            
-            showToast('Listening...', 'Say the payment amount', '🎤');
-            
-            voiceRecognition.onresult = (event) => {
-                const transcript = event.results[0][0].transcript.toLowerCase();
-                console.log('Voice input:', transcript);
-                
-                // Parse numbers from speech
-                const amount = parseVoiceAmount(transcript);
-                
-                if (amount > 0) {
-                    document.getElementById('paymentAmount').value = amount;
-                    showToast('Amount Set', `₹${amount.toLocaleString('en-IN')}`, '✅');
-                } else {
-                    showToast('Try Again', 'Could not understand amount', '❌');
-                }
-            };
-            
-            voiceRecognition.onerror = (event) => {
-                console.error('Voice recognition error:', event.error);
-                showToast('Error', 'Voice input failed', '❌');
-            };
-            
-            voiceRecognition.start();
-        }
-
-        function parseVoiceAmount(text) {
-            // Remove common words
-            text = text.replace(/rupees?|rs\.?|inr|dollars?/gi, '').trim();
-            
-            // Handle spoken numbers
-            const numberWords = {
-                'zero': 0, 'one': 1, 'two': 2, 'three': 3, 'four': 4, 'five': 5,
-                'six': 6, 'seven': 7, 'eight': 8, 'nine': 9, 'ten': 10,
-                'eleven': 11, 'twelve': 12, 'thirteen': 13, 'fourteen': 14, 'fifteen': 15,
-                'sixteen': 16, 'seventeen': 17, 'eighteen': 18, 'nineteen': 19, 'twenty': 20,
-                'thirty': 30, 'forty': 40, 'fifty': 50, 'sixty': 60, 'seventy': 70,
-                'eighty': 80, 'ninety': 90, 'hundred': 100, 'thousand': 1000,
-                'lakh': 100000, 'lac': 100000, 'lakhs': 100000, 'lacs': 100000
-            };
-            
-            let amount = 0;
-            const words = text.split(/\s+/);
-            
-            for (let i = 0; i < words.length; i++) {
-                const word = words[i].toLowerCase();
-                
-                // Direct number
-                if (!isNaN(word)) {
-                    amount = parseFloat(word);
-                    continue;
-                }
-                
-                // Number word
-                if (numberWords[word] !== undefined) {
-                    const value = numberWords[word];
-                    
-                    if (value >= 100) {
-                        if (amount === 0) amount = 1;
-                        amount *= value;
-                    } else {
-                        amount += value;
-                    }
-                }
-            }
-            
-            return amount;
-        }
 
         // Payment Modal Functions
         async function openPaymentModal(bookingId) {
@@ -4731,20 +5025,79 @@
             try {
                 const properties = await db.getProperties();
                 const reservations = await db.getReservations();
+                const payments = await db.getAllPayments();
                 const grid = document.getElementById('propertiesGrid');
                 
                 grid.innerHTML = properties.map(p => {
                     const propBookings = reservations.filter(r => r.property_id === p.id);
                     const activeBookings = propBookings.filter(r => r.status === 'checked-in').length;
+                    const totalBookings = propBookings.length;
+                    
+                    // Calculate revenue
+                    const totalRevenue = propBookings.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0);
+                    
+                    // Calculate occupancy
+                    const totalNights = propBookings.reduce((sum, r) => sum + (parseInt(r.nights) || 0), 0);
+                    const occupancyPercent = totalNights > 0 ? Math.round((totalNights / 365) * 100) : 0;
+                    
+                    // Sync status
+                    const syncStatus = getSyncStatusBadge(p);
+                    const lastSynced = p.ical_last_synced ? 
+                        formatTimeAgo(new Date(p.ical_last_synced)) : 'Never';
                     
                     return `
-                        <div class="stat-card">
-                            <h3 style="margin-bottom: 8px;">${p.name}</h3>
-                            <p style="color: var(--text-secondary); font-size: 14px; margin-bottom: 12px;">📍 ${p.location}</p>
-                            <p style="margin-bottom: 8px;"><strong>Type:</strong> ${p.type}</p>
-                            <p style="margin-bottom: 8px;"><strong>Capacity:</strong> ${p.capacity} guests</p>
-                            <p style="margin-bottom: 16px;"><strong>Active:</strong> ${activeBookings} bookings</p>
-                            <button class="btn btn-danger btn-sm" style="width: 100%;" onclick="deleteProperty(${p.id})">Delete</button>
+                        <div class="property-card">
+                            <div class="property-card-header">
+                                <div>
+                                    <h3 style="margin-bottom: 4px; font-size: 18px;">${p.name}</h3>
+                                    <p style="color: rgba(255, 255, 255, 0.9); font-size: 13px; margin: 0;">📍 ${p.location || 'No location'}</p>
+                                </div>
+                                <button onclick="openPropertySettings(${p.id})" class="btn-icon" title="Settings">
+                                    ⚙️
+                                </button>
+                            </div>
+                            
+                            <div class="property-stats">
+                                <div class="property-stat">
+                                    <div class="property-stat-value">${totalBookings}</div>
+                                    <div class="property-stat-label">Bookings</div>
+                                </div>
+                                <div class="property-stat">
+                                    <div class="property-stat-value">₹${(totalRevenue / 100000).toFixed(1)}L</div>
+                                    <div class="property-stat-label">Revenue</div>
+                                </div>
+                                <div class="property-stat">
+                                    <div class="property-stat-value">${occupancyPercent}%</div>
+                                    <div class="property-stat-label">Occupancy</div>
+                                </div>
+                            </div>
+                            
+                            <div class="property-sync">
+                                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+                                    <span style="font-size: 13px; font-weight: 600;">🔗 iCal Sync</span>
+                                    ${syncStatus}
+                                </div>
+                                ${p.ical_url ? `
+                                    <div style="font-size: 12px; color: var(--text-secondary);">
+                                        Last synced: ${lastSynced}
+                                    </div>
+                                ` : `
+                                    <div style="font-size: 12px; color: var(--text-secondary);">
+                                        No iCal URL configured
+                                    </div>
+                                `}
+                            </div>
+                            
+                            <div class="property-actions">
+                                <button class="btn btn-sm btn-secondary" onclick="showPropertyCalendar(${p.id})" style="flex: 1;">
+                                    📅 Calendar
+                                </button>
+                                ${p.ical_url ? `
+                                    <button class="btn btn-sm btn-primary" onclick="syncPropertyNow(${p.id}, event)" style="flex: 1;">
+                                        🔄 Sync Now
+                                    </button>
+                                ` : ''}
+                            </div>
                         </div>
                     `;
                 }).join('');
@@ -4752,6 +5105,49 @@
                 console.error('Properties error:', error);
                 showToast('Error', 'Failed to load properties', '❌');
             }
+        }
+        
+        function getSyncStatusBadge(property) {
+            if (!property.ical_url) {
+                return '<span style="font-size: 11px; padding: 3px 8px; background: #e2e8f0; color: #64748b; border-radius: 12px;">Not Configured</span>';
+            }
+            
+            if (property.ical_sync_status === 'syncing') {
+                return '<span style="font-size: 11px; padding: 3px 8px; background: #dbeafe; color: #2563eb; border-radius: 12px;">⏳ Syncing...</span>';
+            }
+            
+            if (property.ical_sync_status === 'error') {
+                return '<span style="font-size: 11px; padding: 3px 8px; background: #fee2e2; color: #dc2626; border-radius: 12px;">❌ Error</span>';
+            }
+            
+            if (property.ical_last_synced) {
+                return '<span style="font-size: 11px; padding: 3px 8px; background: #dcfce7; color: #16a34a; border-radius: 12px;">✅ Active</span>';
+            }
+            
+            return '<span style="font-size: 11px; padding: 3px 8px; background: #fef3c7; color: #ca8a04; border-radius: 12px;">⏸️ Idle</span>';
+        }
+        
+    function formatTimeAgo(dateLike) {
+        if (!dateLike) return 'Never';
+
+        // Accept Date, ISO string, or timestamp (seconds/milliseconds)
+        let d = dateLike instanceof Date ? dateLike : new Date(dateLike);
+        // If it’s a numeric string like "1729012345", treat as seconds epoch
+        if (!(d instanceof Date) || isNaN(d.getTime())) {
+            const n = Number(dateLike);
+            if (!Number.isNaN(n)) {
+            d = new Date(n > 1e12 ? n : n * 1000);
+            }
+        }
+        if (isNaN(d.getTime())) return 'Unknown';
+
+        const seconds = Math.floor((Date.now() - d.getTime()) / 1000);
+        if (seconds < 60)    return 'Just now';
+        if (seconds < 3600)  return Math.floor(seconds / 60) + ' min ago';
+        if (seconds < 86400) return Math.floor(seconds / 3600) + ' hrs ago';
+        if (seconds < 604800) return Math.floor(seconds / 86400) + ' days ago';
+
+        return d.toLocaleDateString('en-IN');
         }
 
         function openPropertyModal() {
@@ -4822,6 +5218,480 @@
                 showToast('Error', 'Failed to delete property', '❌');
             }
         }
+
+        // ==========================================
+        // PROPERTY SETTINGS FUNCTIONS
+        // ==========================================
+
+        /**
+         * Open property settings modal
+         */
+        async function openPropertySettings(propertyId) {
+            try {
+                // Fetch property details
+                const { data: property, error } = await supabase
+                    .from('properties')
+                    .select('*')
+                    .eq('id', propertyId)
+                    .single();
+
+                if (error) throw error;
+
+                // Populate modal
+                document.getElementById('settingsPropertyId').value = propertyId;
+                document.getElementById('settingsModalTitle').textContent = `${property.name} Settings`;
+                document.getElementById('settingsPropertyName').textContent = property.name;
+                document.getElementById('settingsPropertyLocation').textContent = property.location || 'No location set';
+                
+                // Set property icon based on type
+                const iconMap = {
+                    'Villa': '🏡',
+                    'Apartment': '🏢',
+                    'Hotel': '🏨',
+                    'Hostel': '🏠',
+                    'Resort': '🌴'
+                };
+                document.getElementById('settingsPropertyIcon').textContent = iconMap[property.type] || '🏠';
+
+                // Populate iCal URL if exists
+                document.getElementById('icalUrlInput').value = property.ical_url || '';
+
+                // Show current sync status if URL exists
+                if (property.ical_url) {
+                    document.getElementById('currentSyncStatus').style.display = 'block';
+                    document.getElementById('currentStatusBadge').innerHTML = getSyncStatusBadge(property);
+                    
+                    if (property.ical_last_synced) {
+                        document.getElementById('currentLastSync').textContent = `Last synced: ${formatTimeAgo(property.ical_last_synced)}`;
+                    } else {
+                        document.getElementById('currentLastSync').textContent = 'Never synced';
+                    }
+
+                    // Show error if exists
+                    if (property.ical_sync_error) {
+                        document.getElementById('currentSyncError').style.display = 'block';
+                        document.getElementById('currentSyncError').textContent = `⚠️ Error: ${property.ical_sync_error}`;
+                    } else {
+                        document.getElementById('currentSyncError').style.display = 'none';
+                    }
+                } else {
+                    document.getElementById('currentSyncStatus').style.display = 'none';
+                }
+
+                // Show modal
+                document.getElementById('propertySettingsModal').style.display = 'flex';
+
+            } catch (error) {
+                console.error('Error opening property settings:', error);
+                showToast('Failed to load property settings', 'error');
+            }
+        }
+
+        /**
+         * Close property settings modal
+         */
+        function closePropertySettings() {
+            document.getElementById('propertySettingsModal').style.display = 'none';
+            document.getElementById('icalUrlInput').value = '';
+            document.getElementById('settingsPropertyId').value = '';
+        }
+
+        /**
+         * Save property settings (iCal URL)
+         */
+        async function savePropertySettings() {
+            const propertyId = document.getElementById('settingsPropertyId').value;
+            const icalUrl = document.getElementById('icalUrlInput').value.trim();
+
+            // Validate URL if provided
+            if (icalUrl) {
+                try {
+                    new URL(icalUrl);
+                    
+                    // Check if it's a valid iCal URL pattern
+                    if (!icalUrl.includes('ical') && !icalUrl.includes('.ics')) {
+                        showToast('Please enter a valid iCal URL (should contain "ical" or ".ics")', 'error');
+                        return;
+                    }
+                } catch (e) {
+                    showToast('Please enter a valid URL', 'error');
+                    return;
+                }
+            }
+
+            try {
+                // Show loading
+                const saveButton = event.target;
+                const originalText = saveButton.innerHTML;
+                saveButton.innerHTML = '⏳ Saving...';
+                saveButton.disabled = true;
+
+                // Update property with new iCal URL
+                const updateData = {
+                    ical_url: icalUrl || null,
+                    ical_sync_status: icalUrl ? 'idle' : null,
+                    updated_at: new Date().toISOString()
+                };
+
+                // Clear error if URL is being updated
+                if (icalUrl) {
+                    updateData.ical_sync_error = null;
+                }
+
+                const { error } = await supabase
+                    .from('properties')
+                    .update(updateData)
+                    .eq('id', propertyId);
+
+                if (error) throw error;
+
+                // Success
+                showToast(icalUrl ? '✅ iCal URL saved successfully!' : '✅ iCal URL removed', 'success');
+                
+                // Close modal
+                closePropertySettings();
+
+                // Reload properties to reflect changes
+                await loadProperties();
+
+            } catch (error) {
+                console.error('Error saving property settings:', error);
+                showToast('Failed to save settings', 'error');
+                
+                // Restore button
+                event.target.innerHTML = originalText;
+                event.target.disabled = false;
+            }
+        }
+
+        // ==========================================
+        // ICAL SYNC FUNCTIONS
+        // ==========================================
+
+        /**
+         * Fetch and parse iCal file from URL
+         */
+        async function fetchAndParseIcal(icalUrl) {
+            try {
+                // Use CORS proxy to fetch iCal file
+                const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(icalUrl)}`;
+                
+                const response = await fetch(proxyUrl, {
+                    method: 'GET',
+                    headers: {
+                        'Accept': 'text/calendar, text/plain, */*'
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Failed to fetch iCal: ${response.status} ${response.statusText}`);
+                }
+
+                const icalData = await response.text();
+                
+                // Validate it's an iCal file
+                if (!icalData.includes('BEGIN:VCALENDAR')) {
+                    throw new Error('Invalid iCal format: Missing VCALENDAR');
+                }
+
+                // Parse iCal data
+                const blockedDates = parseIcalData(icalData);
+                
+                return {
+                    success: true,
+                    dates: blockedDates,
+                    rawData: icalData
+                };
+
+            } catch (error) {
+                console.error('Error fetching iCal:', error);
+                return {
+                    success: false,
+                    error: error.message,
+                    dates: []
+                };
+            }
+        }
+
+        /**
+         * Parse iCal data and extract blocked dates
+         */
+        function parseIcalData(icalText) {
+            const blockedDates = [];
+            
+            try {
+                // Split by VEVENT blocks
+                const events = icalText.split('BEGIN:VEVENT');
+                
+                for (let i = 1; i < events.length; i++) {
+                    const eventBlock = events[i].split('END:VEVENT')[0];
+                    
+                    // Extract DTSTART and DTEND
+                    const dtstart = extractIcalField(eventBlock, 'DTSTART');
+                    const dtend = extractIcalField(eventBlock, 'DTEND');
+                    const summary = extractIcalField(eventBlock, 'SUMMARY') || 'Blocked by OTA';
+                    const uid = extractIcalField(eventBlock, 'UID') || `event_${i}`;
+                    
+                    if (dtstart && dtend) {
+                        // Parse dates
+                        const startDate = parseIcalDate(dtstart);
+                        const endDate = parseIcalDate(dtend);
+                        
+                        if (startDate && endDate) {
+                            // Get all dates in the range (inclusive start, exclusive end as per iCal spec)
+                            const dateRange = getDateRange(startDate, endDate);
+                            
+                            dateRange.forEach(date => {
+                                blockedDates.push({
+                                    date: date,
+                                    summary: summary,
+                                    uid: uid
+                                });
+                            });
+                        }
+                    }
+                }
+                
+                // Remove duplicates and sort
+                const uniqueDates = [...new Map(blockedDates.map(item => [item.date, item])).values()];
+                uniqueDates.sort((a, b) => new Date(a.date) - new Date(b.date));
+                
+                return uniqueDates;
+                
+            } catch (error) {
+                console.error('Error parsing iCal data:', error);
+                return [];
+            }
+        }
+
+        /**
+         * Extract field value from iCal event block
+         */
+        function extractIcalField(eventBlock, fieldName) {
+            // Match field with possible parameters (e.g., DTSTART;VALUE=DATE:20250101)
+            const regex = new RegExp(`${fieldName}[^:]*:(.+)`, 'i');
+            const match = eventBlock.match(regex);
+            
+            if (match && match[1]) {
+                return match[1].trim();
+            }
+            
+            return null;
+        }
+
+        /**
+         * Parse iCal date format to YYYY-MM-DD
+         */
+        function parseIcalDate(icalDate) {
+            try {
+                // Remove any timezone info and clean the string
+                let dateStr = icalDate.replace(/[TZ]/g, '').trim();
+                
+                // Handle different iCal date formats
+                // Format: YYYYMMDD or YYYYMMDDTHHMMSS
+                if (dateStr.length >= 8) {
+                    const year = dateStr.substring(0, 4);
+                    const month = dateStr.substring(4, 6);
+                    const day = dateStr.substring(6, 8);
+                    
+                    return `${year}-${month}-${day}`;
+                }
+                
+                return null;
+            } catch (error) {
+                console.error('Error parsing iCal date:', icalDate, error);
+                return null;
+            }
+        }
+
+        /**
+         * Get array of dates between start and end (exclusive end)
+         */
+        function getDateRange(startDate, endDate) {
+            const dates = [];
+            const current = new Date(startDate + 'T00:00:00');
+            const end = new Date(endDate + 'T00:00:00');
+            
+            while (current < end) {
+                dates.push(current.toISOString().split('T')[0]);
+                current.setDate(current.getDate() + 1);
+            }
+            
+            return dates;
+        }
+
+        /**
+         * Save synced dates to database
+         */
+        async function saveSyncedDates(propertyId, blockedDates, source = 'ical') {
+            try {
+                // First, delete existing synced dates for this property from this source
+                const { error: deleteError } = await supabase
+                    .from('synced_availability')
+                    .delete()
+                    .eq('property_id', propertyId)
+                    .eq('source', source);
+
+                if (deleteError) throw deleteError;
+
+                // Prepare batch insert data
+                const insertData = blockedDates.map(item => ({
+                    property_id: propertyId,
+                    blocked_date: item.date,
+                    source: source,
+                    booking_summary: item.summary || 'Blocked by OTA',
+                    synced_at: new Date().toISOString()
+                }));
+
+                // Insert in batches of 100 to avoid payload size limits
+                const batchSize = 100;
+                for (let i = 0; i < insertData.length; i += batchSize) {
+                    const batch = insertData.slice(i, i + batchSize);
+                    
+                    const { error: insertError } = await supabase
+                        .from('synced_availability')
+                        .insert(batch);
+
+                    if (insertError) throw insertError;
+                }
+
+                return {
+                    success: true,
+                    count: insertData.length
+                };
+
+            } catch (error) {
+                console.error('Error saving synced dates:', error);
+                return {
+                    success: false,
+                    error: error.message
+                };
+            }
+        }
+
+        /**
+         * Update property sync status
+         */
+        async function updatePropertySyncStatus(propertyId, status, error = null) {
+            try {
+                const updateData = {
+                    ical_sync_status: status,
+                    ical_last_synced: new Date().toISOString(),
+                    updated_at: new Date().toISOString()
+                };
+
+                if (error) {
+                    updateData.ical_sync_error = error;
+                } else {
+                    updateData.ical_sync_error = null;
+                }
+
+                const { error: updateError } = await supabase
+                    .from('properties')
+                    .update(updateData)
+                    .eq('id', propertyId);
+
+                if (updateError) throw updateError;
+
+                return true;
+
+            } catch (err) {
+                console.error('Error updating sync status:', err);
+                return false;
+            }
+        }
+
+        /**
+         * Sync property availability now (manual trigger)
+         */
+        async function syncPropertyNow(propertyId, event) {
+            let syncButton = null;
+            let originalHTML = '';
+            
+            try {
+                // Get property details
+                const { data: property, error: propError } = await supabase
+                    .from('properties')
+                    .select('*')
+                    .eq('id', propertyId)
+                    .single();
+
+                if (propError) throw propError;
+
+                // Check if iCal URL exists
+                if (!property.ical_url) {
+                    showToast('⚠️ No iCal URL configured for this property', 'error');
+                    return;
+                }
+
+                // Update button state if event is provided
+                if (event && event.target) {
+                    syncButton = event.target;
+                    originalHTML = syncButton.innerHTML;
+                    syncButton.innerHTML = '⏳ Syncing...';
+                    syncButton.disabled = true;
+                }
+
+                // Show progress toast
+                showToast('🔄 Fetching availability from OTA...', 'info');
+
+                // Update status to syncing
+                await updatePropertySyncStatus(propertyId, 'syncing');
+
+                // Fetch and parse iCal
+                const result = await fetchAndParseIcal(property.ical_url);
+
+                if (!result.success) {
+                    throw new Error(result.error || 'Failed to fetch iCal data');
+                }
+
+                // Check if we got any dates
+                if (result.dates.length === 0) {
+                    await updatePropertySyncStatus(propertyId, 'active');
+                    showToast('✅ Sync completed - No blocked dates found', 'success');
+                    await loadProperties();
+                    return;
+                }
+
+                // Save synced dates to database
+                showToast(`💾 Saving ${result.dates.length} blocked dates...`, 'info');
+                
+                const saveResult = await saveSyncedDates(propertyId, result.dates, 'ical');
+
+                if (!saveResult.success) {
+                    throw new Error(saveResult.error || 'Failed to save synced dates');
+                }
+
+                // Update status to active
+                await updatePropertySyncStatus(propertyId, 'active');
+
+                // Success!
+                showToast(`✅ Sync completed! ${saveResult.count} dates blocked`, 'success');
+
+                // Reload properties to show updated status
+                await loadProperties();
+
+            } catch (error) {
+                console.error('Error syncing property:', error);
+                
+                // Update status to error
+                await updatePropertySyncStatus(propertyId, 'error', error.message);
+                
+                showToast(`❌ Sync failed: ${error.message}`, 'error');
+                
+                // Reload to show error status
+                await loadProperties();
+
+                } finally {
+                    // Restore button if it still exists
+                    if (syncButton && originalHTML) {
+                        syncButton.innerHTML = originalHTML;
+                        syncButton.disabled = false;
+                    }
+                }
+        }
+
+
         // Initialize Performance View
         async function initializePerformanceView() {
             try {
@@ -5555,8 +6425,39 @@
         
         // Availability Calendar
         let currentCalendarDate = new Date();
-        let currentPropertyFilter = '';
-        
+
+        /**
+         * Show property calendar - switches to availability view and filters by property
+         */
+        async function showPropertyCalendar(propertyId) {
+            try {
+                // Switch to availability view using the correct function
+                showView('availability');
+                
+                // Small delay to let the view switch complete
+                await new Promise(resolve => setTimeout(resolve, 100));
+                
+                // Set property filter
+                const propertyFilter = document.getElementById('calendarPropertyFilter');
+                if (propertyFilter) {
+                    propertyFilter.value = propertyId;
+                }
+                
+                // Load calendar with filter
+                await loadAvailabilityCalendar();
+                
+                // Scroll to calendar
+                const availabilityView = document.getElementById('availabilityView');
+                if (availabilityView) {
+                    availabilityView.scrollIntoView({ behavior: 'smooth', block: 'start' });
+                }
+                
+            } catch (error) {
+                console.error('Error showing property calendar:', error);
+                showToast('Failed to open calendar', 'error');
+            }
+        }
+
         async function loadAvailabilityCalendar() {
             const reservations = await db.getReservations();
             const properties = await db.getProperties();
@@ -5574,10 +6475,27 @@
                 filteredReservations = filteredReservations.filter(r => r.property_id == currentPropertyFilter);
             }
             
-            renderCalendar(filteredReservations);
+            // Fetch synced availability dates (OTA blocked dates)
+            let syncedDates = [];
+            try {
+                if (currentPropertyFilter) {
+                    const { data: syncedData, error: syncError } = await supabase
+                        .from('synced_availability')
+                        .select('*')
+                        .eq('property_id', currentPropertyFilter);
+                    
+                    if (!syncError && syncedData) {
+                        syncedDates = syncedData;
+                    }
+                }
+            } catch (error) {
+                console.error('Error fetching synced dates:', error);
+            }
+            
+            renderCalendar(filteredReservations, syncedDates);
         }
         
-        function renderCalendar(reservations) {
+        function renderCalendar(reservations, syncedDates = []) {
             const year = currentCalendarDate.getFullYear();
             const month = currentCalendarDate.getMonth();
             
@@ -5585,6 +6503,7 @@
                 'July', 'August', 'September', 'October', 'November', 'December'];
             document.getElementById('calendarMonthYear').textContent = `${monthNames[month]} ${year}`;
             
+            // Build bookings map (direct bookings)
             const bookingsMap = {};
             reservations.forEach(r => {
                 const checkIn = new Date(r.check_in);
@@ -5598,6 +6517,17 @@
                         bookingsMap[day].push(r);
                     }
                     currentDate.setDate(currentDate.getDate() + 1);
+                }
+            });
+            
+            // Build synced dates map (OTA blocked dates)
+            const syncedMap = {};
+            syncedDates.forEach(sd => {
+                const blockedDate = new Date(sd.blocked_date + 'T00:00:00');
+                if (blockedDate.getMonth() === month && blockedDate.getFullYear() === year) {
+                    const day = blockedDate.getDate();
+                    if (!syncedMap[day]) syncedMap[day] = [];
+                    syncedMap[day].push(sd);
                 }
             });
             
@@ -5618,13 +6548,34 @@
             for (let day = 1; day <= daysInMonth; day++) {
                 const isToday = today.getDate() === day && today.getMonth() === month && today.getFullYear() === year;
                 const hasBooking = bookingsMap[day] && bookingsMap[day].length > 0;
+                const hasSynced = syncedMap[day] && syncedMap[day].length > 0;
                 const bookingCount = hasBooking ? bookingsMap[day].length : 0;
+                const syncedCount = hasSynced ? syncedMap[day].length : 0;
+                
+                // Determine day styling based on booking type
+                let dayClass = '';
+                let dayStyle = '';
+                let indicator = '';
+                
+                if (hasBooking) {
+                    dayClass = 'has-booking';
+                    dayStyle = 'background: #fee2e2; border-left: 4px solid #dc2626;';
+                    indicator = `<div style="font-size: 10px; color: #dc2626; font-weight: 600; margin-top: 2px;">🔴 ${bookingCount}</div>`;
+                } else if (hasSynced) {
+                    dayClass = 'has-synced';
+                    dayStyle = 'background: #fef3c7; border-left: 4px solid #f59e0b;';
+                    indicator = `<div style="font-size: 10px; color: #f59e0b; font-weight: 600; margin-top: 2px;">🟡 ${syncedCount}</div>`;
+                }
+                
+                const tooltip = hasBooking ? `${bookingCount} direct booking(s)` : (hasSynced ? `${syncedCount} OTA block(s)` : 'Available');
                 
                 calendarHTML += `
-                    <div class="calendar-day ${isToday ? 'today' : ''} ${hasBooking ? 'has-booking' : ''}" 
-                         onclick="showDayBookings(${day}, ${month}, ${year})">
-                        <div>${day}</div>
-                        ${hasBooking ? `<div class="booking-dots">${'<div class="booking-dot"></div>'.repeat(Math.min(bookingCount, 3))}</div>` : ''}
+                    <div class="calendar-day ${isToday ? 'today' : ''} ${dayClass}" 
+                        style="${dayStyle}"
+                        onclick="showDayBookings(${day}, ${month}, ${year})"
+                        title="${tooltip}">
+                        <div style="font-weight: 600;">${day}</div>
+                        ${indicator}
                     </div>
                 `;
             }
@@ -6354,12 +7305,427 @@
         }
     });
 
+    // ============================================
+    // VOICE COMMANDS FOR QUICK ACTIONS
+    // ============================================
+    
+    let voiceCommandRecognition = null;
+
+    function initVoiceCommand() {
+        if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+            return null;
+        }
+
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        recognition.lang = 'en-IN';
+        recognition.maxAlternatives = 3;
+
+        return recognition;
+    }
+
+    function startVoiceCommand() {
+        if (!voiceCommandRecognition) {
+            voiceCommandRecognition = initVoiceCommand();
+        }
+        
+        if (!voiceCommandRecognition) {
+            showToast('Voice Error', 'Speech recognition not supported', '❌');
+            return;
+        }
+
+        const btn = document.getElementById('voiceCommandBtn');
+        const searchInput = document.getElementById('quickActionsSearch');
+        
+        btn.classList.add('listening');
+        searchInput.value = '';
+        searchInput.placeholder = 'Listening...';
+
+        let finalTranscript = '';
+
+        voiceCommandRecognition.onresult = (event) => {
+            let interimTranscript = '';
+            
+            for (let i = event.resultIndex; i < event.results.length; i++) {
+                const transcript = event.results[i][0].transcript;
+                if (event.results[i].isFinal) {
+                    finalTranscript = transcript;
+                } else {
+                    interimTranscript = transcript;
+                }
+            }
+
+            // Show what's being heard
+            const displayText = interimTranscript || finalTranscript;
+            if (displayText) {
+                searchInput.value = displayText;
+            }
+        };
+
+        voiceCommandRecognition.onend = () => {
+            btn.classList.remove('listening');
+            searchInput.placeholder = 'Type a command or search...';
+
+            if (finalTranscript.trim()) {
+                processVoiceCommand(finalTranscript.trim());
+            }
+        };
+
+        voiceCommandRecognition.onerror = (event) => {
+            console.error('Voice error:', event.error);
+            btn.classList.remove('listening');
+            searchInput.placeholder = 'Type a command or search...';
+            
+            if (event.error !== 'no-speech') {
+                showToast('Voice Error', 'Could not recognize speech', '❌');
+            }
+        };
+
+        voiceCommandRecognition.start();
+
+        // Auto-stop after 5 seconds
+        setTimeout(() => {
+            if (btn.classList.contains('listening')) {
+                voiceCommandRecognition.stop();
+            }
+        }, 5000);
+    }
+
+    function processVoiceCommand(command) {
+        const cmd = command.toLowerCase();
+        
+        console.log('Voice command:', command);
+
+        // Match command to actions
+        let matchedAction = null;
+
+        // Direct navigation commands
+        if (cmd.includes('dashboard') || cmd.includes('home')) {
+            matchedAction = quickActions.find(a => a.id === 'dashboard');
+        }
+        else if (cmd.includes('payment') && cmd.includes('pending')) {
+            matchedAction = quickActions.find(a => a.id === 'pending-payments');
+        }
+        else if (cmd.includes('check') && cmd.includes('in') && (cmd.includes('today') || cmd.includes('todays'))) {
+            matchedAction = quickActions.find(a => a.id === 'checkins-today');
+        }
+        else if (cmd.includes('check') && cmd.includes('out') && (cmd.includes('today') || cmd.includes('todays'))) {
+            matchedAction = quickActions.find(a => a.id === 'checkouts-today');
+        }
+        else if (cmd.includes('calendar') || cmd.includes('availability')) {
+            matchedAction = quickActions.find(a => a.id === 'calendar');
+        }
+        else if (cmd.includes('export') && cmd.includes('payment')) {
+            matchedAction = quickActions.find(a => a.id === 'export-payments');
+        }
+        else if (cmd.includes('export')) {
+            matchedAction = quickActions.find(a => a.id === 'export-csv');
+        }
+        else if (cmd.includes('add') && cmd.includes('property')) {
+            matchedAction = quickActions.find(a => a.id === 'add-property');
+        }
+        else if (cmd.includes('sync')) {
+            matchedAction = quickActions.find(a => a.id === 'sync-data');
+        }
+        // Search commands
+        else if (cmd.includes('show') || cmd.includes('find') || cmd.includes('search')) {
+            // Extract search term (everything after "show"/"find"/"search")
+            let searchTerm = cmd;
+            searchTerm = searchTerm.replace(/^(show|find|search)\s+/i, '');
+            searchTerm = searchTerm.replace(/\s+(reservation|booking|property|guest)s?$/i, '');
+            
+            if (searchTerm) {
+                closeQuickActions();
+                showView('reservations');
+                document.getElementById('searchReservations').value = searchTerm;
+                searchReservations();
+                showToast('Search', `Showing results for "${searchTerm}"`, '🔍');
+                return;
+            }
+        }
+
+        // Execute matched action
+        if (matchedAction) {
+            showToast('Voice Command', `Executing: ${matchedAction.title}`, '✅');
+            setTimeout(() => {
+                matchedAction.action();
+            }, 500);
+        } else {
+            // Fallback: Use as search query
+            document.getElementById('quickActionsSearch').value = command;
+            filterQuickActions({ target: document.getElementById('quickActionsSearch') });
+            showToast('Search', `Searching for: "${command}"`, '🔍');
+        }
+    }
+    // ============================================
+    // CSV IMPORT FUNCTIONS
+    // ============================================
+    
+    let csvData = [];
+    let validRows = [];
+    let skippedRows = [];
+
+    function openImportModal() {
+        document.getElementById('importModal').classList.add('active');
+        resetImport();
+    }
+
+    function closeImportModal() {
+        document.getElementById('importModal').classList.remove('active');
+        resetImport();
+    }
+
+    function resetImport() {
+        // Reset to step 1
+        document.getElementById('importStep1').style.display = 'block';
+        document.getElementById('importStep2').style.display = 'none';
+        document.getElementById('importStep3').style.display = 'none';
+        document.getElementById('importStep4').style.display = 'none';
+        
+        // Clear data
+        csvData = [];
+        validRows = [];
+        skippedRows = [];
+        
+        // Reset file input
+        document.getElementById('csvFileInput').value = '';
+    }
+
+    function handleCSVUpload(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        const reader = new FileReader();
+        
+        reader.onload = function(e) {
+            const text = e.target.result;
+            parseCSV(text);
+        };
+        
+        reader.onerror = function() {
+            showToast('Error', 'Failed to read CSV file', '❌');
+        };
+        
+        reader.readAsText(file);
+    }
+
+    function parseCSV(text) {
+        try {
+            // Simple CSV parser (handles quoted fields)
+            const lines = text.split('\n');
+            const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+            
+            csvData = [];
+            
+            for (let i = 1; i < lines.length; i++) {
+                if (!lines[i].trim()) continue;
+                
+                const values = parseCSVLine(lines[i]);
+                const row = {};
+                
+                headers.forEach((header, index) => {
+                    row[header] = values[index] ? values[index].trim().replace(/"/g, '') : '';
+                });
+                
+                csvData.push(row);
+            }
+            
+            validateAndPreview();
+            
+        } catch (error) {
+            console.error('CSV Parse Error:', error);
+            showToast('Parse Error', 'Invalid CSV format. Please check your file.', '❌');
+        }
+    }
+
+    function parseCSVLine(line) {
+        const values = [];
+        let current = '';
+        let inQuotes = false;
+        
+        for (let i = 0; i < line.length; i++) {
+            const char = line[i];
+            
+            if (char === '"') {
+                inQuotes = !inQuotes;
+            } else if (char === ',' && !inQuotes) {
+                values.push(current);
+                current = '';
+            } else {
+                current += char;
+            }
+        }
+        
+        values.push(current);
+        return values;
+    }
+
+    function validateAndPreview() {
+        const excludeFY2526 = document.getElementById('excludeFY2526').checked;
+        const skipDuplicates = document.getElementById('skipDuplicates').checked;
+        
+        validRows = [];
+        skippedRows = [];
+        
+        // Get existing booking IDs for duplicate check
+        const existingBookingIds = new Set(allReservations.map(r => r.booking_id));
+        
+        csvData.forEach((row, index) => {
+            const rowNum = index + 2; // +2 because index starts at 0 and row 1 is header
+            let skipReason = null;
+            
+            // Check FY filter
+            if (excludeFY2526 && row.FY === 'FY 2025-26') {
+                skipReason = 'FY 2025-26 excluded';
+            }
+            
+            // Check duplicates
+            if (skipDuplicates && existingBookingIds.has(row.booking_id)) {
+                skipReason = 'Duplicate booking ID';
+            }
+            
+            // Check required fields
+            if (!row.property_name || !row.booking_id || !row.guest_name) {
+                skipReason = 'Missing required fields';
+            }
+            
+            if (skipReason) {
+                skippedRows.push({ row, reason: skipReason, rowNum });
+            } else {
+                validRows.push(row);
+            }
+        });
+        
+        // Update stats
+        document.getElementById('totalRows').textContent = csvData.length;
+        document.getElementById('validRows').textContent = validRows.length;
+        document.getElementById('skippedRows').textContent = skippedRows.length;
+        document.getElementById('importCount').textContent = validRows.length;
+        
+        // Render preview
+        renderPreview();
+        
+        // Show step 2
+        document.getElementById('importStep1').style.display = 'none';
+        document.getElementById('importStep2').style.display = 'block';
+    }
+
+    function renderPreview() {
+        const tbody = document.getElementById('previewTableBody');
+        const previewLimit = 50; // Show first 50 rows
+        
+        let html = '';
+        
+        validRows.slice(0, previewLimit).forEach(row => {
+            html += `
+                <tr style="background: #f0fdf4;">
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border); text-align: left;">${row.property_name || '-'}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border); text-align: left;">${row.guest_name || '-'}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border); text-align: left;">${row.check_in || '-'}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border); text-align: left;"><span style="color: var(--success); font-size: 11px;">✓ Valid</span></td>
+                </tr>
+            `;
+        });
+        
+        skippedRows.slice(0, 10).forEach(item => {
+            html += `
+                <tr style="background: #fef2f2;">
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border); text-align: left;">${item.row.property_name || '-'}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border); text-align: left;">${item.row.guest_name || '-'}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border); text-align: left;">${item.row.check_in || '-'}</td>
+                    <td style="padding: 8px; border-bottom: 1px solid var(--border); text-align: left;"><span style="color: var(--danger); font-size: 11px;">✗ ${item.reason}</span></td>
+                </tr>
+            `;
+        });
+        
+        tbody.innerHTML = html;
+    }
+
+    async function startImport() {
+        if (validRows.length === 0) {
+            showToast('No Data', 'No valid rows to import', '⚠️');
+            return;
+        }
+        
+        // Show step 3 (progress)
+        document.getElementById('importStep2').style.display = 'none';
+        document.getElementById('importStep3').style.display = 'block';
+        document.getElementById('importTotal').textContent = validRows.length;
+        
+        let imported = 0;
+        let errors = [];
+        
+        // Import in batches of 50
+        const batchSize = 50;
+        
+        for (let i = 0; i < validRows.length; i += batchSize) {
+            const batch = validRows.slice(i, i + batchSize);
+            
+            try {
+                const { data, error } = await supabase
+                    .from('reservations')
+                    .insert(batch)
+                    .select();
+                
+                if (error) throw error;
+                
+                imported += batch.length;
+                
+            } catch (error) {
+                console.error('Import batch error:', error);
+                errors.push(`Rows ${i + 1}-${i + batch.length}: ${error.message}`);
+            }
+            
+            // Update progress
+            document.getElementById('importProgress').textContent = Math.min(imported, validRows.length);
+            const progress = (Math.min(imported, validRows.length) / validRows.length) * 100;
+            document.getElementById('importProgressBar').style.width = progress + '%';
+            
+            // Small delay between batches
+            await new Promise(resolve => setTimeout(resolve, 500));
+        }
+        
+        // Show step 4 (complete)
+        document.getElementById('importStep3').style.display = 'none';
+        document.getElementById('importStep4').style.display = 'block';
+        document.getElementById('importedCount').textContent = imported;
+        
+        // Show errors if any
+        if (errors.length > 0) {
+            document.getElementById('importErrors').style.display = 'block';
+            document.getElementById('errorList').innerHTML = errors.map(e => `<li>${e}</li>`).join('');
+        }
+        
+        // Reload reservations
+        await loadReservations();
+        
+        showToast('Import Complete', `Successfully imported ${imported} reservations!`, '✅');
+    }
+        function toggleFormatGuide() {
+        const guide = document.getElementById('formatGuide');
+        const icon = document.getElementById('formatGuideIcon');
+        
+        if (guide.style.display === 'none') {
+            guide.style.display = 'block';
+            icon.textContent = '▲';
+        } else {
+            guide.style.display = 'none';
+            icon.textContent = '▼';
+        }
+    }
+
 </script>
     <!-- Quick Actions Panel -->
     <div id="quickActionsOverlay" class="quick-actions-overlay" onclick="closeQuickActions(event)">
         <div class="quick-actions-panel" onclick="event.stopPropagation()">
             <div class="quick-actions-search">
                 <input type="text" id="quickActionsSearch" placeholder="Type a command or search..." autocomplete="off" onkeyup="filterQuickActions(event)">
+                <button class="quick-actions-voice-btn" onclick="startVoiceCommand()" id="voiceCommandBtn" title="Voice Commands">
+                    🎤
+                </button>
             </div>
             
             <div class="quick-actions-list" id="quickActionsList">
