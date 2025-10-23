@@ -592,6 +592,52 @@
             text-align: center;
         }
 
+        /* Toggle Switch for Auto-Sync */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 48px;
+            height: 24px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #cbd5e1;
+            transition: .3s;
+            border-radius: 24px;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 18px;
+            width: 18px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+
+        input:checked + .slider {
+            background-color: #10b981;
+        }
+
+        input:checked + .slider:before {
+            transform: translateX(24px);
+        }
+
         /* Mobile Navigation */
         .mobile-nav {
             display: none;
@@ -1863,9 +1909,12 @@
 
             <div class="card">
                 <div class="filters">
-                    <div class="filter-item">
-                        <input type="text" id="searchReservations" placeholder="Search by guest, booking ID..." onkeyup="filterReservations()">
+                    <div class="filter-item" style="flex: 1; max-width: 350px;">
+                        <input type="text" id="searchReservations" placeholder="🔍 Search by guest, booking ID, phone, property..." onkeypress="if(event.key==='Enter') filterReservations()" style="width: 100%;">
                     </div>
+                    <button class="btn btn-primary btn-sm" onclick="filterReservations()" style="white-space: nowrap;">
+                        🔍 Search
+                    </button>
                     <div class="filter-item" style="max-width: 180px;">
                         <select id="statusFilter" onchange="filterReservations()">
                             <option value="">All Status</option>
@@ -1943,17 +1992,21 @@
             </div>
 
             <!-- Payment Records -->
-                <div class="card-header">
-                    <h3 class="card-title">Payment Records</h3>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-secondary btn-sm" onclick="exportPaymentsCSV()">📥 Export</button>
-                    </div>
+            <div class="card-header">
+                <h3 class="card-title">Payment Records</h3>
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn btn-primary btn-sm" onclick="openMultiPaymentModal()">➕ Add Multiple</button>
+                    <button class="btn btn-secondary btn-sm" onclick="exportPaymentsCSV()">📥 Export</button>
                 </div>
+            </div>
 
                 <div class="filters">
-                    <div class="filter-item">
-                        <input type="text" id="searchPayments" placeholder="Search..." onkeyup="filterPayments()">
+                    <div class="filter-item" style="flex: 1; max-width: 350px;">
+                        <input type="text" id="searchPayments" placeholder="🔍 Search by guest, booking ID..." onkeypress="if(event.key==='Enter') filterPayments()" style="width: 100%;">
                     </div>
+                    <button class="btn btn-primary btn-sm" onclick="filterPayments()" style="white-space: nowrap;">
+                        🔍 Search
+                    </button>
                     <div class="filter-item" style="max-width: 200px;">
                         <select id="paymentStatusFilter" onchange="filterPayments()">
                             <option value="">All Status</option>
@@ -1962,6 +2015,9 @@
                             <option value="partial">Partial</option>
                         </select>
                     </div>
+                    <button class="btn btn-secondary btn-sm" onclick="clearPaymentFilters()" style="white-space: nowrap;">
+                        Clear
+                    </button>
                 </div>
 
                 <div class="table-container">
@@ -2329,7 +2385,6 @@
         <div class="modal-content" style="max-width: 600px;">
             <div class="modal-header">
                 <h3 class="modal-title">Add Payment</h3>
-                <button class="close-btn" onclick="closePaymentModal()">&times;</button>
             </div>
             
             <div style="background: var(--background); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
@@ -2395,9 +2450,93 @@
             <input type="hidden" id="paymentBookingId">
             <input type="hidden" id="editPaymentId">
             
-            <button class="btn btn-primary" style="width: 100%;" onclick="savePayment()">
-                💰 Save Payment
-            </button>
+            <div style="display: flex; gap: 12px; margin-top: 20px;">
+                <button class="btn btn-secondary" onclick="closePaymentModal()" style="flex: 1;">
+                    Cancel
+                </button>
+                <button class="btn btn-secondary" onclick="switchToMultiPayment()" style="flex: 1;">
+                    <i class="fas fa-layer-group"></i> Add Multiple
+                </button>
+                <button class="btn btn-primary" onclick="savePayment()" style="flex: 1;">
+                    💰 Save Payment
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Multi-Payment Entry Modal -->
+    <div id="multiPaymentModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">💰 Add Multiple Payments</h3>
+                <button class="close-btn" onclick="closeMultiPaymentModal()">&times;</button>
+            </div>
+            
+            <div class="modal-body">
+                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="font-weight: 600; margin-bottom: 8px;">Quick Add Multiple Payments</div>
+                    <div style="font-size: 13px; color: #64748b;">Add payments for multiple bookings at once. Click "+ Add Row" to add more entries.</div>
+                </div>
+
+                <!-- Payment Entries Table -->
+                <div style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+                    <table style="width: 100%; border-collapse: collapse;">
+                        <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 1;">
+                            <tr>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0;">Booking ID</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0;">Guest</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0;">Amount (₹)</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0;">Date</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0; width: 120px;">Method</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0; width: 120px;">Received By</th>
+                                <th style="padding: 8px; text-align: center; border-bottom: 2px solid #e2e8f0; width: 60px;">Action</th>
+                            </tr>
+                        </thead>
+                        <tbody id="multiPaymentTableBody">
+                            <!-- Will be populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Add Row Button -->
+                <button class="btn btn-secondary btn-sm" onclick="addPaymentRow()" style="margin-bottom: 20px;">
+                    ➕ Add Row
+                </button>
+
+                <!-- Common Settings -->
+                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="font-weight: 600; margin-bottom: 12px;">Common Settings (Applied to all entries)</div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Default Payment Method</label>
+                            <select id="multiPaymentMethod">
+                                <option value="">Select Method</option>
+                                <option value="cash">💵 Cash</option>
+                                <option value="upi">📱 UPI</option>
+                                <option value="gateway">💳 Gateway</option>
+                                <option value="bank_transfer">🏦 Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Default Date</label>
+                            <input type="date" id="multiPaymentDate">
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm" onclick="applyCommonSettings()">
+                        Apply to All Rows
+                    </button>
+                </div>
+
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="closeMultiPaymentModal()">
+                        Cancel
+                    </button>
+                    <button class="btn btn-primary" onclick="saveMultiplePayments()">
+                        💾 Save All Payments
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -2768,6 +2907,23 @@
                 </div>
                 <div style="font-size: 13px; color: #64748b;" id="currentLastSync"></div>
                 <div id="currentSyncError" style="display: none; margin-top: 8px; padding: 12px; background: #fef2f2; border-left: 3px solid #ef4444; border-radius: 4px; font-size: 13px; color: #dc2626;"></div>
+            </div>
+
+            <!-- Auto-Sync Settings -->
+            <div style="margin-bottom: 24px; padding: 16px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0;">
+                <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px;">
+                    <div>
+                        <div style="font-weight: 600; color: #1e293b; margin-bottom: 4px;">🔄 Auto-Sync</div>
+                        <div style="font-size: 13px; color: #64748b;">Automatically sync availability every 6 hours</div>
+                    </div>
+                    <label class="switch">
+                        <input type="checkbox" id="autoSyncEnabled" onchange="toggleAutoSyncInfo()">
+                        <span class="slider"></span>
+                    </label>
+                </div>
+                <div id="autoSyncInfo" style="display: none; font-size: 12px; color: #64748b; padding: 8px; background: #fff; border-radius: 4px;">
+                    ⏰ Next sync: <span id="nextSyncTime">-</span>
+                </div>
             </div>
 
             <!-- How to Get iCal URL -->
@@ -3967,7 +4123,7 @@
                                         </td>
                                         <td style="color: var(--danger); font-weight: 700;">₹${Math.round(balance).toLocaleString('en-IN')}</td>
                                         <td>
-                                            <button class="btn btn-success btn-sm" onclick="openPaymentModal('${r.booking_id}')" title="Collect Payment">💰</button>
+                                            <button class="btn btn-success btn-sm" onclick="onclick="openPaymentModal('${r.booking_id}')" title="Collect Payment">💰</button>
                                             <button class="btn btn-primary btn-sm" onclick="sendWhatsAppReminder('${r.booking_id}')" title="Send Reminder">📱</button>
                                             <button class="btn btn-secondary btn-sm" onclick="viewBookingDetails('${r.booking_id}')" title="View Details">👁️</button>
                                         </td>
@@ -4392,7 +4548,7 @@
                     <td>₹${Math.round(r.total_amount || 0).toLocaleString('en-IN')}</td>
                     <td><span class="badge badge-${r.status}">${r.status}</span></td>
                     <td>
-                        <button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')" title="Add Payment">💰</button>
+                        <button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')">💰 Add </button>
                         <button class="btn btn-success btn-sm" onclick="viewPaymentHistory('${r.booking_id}')" title="View Payments">📜</button>
                         <button class="btn btn-secondary btn-sm" onclick="editReservation('${r.booking_id}')">Edit</button>
                         <button class="btn btn-danger btn-sm" onclick="deleteReservation('${r.booking_id}')">×</button>
@@ -4758,8 +4914,10 @@
                         </td>
                         <td><span class="payment-status ${status}">${status.toUpperCase()}</span></td>
                         <td>
-                            ${balance > 0 ? `<button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')">Add Payment</button>` : ''}
-                            <button class="btn btn-success btn-sm" onclick="viewPaymentHistory('${r.booking_id}')">View History</button>
+                            <div style="display: flex; gap: 4px; flex-wrap: wrap;">
+                                ${balance > 0 ? `<button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')">💰 Add</button>` : ''}
+                                <button class="btn btn-success btn-sm" onclick="viewPaymentHistory('${r.booking_id}')">📜 History</button>
+                            </div>
                         </td>
                     </tr>
                 `;
@@ -4779,6 +4937,12 @@
             });
             
             displayPayments(filtered);
+        }
+        function clearPaymentFilters() {
+            document.getElementById('searchPayments').value = '';
+            document.getElementById('paymentStatusFilter').value = '';
+            displayPayments(allReservations);
+            showToast('Filters cleared', 'info');
         }
 
 
@@ -4832,11 +4996,82 @@
             }
         }
 
+        /**
+         * Switch from single payment modal to multi-payment modal
+         */
+        function switchToMultiPayment() {
+            // Get data from single payment modal
+            const bookingId = document.getElementById('paymentBookingId').value;
+            const amount = document.getElementById('paymentAmount').value;
+            const method = document.getElementById('paymentMethod').value;
+            const recipient = document.getElementById('paymentRecipient').value;
+            const date = document.getElementById('paymentDate').value;
+            const notes = document.getElementById('paymentNotes').value;
+            
+            // Close single payment modal
+            closePaymentModal();
+            
+            // Find reservation details
+            const reservation = allReservations.find(r => r.booking_id === bookingId);
+            
+            if (!reservation) {
+                showToast('Error', 'Reservation not found', '❌');
+                return;
+            }
+            
+            // Open multi-payment modal
+            const modal = document.getElementById('multiPaymentModal');
+            const title = modal.querySelector('.modal-title');
+            
+            title.innerHTML = `💰 Add Multiple Payments - ${reservation.guest_name}`;
+            
+            // Initialize with 2 rows
+            multiPaymentRows = [];
+            addPaymentRow();
+            addPaymentRow();
+            
+            modal.classList.add('active');
+            
+            // Pre-fill first row with data from single payment modal
+            setTimeout(() => {
+                if (multiPaymentRows.length > 0) {
+                    const firstRow = multiPaymentRows[0];
+                    
+                    document.getElementById(`bookingId_${firstRow.id}`).value = bookingId;
+                    document.getElementById(`guestName_${firstRow.id}`).value = reservation.guest_name;
+                    document.getElementById(`date_${firstRow.id}`).value = date || new Date().toISOString().split('T')[0];
+                    
+                    if (amount) {
+                        document.getElementById(`amount_${firstRow.id}`).value = amount;
+                    }
+                    
+                    if (method) {
+                        document.getElementById(`method_${firstRow.id}`).value = method;
+                        handleMethodChange(firstRow.id);
+                        
+                        if (recipient) {
+                            document.getElementById(`recipient_${firstRow.id}`).value = recipient;
+                        }
+                    }
+                }
+                
+                // Pre-fill booking ID for other rows
+                multiPaymentRows.slice(1).forEach(row => {
+                    document.getElementById(`bookingId_${row.id}`).value = bookingId;
+                    document.getElementById(`guestName_${row.id}`).value = reservation.guest_name;
+                    document.getElementById(`date_${row.id}`).value = date || new Date().toISOString().split('T')[0];
+                });
+                
+                showToast('Switched to Multi-Payment', 'You can now add multiple payment entries', '✅');
+            }, 100);
+        }
+
         async function savePayment() {
             try {
                 const bookingId = document.getElementById('paymentBookingId').value;
                 const amount = parseFloat(document.getElementById('paymentAmount').value);
                 const method = document.getElementById('paymentMethod').value;
+                const editPaymentId = document.getElementById('editPaymentId').value;
                 
                 if (!amount || amount <= 0) {
                     showToast('Validation Error', 'Please enter a valid amount', '❌');
@@ -4857,7 +5092,7 @@
                     }
                 }
                 
-                const payment = {
+                const paymentData = {
                     booking_id: bookingId,
                     payment_date: document.getElementById('paymentDate').value,
                     amount: amount,
@@ -4869,18 +5104,31 @@
                 };
                 
                 if (navigator.onLine) {
-                    await db.savePayment(payment);
+                    if (editPaymentId) {
+                        // Update existing payment
+                        const { error } = await supabase
+                            .from('payments')
+                            .update(paymentData)
+                            .eq('id', editPaymentId);
+                        
+                        if (error) throw error;
+                        showToast('Success', 'Payment updated successfully!', '✅');
+                    } else {
+                        // Create new payment
+                        await db.savePayment(paymentData);
+                        showToast('Success', 'Payment saved successfully!', '✅');
+                    }
+                    
                     await recalculatePaymentStatus(bookingId);
                     closePaymentModal();
                     await loadPayments();
                     await loadReservations();
                     await loadDashboard();
-                    showToast('Success', 'Payment saved successfully!', '✅');
                 } else {
                     if (!confirm('You are offline. This payment will be saved locally and synced when you are back online. Continue?')) {
                         return;
                     }
-                    await saveToOfflineDB('pendingPayments', payment);
+                    await saveToOfflineDB('pendingPayments', paymentData);
                     closePaymentModal();
                     showToast('Saved Offline', 'Payment will sync when online', '💾');
                 }
@@ -4911,6 +5159,335 @@
                     payment_status: paymentStatus
                 })
                 .eq('booking_id', bookingId);
+        }
+
+        // ==========================================
+        // MULTI-PAYMENT ENTRY FUNCTIONS
+        // ==========================================
+
+        let multiPaymentRows = [];
+
+        /**
+         * Open multi-payment modal
+         */
+        function openMultiPaymentModal() {
+            const modal = document.getElementById('multiPaymentModal');
+            const title = modal.querySelector('.modal-title');
+            
+            // Reset title for general multi-payment entry
+            title.innerHTML = '💰 Add Multiple Payments';
+            
+            modal.classList.add('active');
+            document.getElementById('multiPaymentDate').value = new Date().toISOString().split('T')[0];
+            
+            // Initialize with 3 empty rows
+            multiPaymentRows = [];
+            addPaymentRow();
+            addPaymentRow();
+            addPaymentRow();
+        }
+
+        /**
+         * Close multi-payment modal
+         */
+        function closeMultiPaymentModal() {
+            document.getElementById('multiPaymentModal').classList.remove('active');
+            multiPaymentRows = [];
+        }
+
+        /**
+         * Add a payment entry row
+         */
+        function addPaymentRow() {
+            const rowId = Date.now() + Math.random();
+            multiPaymentRows.push({ id: rowId });
+            renderPaymentRows();
+        }
+
+        /**
+         * Remove a payment entry row
+         */
+        function removePaymentRow(rowId) {
+            multiPaymentRows = multiPaymentRows.filter(row => row.id !== rowId);
+            renderPaymentRows();
+            
+            if (multiPaymentRows.length === 0) {
+                addPaymentRow(); // Always keep at least one row
+            }
+        }
+
+        /**
+         * Render payment entry rows
+         */
+        function renderPaymentRows() {
+            const tbody = document.getElementById('multiPaymentTableBody');
+            
+            tbody.innerHTML = multiPaymentRows.map(row => `
+                <tr>
+                    <td style="padding: 8px;">
+                        <input type="text" 
+                            id="bookingId_${row.id}" 
+                            list="bookingIdList"
+                            placeholder="Enter booking ID" 
+                            onchange="autofillGuestName(${row.id})"
+                            style="width: 100%; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                    </td>
+                    <td style="padding: 8px;">
+                        <input type="text" 
+                            id="guestName_${row.id}" 
+                            placeholder="Auto-filled" 
+                            readonly
+                            style="width: 100%; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px; background: #f8fafc;">
+                    </td>
+                    <td style="padding: 8px;">
+                        <input type="number" 
+                            id="amount_${row.id}" 
+                            placeholder="0" 
+                            min="0" 
+                            step="0.01"
+                            style="width: 100%; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                    </td>
+                    <td style="padding: 8px;">
+                        <input type="date" 
+                            id="date_${row.id}"
+                            style="width: 100%; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                    </td>
+                    <td style="padding: 8px;">
+                        <select id="method_${row.id}" onchange="handleMethodChange(${row.id})" style="width: 100%; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px;">
+                            <option value="">Select</option>
+                            <option value="cash">Cash</option>
+                            <option value="upi">UPI</option>
+                            <option value="gateway">Gateway</option>
+                            <option value="bank_transfer">Bank</option>
+                        </select>
+                    </td>
+                    <td style="padding: 8px;">
+                        <select id="recipient_${row.id}" style="width: 100%; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px; display: none;">
+                            <option value="">Select</option>
+                            <option value="Hostizzy">Hostizzy</option>
+                            <option value="Property Owner">Property Owner</option>
+                        </select>
+                        <span id="recipient_na_${row.id}" style="color: #94a3b8; font-size: 13px; display: none;">N/A</span>
+                    </td>
+                    <td style="padding: 8px; text-align: center;">
+                        <button class="btn btn-danger btn-sm" onclick="removePaymentRow(${row.id})" style="padding: 4px 8px;">
+                            ✕
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+            
+            // Add datalist for booking IDs
+            let datalistHTML = '<datalist id="bookingIdList">';
+            allReservations.forEach(r => {
+                datalistHTML += `<option value="${r.booking_id}">${r.guest_name} - ${r.property_name}</option>`;
+            });
+            datalistHTML += '</datalist>';
+            
+            if (!document.getElementById('bookingIdList')) {
+                tbody.insertAdjacentHTML('afterend', datalistHTML);
+            }
+        }
+
+        /**
+         * Auto-fill guest name when booking ID is selected
+         */
+        function autofillGuestName(rowId) {
+            const bookingId = document.getElementById(`bookingId_${rowId}`).value;
+            const reservation = allReservations.find(r => r.booking_id === bookingId);
+            
+            if (reservation) {
+                document.getElementById(`guestName_${rowId}`).value = reservation.guest_name;
+                
+                // Auto-fill amount with balance if available
+                const total = parseFloat(reservation.total_amount) || 0;
+                const paid = parseFloat(reservation.paid_amount) || 0;
+                const balance = total - paid;
+                
+                if (balance > 0 && !document.getElementById(`amount_${rowId}`).value) {
+                    document.getElementById(`amount_${rowId}`).value = Math.round(balance);
+                }
+            } else {
+                document.getElementById(`guestName_${rowId}`).value = '';
+            }
+        }
+
+        /**
+         * Handle payment method change to show/hide recipient field
+         */
+        function handleMethodChange(rowId) {
+            const method = document.getElementById(`method_${rowId}`).value;
+            const recipientSelect = document.getElementById(`recipient_${rowId}`);
+            const recipientNA = document.getElementById(`recipient_na_${rowId}`);
+            
+            if (method === 'cash' || method === 'upi' || method === 'bank_transfer') {
+                recipientSelect.style.display = 'block';
+                recipientNA.style.display = 'none';
+                recipientSelect.required = true;
+            } else if (method === '') {
+                recipientSelect.style.display = 'none';
+                recipientNA.style.display = 'none';
+                recipientSelect.required = false;
+            } else {
+                recipientSelect.style.display = 'none';
+                recipientNA.style.display = 'block';
+                recipientSelect.required = false;
+                recipientSelect.value = '';
+            }
+        }
+
+        /**
+         * Apply common settings to all rows
+         */
+        function applyCommonSettings() {
+            const method = document.getElementById('multiPaymentMethod').value;
+            const date = document.getElementById('multiPaymentDate').value;
+            
+            multiPaymentRows.forEach(row => {
+                if (method) {
+                    document.getElementById(`method_${row.id}`).value = method;
+                }
+                if (date) {
+                    document.getElementById(`date_${row.id}`).value = date;
+                }
+            });
+            
+            showToast('Common settings applied to all rows', 'success');
+        }
+
+        /**
+         * Save multiple payments
+         */
+        async function saveMultiplePayments() {
+            const payments = [];
+            let hasErrors = false;
+            
+            // Collect all payment entries
+            for (const row of multiPaymentRows) {
+                const bookingId = document.getElementById(`bookingId_${row.id}`).value;
+                const amount = parseFloat(document.getElementById(`amount_${row.id}`).value);
+                const date = document.getElementById(`date_${row.id}`).value;
+                const method = document.getElementById(`method_${row.id}`).value;
+                const recipient = document.getElementById(`recipient_${row.id}`).value;
+                
+                // Skip empty rows
+                if (!bookingId || !amount || !method) continue;
+                
+                // Validate recipient for specific methods
+                if ((method === 'cash' || method === 'upi' || method === 'bank_transfer') && !recipient) {
+                    showToast('Validation Error', `Please select "Received By" for ${method.toUpperCase()} payment`, '❌');
+                    hasErrors = true;
+                    break;
+                }
+                
+                // Validate booking exists
+                const reservation = allReservations.find(r => r.booking_id === bookingId);
+                if (!reservation) {
+                    showToast('Validation Error', `Booking ID ${bookingId} not found`, '❌');
+                    hasErrors = true;
+                    break;
+                }
+                
+                payments.push({
+                    booking_id: bookingId,
+                    payment_date: date || new Date().toISOString().split('T')[0],
+                    amount: amount,
+                    payment_method: method,
+                    payment_recipient: recipient || null,
+                    reference_number: null,
+                    notes: `Multi-payment entry for ${reservation.guest_name}`,
+                    created_by: currentUser?.id || null
+                });
+            }
+            
+            if (hasErrors || payments.length === 0) {
+                if (payments.length === 0) {
+                    showToast('Please add at least one payment entry', 'error');
+                }
+                return;
+            }
+            
+            // Show confirmation
+            if (!confirm(`Save ${payments.length} payment(s)?`)) {
+                return;
+            }
+            
+            try {
+                // Save payments to database
+                const { data, error } = await supabase
+                    .from('payments')
+                    .insert(payments)
+                    .select();
+                
+                if (error) throw error;
+                
+                // Update paid amounts for each reservation
+                for (const payment of payments) {
+                    const reservation = allReservations.find(r => r.booking_id === payment.booking_id);
+                    if (reservation) {
+                        const newPaidAmount = (parseFloat(reservation.paid_amount) || 0) + payment.amount;
+                        const total = parseFloat(reservation.total_amount) || 0;
+                        const newStatus = newPaidAmount >= total ? 'paid' : (newPaidAmount > 0 ? 'partial' : 'pending');
+                        
+                        await supabase
+                            .from('reservations')
+                            .update({
+                                paid_amount: newPaidAmount,
+                                payment_status: newStatus
+                            })
+                            .eq('booking_id', payment.booking_id);
+                    }
+                }
+                
+                showToast(`✅ ${payments.length} payment(s) saved successfully!`, 'success');
+                closeMultiPaymentModal();
+                
+                // Reload payments
+                await loadPayments();
+                
+            } catch (error) {
+                console.error('Error saving multiple payments:', error);
+                showToast('Failed to save payments: ' + error.message, 'error');
+            }
+        }
+
+        /**
+         * Open multi-payment modal for a specific reservation
+         */
+        function openMultiPaymentModalForReservation(bookingId) {
+            const reservation = allReservations.find(r => r.booking_id === bookingId);
+            
+            if (!reservation) {
+                showToast('Error', 'Reservation not found', '❌');
+                return;
+            }
+            
+            const modal = document.getElementById('multiPaymentModal');
+            const title = modal.querySelector('.modal-title');
+            
+            // Update title to show it's for a specific reservation
+            title.innerHTML = `💰 Add Multiple Payments - ${reservation.guest_name}`;
+            
+            // Pre-fill booking ID in all rows
+            document.getElementById('multiPaymentDate').value = new Date().toISOString().split('T')[0];
+            
+            // Initialize with 2 empty rows
+            multiPaymentRows = [];
+            addPaymentRow();
+            addPaymentRow();
+            
+            // Pre-fill booking ID and guest name in all rows
+            setTimeout(() => {
+                multiPaymentRows.forEach(row => {
+                    document.getElementById(`bookingId_${row.id}`).value = bookingId;
+                    document.getElementById(`guestName_${row.id}`).value = reservation.guest_name;
+                    
+                    // Set default date
+                    document.getElementById(`date_${row.id}`).value = new Date().toISOString().split('T')[0];
+                });
+            }, 100);
+            
+            modal.classList.add('active');
         }
 
         // Payment History Modal
@@ -4983,7 +5560,10 @@
                                             </div>
                                         </td>
                                         <td style="text-align: center;">
-                                            <button onclick="deletePayment(${p.id}, '${bookingId}')" class="btn btn-danger btn-sm">Delete</button>
+                                            <div style="display: flex; gap: 4px; justify-content: center;">
+                                                <button onclick="editPayment(${p.id})" class="btn btn-secondary btn-sm" title="Edit">✏️</button>
+                                                <button onclick="deletePayment(${p.id}, '${bookingId}')" class="btn btn-danger btn-sm" title="Delete">🗑️</button>
+                                            </div>
                                         </td>
                                     </tr>
                                 `).join('')}
@@ -5020,6 +5600,52 @@
             }
         }
 
+        /**
+         * Edit existing payment
+         */
+        async function editPayment(paymentId) {
+            try {
+                // Fetch payment details
+                const { data: payment, error } = await supabase
+                    .from('payments')
+                    .select('*')
+                    .eq('id', paymentId)
+                    .single();
+                
+                if (error) throw error;
+                
+                if (!payment) {
+                    showToast('Payment not found', 'error');
+                    return;
+                }
+                
+                // Open payment modal with existing data
+                await openPaymentModal(payment.booking_id);
+                
+                // Populate fields with existing payment data
+                document.getElementById('editPaymentId').value = paymentId;
+                document.getElementById('paymentAmount').value = payment.amount;
+                document.getElementById('paymentDate').value = payment.payment_date;
+                document.getElementById('paymentMethod').value = payment.payment_method;
+                document.getElementById('paymentRecipient').value = payment.payment_recipient || '';
+                document.getElementById('paymentReference').value = payment.reference_number || '';
+                document.getElementById('paymentNotes').value = payment.notes || '';
+                
+                // Show recipient field if needed
+                toggleRecipientField();
+                
+                // Change button text
+                const saveButton = document.querySelector('#paymentModal .btn-primary');
+                saveButton.textContent = '💾 Update Payment';
+                
+                // Close payment history modal
+                document.getElementById('paymentHistoryModal').classList.remove('active');
+                
+            } catch (error) {
+                console.error('Error loading payment for edit:', error);
+                showToast('Failed to load payment details', 'error');
+            }
+        }
         // Properties
         async function loadProperties() {
             try {
@@ -5373,6 +5999,8 @@
          */
         async function fetchAndParseIcal(icalUrl) {
             try {
+                // ✅ Normalize Airbnb's "webcal://" URLs
+                icalUrl = icalUrl.replace(/^webcal:/i, 'https:');
                 // Use CORS proxy to fetch iCal file
                 const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(icalUrl)}`;
                 
@@ -5418,6 +6046,8 @@
          */
         function parseIcalData(icalText) {
             const blockedDates = [];
+            const unfolded = icalText.replace(/\r?\n[ \t]/g, '');
+            const events = unfolded.split('BEGIN:VEVENT');
             
             try {
                 // Split by VEVENT blocks
@@ -5453,7 +6083,7 @@
                 }
                 
                 // Remove duplicates and sort
-                const uniqueDates = [...new Map(blockedDates.map(item => [item.date, item])).values()];
+                const uniqueDates = Array.from(new Map(blockedDates.map(d => [d.date, d])).values());
                 uniqueDates.sort((a, b) => new Date(a.date) - new Date(b.date));
                 
                 return uniqueDates;
@@ -5504,20 +6134,25 @@
             }
         }
 
-        /**
-         * Get array of dates between start and end (exclusive end)
-         */
+        // UTC-safe date range: inclusive start, exclusive end (iCal spec)
         function getDateRange(startDate, endDate) {
-            const dates = [];
-            const current = new Date(startDate + 'T00:00:00');
-            const end = new Date(endDate + 'T00:00:00');
-            
-            while (current < end) {
-                dates.push(current.toISOString().split('T')[0]);
-                current.setDate(current.getDate() + 1);
-            }
-            
-            return dates;
+        // startDate/endDate are "YYYY-MM-DD"
+        const [sy, sm, sd] = startDate.split('-').map(Number);
+        const [ey, em, ed] = endDate.split('-').map(Number);
+
+        let current = new Date(Date.UTC(sy, sm - 1, sd));
+        const end = new Date(Date.UTC(ey, em - 1, ed));
+
+        const dates = [];
+        while (current < end) {
+            const y = current.getUTCFullYear();
+            const m = String(current.getUTCMonth() + 1).padStart(2, '0');
+            const d = String(current.getUTCDate()).padStart(2, '0');
+            dates.push(`${y}-${m}-${d}`);
+            // advance one UTC day
+            current.setUTCDate(current.getUTCDate() + 1);
+        }
+        return dates;
         }
 
         /**
@@ -5690,7 +6325,98 @@
                     }
                 }
         }
+        // ==========================================
+        // AUTO-SYNC FUNCTIONS
+        // ==========================================
 
+        let autoSyncIntervals = {}; // Store interval IDs by property
+
+        /**
+         * Toggle auto-sync info display
+         */
+        function toggleAutoSyncInfo() {
+            const enabled = document.getElementById('autoSyncEnabled').checked;
+            const infoDiv = document.getElementById('autoSyncInfo');
+            
+            if (enabled) {
+                infoDiv.style.display = 'block';
+                updateNextSyncTime();
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
+
+        /**
+         * Update next sync time display
+         */
+        function updateNextSyncTime() {
+            const now = new Date();
+            const nextSync = new Date(now.getTime() + (6 * 60 * 60 * 1000)); // 6 hours from now
+            document.getElementById('nextSyncTime').textContent = nextSync.toLocaleString();
+        }
+
+        /**
+         * Start auto-sync for a property
+         */
+        function startAutoSync(propertyId) {
+            // Clear existing interval if any
+            if (autoSyncIntervals[propertyId]) {
+                clearInterval(autoSyncIntervals[propertyId]);
+            }
+            
+            // Set up auto-sync every 6 hours (6 * 60 * 60 * 1000 ms)
+            const syncInterval = 6 * 60 * 60 * 1000; // 6 hours
+            
+            autoSyncIntervals[propertyId] = setInterval(async () => {
+                console.log(`🔄 Auto-syncing property ${propertyId}...`);
+                try {
+                    await syncPropertyNow(propertyId);
+                    console.log(`✅ Auto-sync completed for property ${propertyId}`);
+                } catch (error) {
+                    console.error(`❌ Auto-sync failed for property ${propertyId}:`, error);
+                }
+            }, syncInterval);
+            
+            console.log(`✅ Auto-sync enabled for property ${propertyId} (every 6 hours)`);
+        }
+
+        /**
+         * Stop auto-sync for a property
+         */
+        function stopAutoSync(propertyId) {
+            if (autoSyncIntervals[propertyId]) {
+                clearInterval(autoSyncIntervals[propertyId]);
+                delete autoSyncIntervals[propertyId];
+                console.log(`⏹️ Auto-sync disabled for property ${propertyId}`);
+            }
+        }
+
+        /**
+         * Initialize auto-sync for all properties with iCal URLs
+         */
+        async function initializeAutoSync() {
+            try {
+                const { data: properties, error } = await supabase
+                    .from('properties')
+                    .select('id, name, ical_url, auto_sync_enabled')
+                    .eq('is_active', true)
+                    .not('ical_url', 'is', null);
+                
+                if (error) throw error;
+                
+                if (properties && properties.length > 0) {
+                    properties.forEach(property => {
+                        // Check if auto_sync_enabled column exists and is true
+                        // For now, auto-enable for all properties with iCal URLs
+                        startAutoSync(property.id);
+                    });
+                    
+                    console.log(`🔄 Auto-sync initialized for ${properties.length} properties`);
+                }
+            } catch (error) {
+                console.error('Error initializing auto-sync:', error);
+            }
+        }
 
         // Initialize Performance View
         async function initializePerformanceView() {
@@ -6522,14 +7248,35 @@
             
             // Build synced dates map (OTA blocked dates)
             const syncedMap = {};
+            console.log('🔍 Debug: Total synced dates:', syncedDates.length);
             syncedDates.forEach(sd => {
-                const blockedDate = new Date(sd.blocked_date + 'T00:00:00');
-                if (blockedDate.getMonth() === month && blockedDate.getFullYear() === year) {
-                    const day = blockedDate.getDate();
-                    if (!syncedMap[day]) syncedMap[day] = [];
-                    syncedMap[day].push(sd);
+                try {
+                    console.log('📅 Processing date:', sd.blocked_date);
+                    
+                    // Handle date string - remove time component if present
+                    let dateStr = sd.blocked_date;
+                    if (dateStr.includes('T')) {
+                        dateStr = dateStr.split('T')[0];
+                    }
+                    
+                    // Parse date string directly without timezone conversion
+                    const dateParts = dateStr.split('-');
+                    const blockedYear = parseInt(dateParts[0]);
+                    const blockedMonth = parseInt(dateParts[1]) - 1; // Month is 0-indexed
+                    const blockedDay = parseInt(dateParts[2]);
+                    
+                    console.log(`   Year: ${blockedYear}, Month: ${blockedMonth} (viewing: ${month}), Day: ${blockedDay}`);
+                    
+                    if (blockedMonth === month && blockedYear === year) {
+                        console.log(`   ✅ Added to calendar day ${blockedDay}`);
+                        if (!syncedMap[blockedDay]) syncedMap[blockedDay] = [];
+                        syncedMap[blockedDay].push(sd);
+                    }
+                } catch (error) {
+                    console.warn('Error parsing synced date:', sd.blocked_date, error);
                 }
             });
+            console.log('🗺️ Final syncedMap:', syncedMap);
             
             const firstDay = new Date(year, month, 1).getDay();
             const daysInMonth = new Date(year, month + 1, 0).getDate();
@@ -6583,10 +7330,201 @@
             document.getElementById('calendarGrid').innerHTML = calendarHTML;
         }
         
-        function showDayBookings(day, month, year) {
+        async function showDayBookings(day, month, year) {
             const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
-            document.getElementById('todayBookings').innerHTML = `Bookings for ${dateStr} - Click booking to view details`;
+            const todayBookingsEl = document.getElementById('todayBookings');
+            
+            try {
+                // Get all reservations for this date
+                const reservations = await db.getReservations();
+                const propertyFilter = document.getElementById('calendarPropertyFilter').value;
+                
+                // Filter reservations for the selected date
+                const dayBookings = reservations.filter(r => {
+                    if (r.status === 'cancelled') return false;
+                    if (propertyFilter && r.property_id != propertyFilter) return false;
+                    
+                    const checkIn = new Date(r.check_in);
+                    const checkOut = new Date(r.check_out);
+                    const selectedDate = new Date(dateStr);
+                    
+                    return selectedDate >= checkIn && selectedDate <= checkOut;
+                });
+                
+                // Get synced availability for this date
+                let syncedBlocks = [];
+                if (propertyFilter) {
+                    const { data: syncedData } = await supabase
+                        .from('synced_availability')
+                        .select('*')
+                        .eq('property_id', propertyFilter)
+                        .eq('blocked_date', dateStr);
+                    
+                    if (syncedData) syncedBlocks = syncedData;
+                }
+                
+                // Build HTML
+                let html = `<div style="font-weight: 600; margin-bottom: 12px; font-size: 16px;">📅 ${dateStr}</div>`;
+                
+                // Show direct bookings
+                if (dayBookings.length > 0) {
+                    html += `<div style="margin-bottom: 16px;">
+                        <div style="font-weight: 600; color: #dc2626; margin-bottom: 8px;">🔴 Direct Bookings (${dayBookings.length})</div>`;
+                    
+                    dayBookings.forEach(booking => {
+                        html += `
+                            <div style="padding: 12px; background: #fee2e2; border-left: 4px solid #dc2626; border-radius: 6px; margin-bottom: 8px; cursor: pointer;" onclick="viewReservation('${booking.booking_id}')">
+                                <div style="font-weight: 600; color: #1e293b;">${booking.guest_name}</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 4px;">
+                                    ${booking.check_in} → ${booking.check_out} (${booking.nights} nights)
+                                </div>
+                                <div style="font-size: 13px; color: #64748b;">
+                                    Property: ${booking.property_name || 'Unknown'}
+                                </div>
+                                <div style="font-size: 13px; color: #16a34a; font-weight: 600; margin-top: 4px;">
+                                    ₹${parseFloat(booking.total_amount || 0).toLocaleString()}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+                
+                // Show OTA blocks
+                if (syncedBlocks.length > 0) {
+                    html += `<div style="margin-bottom: 16px;">
+                        <div style="font-weight: 600; color: #f59e0b; margin-bottom: 8px;">🟡 OTA Blocked (${syncedBlocks.length})</div>`;
+                    
+                    syncedBlocks.forEach(block => {
+                        html += `
+                            <div style="padding: 12px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px; margin-bottom: 8px;">
+                                <div style="font-weight: 600; color: #1e293b;">${block.booking_summary || 'Blocked by OTA'}</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 4px;">
+                                    Source: ${block.source || 'iCal Sync'}
+                                </div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                                    Synced: ${block.synced_at ? new Date(block.synced_at).toLocaleString() : 'Unknown'}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+                
+                // No bookings
+                if (dayBookings.length === 0 && syncedBlocks.length === 0) {
+                    html += `<div style="padding: 24px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 8px;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">🟢</div>
+                        <div style="font-weight: 600;">Available</div>
+                        <div style="font-size: 13px; margin-top: 4px;">No bookings or blocks for this date</div>
+                    </div>`;
+                }
+                
+                todayBookingsEl.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error showing day bookings:', error);
+                todayBookingsEl.innerHTML = `<div style="color: #dc2626;">Error loading bookings for ${dateStr}</div>`;
+            }
         }
+        async function showDayBookings(day, month, year) {
+            const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+            const todayBookingsEl = document.getElementById('todayBookings');
+            
+            try {
+                // Get all reservations for this date
+                const reservations = await db.getReservations();
+                const propertyFilter = document.getElementById('calendarPropertyFilter').value;
+                
+                // Filter reservations for the selected date
+                const dayBookings = reservations.filter(r => {
+                    if (r.status === 'cancelled') return false;
+                    if (propertyFilter && r.property_id != propertyFilter) return false;
+                    
+                    const checkIn = new Date(r.check_in);
+                    const checkOut = new Date(r.check_out);
+                    const selectedDate = new Date(dateStr);
+                    
+                    return selectedDate >= checkIn && selectedDate <= checkOut;
+                });
+                
+                // Get synced availability for this date
+                let syncedBlocks = [];
+                if (propertyFilter) {
+                    const { data: syncedData } = await supabase
+                        .from('synced_availability')
+                        .select('*')
+                        .eq('property_id', propertyFilter)
+                        .eq('blocked_date', dateStr);
+                    
+                    if (syncedData) syncedBlocks = syncedData;
+                }
+                
+                // Build HTML
+                let html = `<div style="font-weight: 600; margin-bottom: 12px; font-size: 16px;">📅 ${dateStr}</div>`;
+                
+                // Show direct bookings
+                if (dayBookings.length > 0) {
+                    html += `<div style="margin-bottom: 16px;">
+                        <div style="font-weight: 600; color: #dc2626; margin-bottom: 8px;">🔴 Direct Bookings (${dayBookings.length})</div>`;
+                    
+                    dayBookings.forEach(booking => {
+                        html += `
+                            <div style="padding: 12px; background: #fee2e2; border-left: 4px solid #dc2626; border-radius: 6px; margin-bottom: 8px; cursor: pointer;" onclick="viewReservation('${booking.booking_id}')">
+                                <div style="font-weight: 600; color: #1e293b;">${booking.guest_name}</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 4px;">
+                                    ${booking.check_in} → ${booking.check_out} (${booking.nights} nights)
+                                </div>
+                                <div style="font-size: 13px; color: #64748b;">
+                                    Property: ${booking.property_name || 'Unknown'}
+                                </div>
+                                <div style="font-size: 13px; color: #16a34a; font-weight: 600; margin-top: 4px;">
+                                    ₹${parseFloat(booking.total_amount || 0).toLocaleString()}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+                
+                // Show OTA blocks
+                if (syncedBlocks.length > 0) {
+                    html += `<div style="margin-bottom: 16px;">
+                        <div style="font-weight: 600; color: #f59e0b; margin-bottom: 8px;">🟡 OTA Blocked (${syncedBlocks.length})</div>`;
+                    
+                    syncedBlocks.forEach(block => {
+                        html += `
+                            <div style="padding: 12px; background: #fef3c7; border-left: 4px solid #f59e0b; border-radius: 6px; margin-bottom: 8px;">
+                                <div style="font-weight: 600; color: #1e293b;">${block.booking_summary || 'Blocked by OTA'}</div>
+                                <div style="font-size: 13px; color: #64748b; margin-top: 4px;">
+                                    Source: ${block.source || 'iCal Sync'}
+                                </div>
+                                <div style="font-size: 12px; color: #64748b; margin-top: 4px;">
+                                    Synced: ${block.synced_at ? new Date(block.synced_at).toLocaleString() : 'Unknown'}
+                                </div>
+                            </div>
+                        `;
+                    });
+                    html += `</div>`;
+                }
+                
+                // No bookings
+                if (dayBookings.length === 0 && syncedBlocks.length === 0) {
+                    html += `<div style="padding: 24px; text-align: center; color: #64748b; background: #f8fafc; border-radius: 8px;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">🟢</div>
+                        <div style="font-weight: 600;">Available</div>
+                        <div style="font-size: 13px; margin-top: 4px;">No bookings or blocks for this date</div>
+                    </div>`;
+                }
+                
+                todayBookingsEl.innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error showing day bookings:', error);
+                todayBookingsEl.innerHTML = `<div style="color: #dc2626;">Error loading bookings for ${dateStr}</div>`;
+            }
+        }
+
         
         function changeMonth(direction) {
             currentCalendarDate.setMonth(currentCalendarDate.getMonth() + direction);
@@ -6883,6 +7821,8 @@
                     
                     if (navigator.onLine) {
                         setTimeout(autoSync, 2000);
+                        // Initialize auto-sync for properties with iCal URLs
+                        setTimeout(initializeAutoSync, 3000);
                     }
                 } catch (error) {
                     console.error('Session restore error:', error);
