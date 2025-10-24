@@ -1914,6 +1914,298 @@
             }
         }
 
+        /* Payment Reminders Collapse Animation */
+        #paymentRemindersList {
+            transition: all 0.3s ease;
+            overflow: hidden;
+        }
+
+        .card-header[onclick*="togglePaymentReminders"] {
+            transition: background-color 0.2s ease;
+        }
+
+        .card-header[onclick*="togglePaymentReminders"]:hover {
+            background-color: rgba(0, 0, 0, 0.02);
+        }
+
+        #paymentRemindersIcon {
+            display: inline-block;
+            transition: transform 0.3s ease;
+        }
+
+        /* Rotate when collapsed */
+        .collapsed #paymentRemindersIcon {
+            transform: rotate(-90deg);
+        }
+
+        #paymentRemindersCount {
+            font-weight: 500;
+            padding: 4px 12px;
+            background: var(--background);
+            border-radius: 20px;
+        }
+        /* ============================================
+        MULTI-PAYMENT MODAL - HYBRID LAYOUT
+        ============================================ */
+
+        .multi-payment-modal .modal-content {
+            max-width: 900px;
+        }
+
+        .entry-count {
+            font-size: 14px;
+            color: var(--text-secondary);
+            font-weight: normal;
+        }
+
+        .info-banner {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid var(--primary);
+        }
+
+        .common-settings-box {
+            background: #f8fafc;
+            padding: 16px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 12px;
+            justify-content: flex-end;
+        }
+
+        .add-payment-btn {
+            margin-bottom: 20px;
+            width: 100%;
+        }
+
+        /* Show/Hide Desktop vs Mobile Views */
+        .desktop-payment-table {
+            display: block;
+        }
+
+        .mobile-payment-cards {
+            display: none;
+        }
+
+        .mobile-text {
+            display: none;
+        }
+
+        .desktop-text {
+            display: inline;
+        }
+
+        /* Payment Entry Card (Mobile) */
+        .payment-entry-card {
+            background: white;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
+            position: relative;
+            transition: all 0.2s ease;
+        }
+
+        .payment-entry-card:hover {
+            border-color: var(--primary);
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .payment-entry-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .payment-entry-number {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+            padding: 4px 12px;
+            border-radius: 20px;
+        }
+
+        .payment-entry-remove {
+            background: var(--danger);
+            color: white;
+            border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .payment-entry-remove:hover {
+            background: #dc2626;
+            transform: scale(1.1);
+        }
+
+        .payment-entry-fields {
+            display: grid;
+            gap: 12px;
+        }
+
+        .payment-field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .payment-field label {
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-secondary);
+            margin-bottom: 6px;
+        }
+
+        .payment-field input,
+        .payment-field select {
+            width: 100%;
+            padding: 10px 12px;
+            border: 1px solid #e2e8f0;
+            border-radius: 6px;
+            font-size: 14px;
+            transition: all 0.2s ease;
+        }
+
+        .payment-field input:focus,
+        .payment-field select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .payment-field input[readonly] {
+            background: #f8fafc;
+            color: var(--text-secondary);
+        }
+
+        /* Tablet Breakpoint (769px - 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .multi-payment-modal .modal-content {
+                max-width: 95%;
+            }
+            
+            .desktop-payment-table {
+                overflow-x: auto;
+            }
+        }
+
+        /* Mobile Breakpoint (<768px) */
+        @media (max-width: 768px) {
+            /* Hide desktop table, show mobile cards */
+            .desktop-payment-table {
+                display: none !important;
+            }
+            
+            .mobile-payment-cards {
+                display: block !important;
+                max-height: 500px;
+                overflow-y: auto;
+                margin-bottom: 20px;
+            }
+            
+            .mobile-text {
+                display: inline;
+            }
+            
+            .desktop-text {
+                display: none;
+            }
+            
+            /* Full-screen modal on mobile */
+            .multi-payment-modal .modal-content {
+                width: 100%;
+                max-width: 100%;
+                height: 100vh;
+                margin: 0;
+                border-radius: 0;
+            }
+            
+            .modal-body {
+                padding: 16px;
+                max-height: calc(100vh - 80px);
+                overflow-y: auto;
+            }
+            
+            .info-banner {
+                padding: 12px;
+                font-size: 13px;
+            }
+            
+            .mobile-payment-cards {
+                max-height: none !important;
+            }
+            
+            .payment-entry-card {
+                padding: 16px;
+                margin-bottom: 12px;
+            }
+            
+            .payment-entry-fields {
+                grid-template-columns: 1fr;
+            }
+            
+            .payment-field input,
+            .payment-field select {
+                padding: 12px;
+                font-size: 16px; /* Prevents iOS zoom */
+            }
+            
+            .modal-actions {
+                flex-direction: column;
+                gap: 8px;
+                position: sticky;
+                bottom: 0;
+                background: white;
+                padding: 12px 0;
+                margin: 0 -16px;
+                padding: 12px 16px;
+                border-top: 1px solid #e2e8f0;
+            }
+            
+            .modal-actions button {
+                width: 100%;
+            }
+            
+            .form-row {
+                flex-direction: column !important;
+            }
+            
+            .form-group {
+                width: 100% !important;
+            }
+            
+            .common-settings-box {
+                padding: 12px;
+            }
+        }
+
+        /* Desktop 2-column card layout (if cards are shown) */
+        @media (min-width: 769px) {
+            .payment-entry-fields {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .payment-field-full {
+                grid-column: 1 / -1;
+            }
+        }
+
     </style>
 
     <!-- Splash Screen -->
@@ -2648,21 +2940,24 @@
 
             <!-- Payment Reminders -->
             <div class="card" id="paymentRemindersCard" style="display: none;">
-                <div class="card-header">
-                    <h3 class="card-title">⚠️ Payment Reminders</h3>
-                    <button class="btn btn-primary btn-sm" onclick="openBulkPaymentModal()">💰 Collect Selected</button>
+                <div class="card-header" onclick="togglePaymentReminders()" style="cursor: pointer; user-select: none;">
+                    <h3 class="card-title">⚠️ Payment Reminders <span id="paymentRemindersIcon">🔽</span></h3>
+                    <span id="paymentRemindersCount" style="font-size: 14px; color: var(--text-secondary);"></span>
                 </div>
-                <div id="paymentRemindersList"></div>
+                <div id="paymentRemindersList" style="display: block;">
+                    <!-- Content will be populated by JavaScript -->
+                </div>
             </div>
 
             <!-- Payment Records -->
-            <div class="card-header">
-                <h3 class="card-title">Payment Records</h3>
-                <div style="display: flex; gap: 8px;">
-                    <button class="btn btn-primary btn-sm" onclick="openMultiPaymentModal()">➕ Add Multiple</button>
-                    <button class="btn btn-secondary btn-sm" onclick="exportPaymentsCSV()">📥 Export</button>
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="card-title">Payment Records</h3>
+                    <div style="display: flex; gap: 8px;">
+                        <button class="btn btn-primary btn-sm" onclick="openMultiPaymentModal()">➕ Add Multiple</button>
+                        <button class="btn btn-secondary btn-sm" onclick="exportPaymentsCSV()">📥 Export</button>
+                    </div>
                 </div>
-            </div>
 
                 <div class="filters">
                     <div class="filter-item" style="flex: 1; max-width: 350px;">
@@ -2704,7 +2999,6 @@
                     </table>
                 </div>
             </div>
-        </div>
 
         <!-- Availability Calendar View -->
         <div id="availabilityView" class="container hidden">
@@ -3149,46 +3443,54 @@
 
     <!-- Multi-Payment Entry Modal -->
     <div id="multiPaymentModal" class="modal">
-        <div class="modal-content" style="max-width: 900px;">
+        <div class="modal-content multi-payment-modal">
             <div class="modal-header">
-                <h3 class="modal-title">💰 Add Multiple Payments</h3>
+                <h3 class="modal-title">
+                    💰 Add Multiple Payments
+                    <span id="paymentEntryCount" class="entry-count"></span>
+                </h3>
                 <button class="close-btn" onclick="closeMultiPaymentModal()">&times;</button>
             </div>
             
             <div class="modal-body">
-                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                <div class="info-banner">
                     <div style="font-weight: 600; margin-bottom: 8px;">Quick Add Multiple Payments</div>
                     <div style="font-size: 13px; color: #64748b;">Add payments for multiple bookings at once. Click "+ Add Row" to add more entries.</div>
                 </div>
 
-                <!-- Payment Entries Table -->
-                <div style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+                <!-- DESKTOP VIEW: Table Layout -->
+                <div class="desktop-payment-table" style="max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
                     <table style="width: 100%; border-collapse: collapse;">
                         <thead style="position: sticky; top: 0; background: #f8fafc; z-index: 1;">
                             <tr>
-                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0;">Booking ID</th>
-                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0;">Guest</th>
-                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0;">Amount (₹)</th>
-                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0;">Date</th>
-                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0; width: 120px;">Method</th>
-                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0; width: 120px;">Received By</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0; min-width: 120px;">Booking ID</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0; min-width: 120px;">Guest</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0; min-width: 100px;">Amount (₹)</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0; min-width: 120px;">Date</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0; min-width: 120px;">Method</th>
+                                <th style="padding: 8px; text-align: left; border-bottom: 2px solid #e2e8f0; min-width: 120px;">Received By</th>
                                 <th style="padding: 8px; text-align: center; border-bottom: 2px solid #e2e8f0; width: 60px;">Action</th>
                             </tr>
                         </thead>
                         <tbody id="multiPaymentTableBody">
-                            <!-- Will be populated dynamically -->
+                            <!-- Desktop table rows -->
                         </tbody>
                     </table>
                 </div>
 
+                <!-- MOBILE VIEW: Card Layout -->
+                <div class="mobile-payment-cards" id="multiPaymentCardsContainer">
+                    <!-- Mobile cards -->
+                </div>
+
                 <!-- Add Row Button -->
-                <button class="btn btn-secondary btn-sm" onclick="addPaymentRow()" style="margin-bottom: 20px;">
-                    ➕ Add Row
+                <button class="btn btn-secondary btn-sm add-payment-btn" onclick="addPaymentRow()">
+                    ➕ <span class="desktop-text">Add Row</span><span class="mobile-text">Add Payment Entry</span>
                 </button>
 
                 <!-- Common Settings -->
-                <div style="background: #f8fafc; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
-                    <div style="font-weight: 600; margin-bottom: 12px;">Common Settings (Applied to all entries)</div>
+                <div class="common-settings-box">
+                    <div style="font-weight: 600; margin-bottom: 12px;">⚡ Quick Fill (Optional)</div>
                     <div class="form-row">
                         <div class="form-group">
                             <label>Default Payment Method</label>
@@ -3206,12 +3508,12 @@
                         </div>
                     </div>
                     <button class="btn btn-secondary btn-sm" onclick="applyCommonSettings()">
-                        Apply to All Rows
+                        Apply to All <span class="desktop-text">Rows</span><span class="mobile-text">Entries</span>
                     </button>
                 </div>
 
                 <!-- Action Buttons -->
-                <div style="display: flex; gap: 12px; justify-content: flex-end;">
+                <div class="modal-actions">
                     <button class="btn btn-secondary" onclick="closeMultiPaymentModal()">
                         Cancel
                     </button>
@@ -4887,107 +5189,117 @@
             document.getElementById('monthlyTrends').innerHTML = html || '<div style="text-align: center; color: var(--text-secondary);">No data available</div>';
         }
 
-        // Payment Reminders
+        // Payment Reminders - Simplified Version with Collapse
         function renderPaymentReminders(reservations) {
             const today = new Date();
-            const upcomingCheckIns = reservations.filter(r => {
+            today.setHours(0, 0, 0, 0);
+            
+            // Get all reservations with pending/partial payments
+            const pendingPayments = reservations.filter(r => {
                 const checkInDate = new Date(r.check_in);
-                const daysUntilCheckIn = Math.ceil((checkInDate - today) / (1000 * 60 * 60 * 24));
-                return r.payment_status !== 'paid' && daysUntilCheckIn <= 7 && daysUntilCheckIn >= 0 && r.status !== 'cancelled';
+                checkInDate.setHours(0, 0, 0, 0);
+                const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                
+                return balance > 1 && // More than ₹1 balance (tolerance)
+                    r.status !== 'cancelled' &&
+                    checkInDate >= today; // Only upcoming or today
             }).sort((a, b) => new Date(a.check_in) - new Date(b.check_in));
 
-            const overduePayments = reservations.filter(r => {
-                const checkInDate = new Date(r.check_in);
-                return r.payment_status !== 'paid' && checkInDate < today && r.status !== 'cancelled';
-            });
-
-            const allReminders = [...overduePayments, ...upcomingCheckIns];
-
             const reminderCard = document.getElementById('paymentRemindersCard');
+            const remindersList = document.getElementById('paymentRemindersList');
+            const remindersCount = document.getElementById('paymentRemindersCount');
             
-            if (allReminders.length === 0) {
+            if (pendingPayments.length === 0) {
                 reminderCard.style.display = 'none';
                 return;
             }
 
             reminderCard.style.display = 'block';
+            
+            // Keep expanded by default
+            remindersList.style.display = 'block';
+            document.getElementById('paymentRemindersIcon').textContent = '🔽';
+            
+            const totalPending = pendingPayments.reduce((sum, r) => 
+                sum + ((parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0)), 0
+            );
+            
+            // Update count in header
+            remindersCount.textContent = `${pendingPayments.length} pending • ₹${Math.round(totalPending).toLocaleString('en-IN')} due`;
 
             const html = `
-                <div style="background: var(--background); padding: 16px; border-radius: 8px; margin-bottom: 16px;">
-                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                <div style="background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); padding: 16px; border-radius: 8px; margin-bottom: 16px; border-left: 4px solid #f59e0b;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
                         <div>
-                            <strong style="font-size: 16px;">
-                                ${overduePayments.length > 0 ? `🔴 ${overduePayments.length} Overdue` : ''}
-                                ${overduePayments.length > 0 && upcomingCheckIns.length > 0 ? ' • ' : ''}
-                                ${upcomingCheckIns.length > 0 ? `🟡 ${upcomingCheckIns.length} Due Soon` : ''}
-                            </strong>
-                            <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
-                                Total pending: ₹${Math.round(allReminders.reduce((sum, r) => 
-                                    sum + ((parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0)), 0
-                                )).toLocaleString('en-IN')}
+                            <div style="font-size: 18px; font-weight: 700; color: #92400e; margin-bottom: 4px;">
+                                ⚠️ ${pendingPayments.length} Pending Payment${pendingPayments.length > 1 ? 's' : ''}
                             </div>
-                        </div>
-                        <div style="display: flex; gap: 8px;">
-                            <input type="checkbox" id="selectAllPaymentReminders" onchange="toggleAllPaymentReminders(this)" style="width: 20px; height: 20px;">
-                            <label for="selectAllPaymentReminders" style="font-size: 13px; margin: 0;">Select All</label>
+                            <div style="font-size: 14px; color: #78350f;">
+                                Total Due: ₹${Math.round(totalPending).toLocaleString('en-IN')}
+                            </div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th style="width: 40px;"><input type="checkbox" id="selectAllRemindersHeader" onchange="toggleAllPaymentReminders(this)"></th>
-                                <th>Priority</th>
-                                <th>Booking ID</th>
-                                <th>Guest</th>
-                                <th>Property</th>
-                                <th>Check-in</th>
-                                <th>Due Amount</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            ${allReminders.map(r => {
-                                const checkInDate = new Date(r.check_in);
-                                const daysUntilCheckIn = Math.ceil((checkInDate - today) / (1000 * 60 * 60 * 24));
-                                const isOverdue = daysUntilCheckIn < 0;
-                                const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                <div style="display: grid; gap: 12px; padding: 0 16px 16px 16px;">
+                    ${pendingPayments.map(r => {
+                        const checkInDate = new Date(r.check_in);
+                        const daysUntilCheckIn = Math.ceil((checkInDate - today) / (1000 * 60 * 60 * 24));
+                        const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                        const isUrgent = daysUntilCheckIn <= 3;
+                        
+                        return `
+                            <div style="background: ${isUrgent ? '#fee2e2' : 'white'}; border: 1px solid ${isUrgent ? '#fca5a5' : 'var(--border)'}; border-radius: 8px; padding: 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px;">
+                                <div style="flex: 1; min-width: 200px;">
+                                    <div style="display: flex; align-items: center; gap: 8px; margin-bottom: 8px;">
+                                        ${isUrgent ? '<span style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">URGENT</span>' : ''}
+                                        <strong style="font-size: 15px;">${r.booking_id}</strong>
+                                    </div>
+                                    <div style="font-size: 14px; color: var(--text); margin-bottom: 4px;">
+                                        👤 ${r.guest_name}
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--text-secondary);">
+                                        🏠 ${r.property_name} • 📅 ${formatDate(r.check_in)} ${daysUntilCheckIn === 0 ? '(Today)' : `(${daysUntilCheckIn} ${daysUntilCheckIn === 1 ? 'day' : 'days'})`}
+                                    </div>
+                                </div>
                                 
-                                return `
-                                    <tr style="background: ${isOverdue ? '#fee2e2' : '#fef3c7'};">
-                                        <td><input type="checkbox" class="reminder-checkbox" data-booking-id="${r.booking_id}"></td>
-                                        <td>
-                                            ${isOverdue ? 
-                                                '<span style="background: var(--danger); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">🔴 OVERDUE</span>' : 
-                                                '<span style="background: var(--warning); color: white; padding: 4px 8px; border-radius: 4px; font-size: 11px; font-weight: 600;">🟡 DUE SOON</span>'
-                                            }
-                                        </td>
-                                        <td><strong>${r.booking_id}</strong></td>
-                                        <td>${r.guest_name}</td>
-                                        <td>${r.property_name}</td>
-                                        <td>
-                                            ${formatDate(r.check_in)}
-                                            <div style="font-size: 11px; color: var(--text-secondary);">
-                                                ${isOverdue ? `${Math.abs(daysUntilCheckIn)} days overdue` : `in ${daysUntilCheckIn} days`}
-                                            </div>
-                                        </td>
-                                        <td style="color: var(--danger); font-weight: 700;">₹${Math.round(balance).toLocaleString('en-IN')}</td>
-                                        <td>
-                                            <button class="btn btn-success btn-sm" onclick="onclick="openPaymentModal('${r.booking_id}')" title="Collect Payment">💰</button>
-                                            <button class="btn btn-primary btn-sm" onclick="sendWhatsAppReminder('${r.booking_id}')" title="Send Reminder">📱</button>
-                                            <button class="btn btn-secondary btn-sm" onclick="viewBookingDetails('${r.booking_id}')" title="View Details">👁️</button>
-                                        </td>
-                                    </tr>
-                                `;
-                            }).join('')}
-                        </tbody>
-                    </table>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 20px; font-weight: 700; color: var(--danger); margin-bottom: 8px;">
+                                        ₹${Math.round(balance).toLocaleString('en-IN')}
+                                    </div>
+                                    <div style="display: flex; gap: 8px; justify-content: flex-end;">
+                                        <button class="btn btn-success btn-sm" onclick="openPaymentModal('${r.booking_id}')" title="Collect Payment">
+                                            💰 Collect
+                                        </button>
+                                        <button class="btn btn-primary btn-sm" onclick="sendWhatsAppReminder('${r.booking_id}')" title="Send WhatsApp Reminder">
+                                            📱 Remind
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                    }).join('')}
                 </div>
             `;
 
-            document.getElementById('paymentRemindersList').innerHTML = html;
+            remindersList.innerHTML = html;
+        }
+
+        // Toggle Payment Reminders Collapse
+        function togglePaymentReminders() {
+            const content = document.getElementById('paymentRemindersList');
+            const icon = document.getElementById('paymentRemindersIcon');
+            const card = document.getElementById('paymentRemindersCard');
+            
+            if (content.style.display === 'none') {
+                content.style.display = 'block';
+                icon.textContent = '🔽';
+                card.classList.remove('collapsed');
+            } else {
+                content.style.display = 'none';
+                icon.textContent = '▶️';
+                card.classList.add('collapsed');
+            }
         }
 
         function toggleAllPaymentReminders(checkbox) {
@@ -5997,10 +6309,14 @@
             const reservation = await db.getReservation(bookingId);
             const totalAmount = parseFloat(reservation.total_amount) || 0;
             
+            // Round to nearest rupee to avoid floating-point precision issues
+            const paidRounded = Math.round(totalPaid);
+            const totalRounded = Math.round(totalAmount);
+
             let paymentStatus = 'pending';
-            if (totalPaid >= totalAmount) {
+            if (paidRounded >= totalRounded) {
                 paymentStatus = 'paid';
-            } else if (totalPaid > 0) {
+            } else if (paidRounded > 0) {
                 paymentStatus = 'partial';
             }
             
@@ -6069,12 +6385,28 @@
         }
 
         /**
-         * Render payment entry rows
+         * Render payment entry rows - HYBRID (Table for desktop, Cards for mobile)
          */
         function renderPaymentRows() {
-            const tbody = document.getElementById('multiPaymentTableBody');
+            const tableBody = document.getElementById('multiPaymentTableBody');
+            const cardsContainer = document.getElementById('multiPaymentCardsContainer');
+            const countEl = document.getElementById('paymentEntryCount');
             
-            tbody.innerHTML = multiPaymentRows.map(row => `
+            // Update entry count
+            if (countEl) {
+                countEl.textContent = `(${multiPaymentRows.length} ${multiPaymentRows.length === 1 ? 'entry' : 'entries'})`;
+            }
+            
+            if (multiPaymentRows.length === 0) {
+                tableBody.innerHTML = '<tr><td colspan="7" class="text-center" style="padding: 40px; color: var(--text-secondary);">Click "Add Row" to start</td></tr>';
+                cardsContainer.innerHTML = '<div class="text-center" style="padding: 40px; color: var(--text-secondary);">Click "Add Payment Entry" to start</div>';
+                return;
+            }
+            
+            // ========================================
+            // RENDER DESKTOP TABLE VIEW
+            // ========================================
+            tableBody.innerHTML = multiPaymentRows.map(row => `
                 <tr>
                     <td style="padding: 8px;">
                         <input type="text" 
@@ -6107,19 +6439,19 @@
                     <td style="padding: 8px;">
                         <select id="method_${row.id}" onchange="handleMethodChange(${row.id})" style="width: 100%; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px;">
                             <option value="">Select</option>
-                            <option value="cash">Cash</option>
-                            <option value="upi">UPI</option>
-                            <option value="gateway">Gateway</option>
-                            <option value="bank_transfer">Bank</option>
+                            <option value="cash">💵 Cash</option>
+                            <option value="upi">📱 UPI</option>
+                            <option value="gateway">💳 Gateway</option>
+                            <option value="bank_transfer">🏦 Bank</option>
                         </select>
                     </td>
                     <td style="padding: 8px;">
                         <select id="recipient_${row.id}" style="width: 100%; padding: 6px; border: 1px solid #e2e8f0; border-radius: 4px; display: none;">
                             <option value="">Select</option>
-                            <option value="Hostizzy">Hostizzy</option>
-                            <option value="Property Owner">Property Owner</option>
+                            <option value="Hostizzy">🏢 Hostizzy</option>
+                            <option value="Property Owner">🏠 Owner</option>
                         </select>
-                        <span id="recipient_na_${row.id}" style="color: #94a3b8; font-size: 13px; display: none;">N/A</span>
+                        <span id="recipient_na_${row.id}" style="color: #94a3b8; font-size: 13px;">N/A</span>
                     </td>
                     <td style="padding: 8px; text-align: center;">
                         <button class="btn btn-danger btn-sm" onclick="removePaymentRow(${row.id})" style="padding: 4px 8px;">
@@ -6129,15 +6461,89 @@
                 </tr>
             `).join('');
             
-            // Add datalist for booking IDs
-            let datalistHTML = '<datalist id="bookingIdList">';
-            allReservations.forEach(r => {
-                datalistHTML += `<option value="${r.booking_id}">${r.guest_name} - ${r.property_name}</option>`;
-            });
-            datalistHTML += '</datalist>';
+            // ========================================
+            // RENDER MOBILE CARD VIEW
+            // ========================================
+            cardsContainer.innerHTML = multiPaymentRows.map((row, index) => `
+                <div class="payment-entry-card">
+                    <div class="payment-entry-header">
+                        <span class="payment-entry-number">Payment #${index + 1}</span>
+                        ${multiPaymentRows.length > 1 ? `
+                            <button class="payment-entry-remove" onclick="removePaymentRow(${row.id})" title="Remove">
+                                ✕
+                            </button>
+                        ` : ''}
+                    </div>
+                    
+                    <div class="payment-entry-fields">
+                        <div class="payment-field payment-field-full">
+                            <label>Booking ID *</label>
+                            <input type="text" 
+                                id="bookingId_mobile_${row.id}" 
+                                list="bookingIdList"
+                                placeholder="Enter or select booking ID" 
+                                onchange="autofillGuestNameMobile(${row.id})"
+                                required>
+                        </div>
+                        
+                        <div class="payment-field payment-field-full">
+                            <label>Guest Name</label>
+                            <input type="text" 
+                                id="guestName_mobile_${row.id}" 
+                                placeholder="Auto-filled from booking" 
+                                readonly>
+                        </div>
+                        
+                        <div class="payment-field">
+                            <label>Amount (₹) *</label>
+                            <input type="number" 
+                                id="amount_mobile_${row.id}" 
+                                placeholder="0" 
+                                min="0" 
+                                step="0.01"
+                                required>
+                        </div>
+                        
+                        <div class="payment-field">
+                            <label>Payment Date *</label>
+                            <input type="date" 
+                                id="date_mobile_${row.id}"
+                                required>
+                        </div>
+                        
+                        <div class="payment-field">
+                            <label>Payment Method *</label>
+                            <select id="method_mobile_${row.id}" onchange="handleMethodChangeMobile(${row.id})" required>
+                                <option value="">Select Method</option>
+                                <option value="cash">💵 Cash</option>
+                                <option value="upi">📱 UPI</option>
+                                <option value="gateway">💳 Gateway</option>
+                                <option value="bank_transfer">🏦 Bank Transfer</option>
+                            </select>
+                        </div>
+                        
+                        <div class="payment-field" id="recipientField_mobile_${row.id}" style="display: none;">
+                            <label>Received By *</label>
+                            <select id="recipient_mobile_${row.id}">
+                                <option value="">Select Recipient</option>
+                                <option value="Hostizzy">🏢 Hostizzy</option>
+                                <option value="Property Owner">🏠 Property Owner</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
             
+            // Add datalist for booking IDs (shared by both views)
             if (!document.getElementById('bookingIdList')) {
-                tbody.insertAdjacentHTML('afterend', datalistHTML);
+                const datalistHTML = `
+                    <datalist id="bookingIdList">
+                        ${allReservations.map(r => 
+                            `<option value="${r.booking_id}">${r.guest_name} - ${r.property_name}</option>`
+                        ).join('')}
+                    </datalist>
+                `;
+                tableBody.insertAdjacentHTML('afterend', datalistHTML);
             }
         }
 
@@ -6189,6 +6595,65 @@
         }
 
         /**
+         * Auto-fill guest name for mobile cards
+         */
+        function autofillGuestNameMobile(rowId) {
+            const bookingId = document.getElementById(`bookingId_mobile_${rowId}`).value;
+            const reservation = allReservations.find(r => r.booking_id === bookingId);
+            
+            if (reservation) {
+                document.getElementById(`guestName_mobile_${rowId}`).value = reservation.guest_name;
+                
+                // Auto-fill amount with balance if available
+                const total = parseFloat(reservation.total_amount) || 0;
+                const paid = parseFloat(reservation.paid_amount) || 0;
+                const balance = total - paid;
+                
+                if (balance > 0 && !document.getElementById(`amount_mobile_${rowId}`).value) {
+                    document.getElementById(`amount_mobile_${rowId}`).value = Math.round(balance);
+                }
+                
+                // Sync with desktop view
+                const desktopBookingId = document.getElementById(`bookingId_${rowId}`);
+                const desktopGuestName = document.getElementById(`guestName_${rowId}`);
+                const desktopAmount = document.getElementById(`amount_${rowId}`);
+                
+                if (desktopBookingId) desktopBookingId.value = bookingId;
+                if (desktopGuestName) desktopGuestName.value = reservation.guest_name;
+                if (desktopAmount && balance > 0 && !desktopAmount.value) {
+                    desktopAmount.value = Math.round(balance);
+                }
+            } else {
+                document.getElementById(`guestName_mobile_${rowId}`).value = '';
+            }
+        }
+
+        /**
+         * Handle payment method change for mobile cards
+         */
+        function handleMethodChangeMobile(rowId) {
+            const method = document.getElementById(`method_mobile_${rowId}`).value;
+            const recipientField = document.getElementById(`recipientField_mobile_${rowId}`);
+            const recipientSelect = document.getElementById(`recipient_mobile_${rowId}`);
+            
+            if (method === 'cash' || method === 'upi' || method === 'bank_transfer') {
+                recipientField.style.display = 'block';
+                recipientSelect.required = true;
+            } else {
+                recipientField.style.display = 'none';
+                recipientSelect.required = false;
+                recipientSelect.value = '';
+            }
+            
+            // Sync with desktop view
+            const desktopMethod = document.getElementById(`method_${rowId}`);
+            if (desktopMethod) {
+                desktopMethod.value = method;
+                handleMethodChange(rowId);
+            }
+        }
+
+        /**
          * Apply common settings to all rows
          */
         function applyCommonSettings() {
@@ -6211,67 +6676,65 @@
          * Save multiple payments
          */
         async function saveMultiplePayments() {
-            const payments = [];
-            let hasErrors = false;
-            
-            // Collect all payment entries
-            for (const row of multiPaymentRows) {
-                const bookingId = document.getElementById(`bookingId_${row.id}`).value;
-                const amount = parseFloat(document.getElementById(`amount_${row.id}`).value);
-                const date = document.getElementById(`date_${row.id}`).value;
-                const method = document.getElementById(`method_${row.id}`).value;
-                const recipient = document.getElementById(`recipient_${row.id}`).value;
-                
-                // Skip empty rows
-                if (!bookingId || !amount || !method) continue;
-                
-                // Validate recipient for specific methods
-                if ((method === 'cash' || method === 'upi' || method === 'bank_transfer') && !recipient) {
-                    showToast('Validation Error', `Please select "Received By" for ${method.toUpperCase()} payment`, '❌');
-                    hasErrors = true;
-                    break;
-                }
-                
-                // Validate booking exists
-                const reservation = allReservations.find(r => r.booking_id === bookingId);
-                if (!reservation) {
-                    showToast('Validation Error', `Booking ID ${bookingId} not found`, '❌');
-                    hasErrors = true;
-                    break;
-                }
-                
-                payments.push({
-                    booking_id: bookingId,
-                    payment_date: date || new Date().toISOString().split('T')[0],
-                    amount: amount,
-                    payment_method: method,
-                    payment_recipient: recipient || null,
-                    reference_number: null,
-                    notes: `Multi-payment entry for ${reservation.guest_name}`,
-                    created_by: currentUser?.id || null
-                });
-            }
-            
-            if (hasErrors || payments.length === 0) {
-                if (payments.length === 0) {
-                    showToast('Please add at least one payment entry', 'error');
-                }
-                return;
-            }
-            
-            // Show confirmation
-            if (!confirm(`Save ${payments.length} payment(s)?`)) {
-                return;
-            }
-            
             try {
-                // Save payments to database
-                const { data, error } = await supabase
-                    .from('payments')
-                    .insert(payments)
-                    .select();
+                const payments = [];
                 
-                if (error) throw error;
+                // Determine if we're on mobile or desktop
+                const isMobile = window.innerWidth <= 768;
+                const prefix = isMobile ? 'mobile_' : '';
+                
+                for (const row of multiPaymentRows) {
+                    const bookingId = document.getElementById(`bookingId_${prefix}${row.id}`).value.trim();
+                    const amount = parseFloat(document.getElementById(`amount_${prefix}${row.id}`).value);
+                    const date = document.getElementById(`date_${prefix}${row.id}`).value;
+                    const method = document.getElementById(`method_${prefix}${row.id}`).value;
+                    
+                    // Validate required fields
+                    if (!bookingId || !amount || !date || !method) {
+                        showToast('Error', 'Please fill all required fields for all entries', '❌');
+                        return;
+                    }
+                    
+                    // Get recipient if needed
+                    let recipient = '';
+                    const recipientEl = document.getElementById(`recipient_${prefix}${row.id}`);
+                    if (recipientEl && recipientEl.style.display !== 'none') {
+                        recipient = recipientEl.value;
+                        if (!recipient) {
+                            showToast('Error', 'Please select payment recipient for all entries', '❌');
+                            return;
+                        }
+                    }
+                    
+                    // Verify booking exists
+                    const reservation = allReservations.find(r => r.booking_id === bookingId);
+                    if (!reservation) {
+                        showToast('Error', `Booking ID "${bookingId}" not found`, '❌');
+                        return;
+                    }
+                    
+                    payments.push({
+                        booking_id: bookingId,
+                        amount: amount,
+                        payment_date: date,
+                        payment_method: method,
+                        payment_recipient: recipient || null,
+                        notes: `Multi-payment entry`,
+                        created_at: new Date().toISOString()
+                    });
+                }
+                
+                if (payments.length === 0) {
+                    showToast('Error', 'No valid payments to save', '❌');
+                    return;
+                }
+                
+                // Save all payments
+                const { error: paymentError } = await supabase
+                    .from('payments')
+                    .insert(payments);
+                    
+                if (paymentError) throw paymentError;
                 
                 // Update paid amounts for each reservation
                 for (const payment of payments) {
@@ -6279,7 +6742,8 @@
                     if (reservation) {
                         const newPaidAmount = (parseFloat(reservation.paid_amount) || 0) + payment.amount;
                         const total = parseFloat(reservation.total_amount) || 0;
-                        const newStatus = newPaidAmount >= total ? 'paid' : (newPaidAmount > 0 ? 'partial' : 'pending');
+                        const tolerance = 1;
+                        const newStatus = newPaidAmount >= (total - tolerance) ? 'paid' : (newPaidAmount > 0 ? 'partial' : 'pending');
                         
                         await supabase
                             .from('reservations')
@@ -6291,15 +6755,13 @@
                     }
                 }
                 
-                showToast(`✅ ${payments.length} payment(s) saved successfully!`, 'success');
+                showToast('Success', `✅ ${payments.length} payment(s) saved successfully!`, '✅');
                 closeMultiPaymentModal();
-                
-                // Reload payments
-                await loadPayments();
+                loadPayments();
                 
             } catch (error) {
-                console.error('Error saving multiple payments:', error);
-                showToast('Failed to save payments: ' + error.message, 'error');
+                console.error('Save error:', error);
+                showToast('Error', error.message, '❌');
             }
         }
 
