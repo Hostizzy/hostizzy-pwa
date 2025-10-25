@@ -2,7 +2,10 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="theme-color" content="#2563eb">
     <title>ResIQ by Hostizzy - Reservation Management System</title>
     <link rel="manifest" href="manifest.json">
     <style>
@@ -33,6 +36,46 @@
             background-color: var(--background);
             color: var(--text-primary);
             line-height: 1.6;
+        }
+
+        /* Pull to Refresh Indicator */
+        .pull-to-refresh-indicator {
+            position: fixed;
+            top: -60px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 50px;
+            height: 50px;
+            background: white;
+            border-radius: 50%;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            z-index: 9999;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .pull-to-refresh-indicator.active {
+            top: 70px;
+        }
+
+        .pull-to-refresh-indicator.loading {
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            from { transform: translateX(-50%) rotate(0deg); }
+            to { transform: translateX(-50%) rotate(360deg); }
+        }
+
+        .pull-to-refresh-arrow {
+            transition: transform 0.3s ease;
+        }
+
+        .pull-to-refresh-arrow.flip {
+            transform: rotate(180deg);
         }
 
         /* Splash Screen Animations */
@@ -122,12 +165,17 @@
 
         input, select, textarea {
             width: 100%;
-            padding: 12px 16px;
-            border: 2px solid var(--border);
-            border-radius: 8px;
+            padding: 14px 16px;
+            border: 1px solid #ddd;
+            border-radius: 12px;
             font-size: 14px;
             font-family: inherit;
-            transition: all 0.2s;
+            transition: all 0.2s ease;
+            background: white;
+        }
+
+        input:hover, select:hover, textarea:hover {
+            border-color: #bbb;
         }
 
         input:focus, select:focus, textarea:focus {
@@ -140,13 +188,18 @@
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 8px;
+            border-radius: 12px;
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             text-decoration: none;
             display: inline-block;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+        }
+
+        .btn:active {
+            transform: scale(0.98);
         }
 
         .btn-primary {
@@ -264,15 +317,21 @@
             max-width: 1400px;
             margin: 0 auto;
             padding: 24px;
+            padding-bottom: 100px; /* Add space for mobile bottom nav */
         }
 
         /* Cards */
         .card {
             background: white;
-            border-radius: 12px;
-            padding: 24px;
-            box-shadow: var(--shadow);
+            border-radius: 16px;
+            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06), 0 1px 3px rgba(0, 0, 0, 0.1);
             margin-bottom: 24px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08), 0 2px 6px rgba(0, 0, 0, 0.08);
         }
 
         .card-header {
@@ -448,42 +507,53 @@
 
         table {
             width: 100%;
-            border-collapse: collapse;
+            border-collapse: separate;
+            border-spacing: 0;
             font-size: 14px;
         }
 
-        thead {
-            background: var(--background);
+        table thead {
+            background: #f8fafc;
         }
 
-        th {
-            padding: 14px 12px;
+        table th {
+            padding: 16px;
             text-align: left;
             font-weight: 600;
             color: var(--text-primary);
             border-bottom: 2px solid var(--border);
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        td {
-            padding: 14px 12px;
+        table td {
+            padding: 16px;
             border-bottom: 1px solid var(--border);
+            color: var(--text-primary);
         }
 
-        tbody tr {
-            transition: background 0.2s;
+        table tbody tr {
+            transition: background-color 0.2s ease;
         }
 
-        tbody tr:hover {
-            background: var(--background);
+        table tbody tr:hover {
+            background-color: #f8fafc;
+        }
+
+        table tbody tr:last-child td {
+            border-bottom: none;
         }
 
         /* Status Badges */
         .badge {
-            padding: 6px 12px;
+            display: inline-block;
+            padding: 6px 14px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
-            display: inline-block;
+            text-transform: capitalize;
+            letter-spacing: 0.3px;
         }
 
         .badge-confirmed {
@@ -492,34 +562,33 @@
         }
 
         .badge-pending {
-            background: #fef3c7;
+            background: #fed7aa;
             color: #92400e;
         }
 
-        .badge-cancelled {
-            background: #fee2e2;
-            color: #991b1b;
-        }
-
         .badge-checked-in {
-            background: #dbeafe;
+            background: #bfdbfe;
             color: #1e40af;
         }
 
         .badge-checked-out {
-            background: #e0e7ff;
-            color: #4338ca;
+            background: #e5e7eb;
+            color: #374151;
         }
 
-        /* Payment Status */
+        .badge-cancelled {
+            background: #fecaca;
+            color: #991b1b;
+        }
+
         .payment-status {
-            display: inline-flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
+            display: inline-block;
+            padding: 6px 14px;
             border-radius: 20px;
-            font-size: 12px;
+            font-size: 11px;
             font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .payment-status.paid {
@@ -528,13 +597,13 @@
         }
 
         .payment-status.pending {
-            background: #fef3c7;
+            background: #fed7aa;
             color: #92400e;
         }
 
         .payment-status.partial {
-            background: #dbeafe;
-            color: #1e40af;
+            background: #fef3c7;
+            color: #92400e;
         }
 
         /* Modal */
@@ -557,24 +626,47 @@
             align-items: flex-start;
         }
 
+        .modal.show {
+            display: flex;
+            justify-content: center;
+            align-items: flex-start;
+        }   
+
         .modal-content {
             background: white;
-            border-radius: 12px;
-            padding: 32px;
-            max-width: 900px;
-            width: 100%;
+            border-radius: 20px;
+            padding: 0;
+            max-width: 600px;
+            width: 95%;
             max-height: 90vh;
             overflow-y: auto;
-            margin: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            animation: slideUp 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(50px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
         }
 
         .modal-header {
+            padding: 24px;
+            border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 24px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--border);
+            background: #f8fafc;
+            border-radius: 20px 20px 0 0;
+        }
+
+        .modal-content > div:not(.modal-header) {
+            padding: 24px;
         }
 
         .modal-title {
@@ -617,7 +709,7 @@
 
         /* Utilities */
         .hidden {
-            display: none !important;
+            display: none;
         }
 
         .text-right {
@@ -950,16 +1042,18 @@
             }
             
             .mobile-nav {
-                display: block;
+                display: block !important;
                 position: fixed;
                 bottom: 0;
                 left: 0;
                 right: 0;
                 background: white;
                 border-top: 1px solid var(--border);
-                padding: 8px 0;
+                padding: 8px 0 max(8px, env(safe-area-inset-bottom));
                 z-index: 1000;
-                box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+                box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.08);
+                backdrop-filter: blur(10px);
+                background: rgba(255, 255, 255, 0.95);
             }
             
             .mobile-nav-items {
@@ -972,15 +1066,37 @@
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                padding: 8px;
-                color: #6b7280;
+                justify-content: center;
+                gap: 4px;
                 text-decoration: none;
+                color: var(--text-secondary);
                 font-size: 11px;
-                transition: all 0.2s;
+                font-weight: 500;
+                padding: 8px 4px;
+                border-radius: 12px;
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+                position: relative;
             }
-            
+
+            .mobile-nav-item:active {
+                transform: scale(0.95);
+            }
+
             .mobile-nav-item.active {
                 color: var(--primary);
+                font-weight: 600;
+            }
+
+            .mobile-nav-item.active::before {
+                content: '';
+                position: absolute;
+                top: 0;
+                left: 50%;
+                transform: translateX(-50%);
+                width: 32px;
+                height: 3px;
+                background: var(--primary);
+                border-radius: 0 0 3px 3px;
             }
             
             .mobile-nav-icon {
@@ -2383,6 +2499,11 @@
         <!-- Mobile Overlay -->
         <div id="mobileOverlay" class="mobile-overlay" onclick="toggleMobileSidebar()"></div>
 
+        <!-- Pull to Refresh Indicator -->
+        <div class="pull-to-refresh-indicator" id="pullToRefreshIndicator">
+            <div class="pull-to-refresh-arrow" id="pullToRefreshArrow">⬇️</div>
+        </div>
+
         <!-- Desktop Navigation -->
         <nav class="navbar">
             <div class="navbar-content">
@@ -2406,7 +2527,7 @@
         </nav>
 
         <!-- Mobile Bottom Navigation -->
-        <div class="mobile-nav hidden">
+        <div class="mobile-nav">
             <div class="mobile-nav-items">
                 <a class="mobile-nav-item" onclick="showView('home')">
                     <div class="mobile-nav-icon">🏠</div>
@@ -3866,7 +3987,88 @@
                 </div>
             </div>
         </div>
- </div>
+     </div>
+
+    <!-- WhatsApp Modal -->
+    <div id="whatsappModal" class="modal">
+         <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h3 class="modal-title">📱 Send WhatsApp Message</h3>
+                <button class="close-btn" onclick="closeWhatsAppModal()">&times;</button>
+            </div>
+            
+            <div style="padding: 24px;">
+                <!-- Guest Info Card -->
+                <div style="background: linear-gradient(135deg, #10b981 0%, #059669 100%); padding: 20px; border-radius: 12px; margin-bottom: 20px; color: white;">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <div style="font-size: 32px;">👤</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 700; font-size: 18px; margin-bottom: 4px;" id="whatsappGuestName">Guest Name</div>
+                            <div style="font-size: 14px; opacity: 0.9; display: flex; align-items: center; gap: 8px;">
+                                <span>📞</span>
+                                <span id="whatsappGuestPhone">Phone</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div style="font-size: 12px; opacity: 0.8; margin-top: 8px;">
+                        🆔 Booking: <span id="whatsappBookingId" style="font-weight: 600;">-</span>
+                    </div>
+                </div>
+                
+                <!-- Template Selection -->
+                <div class="form-group">
+                    <label>Select Message Template *</label>
+                    <select id="whatsappTemplate" onchange="previewWhatsAppMessage()" style="font-size: 14px;">
+                        <option value="booking_confirmation">✅ Booking Confirmation - Full booking details</option>
+                        <option value="payment_reminder">💰 Payment Reminder - Pending balance alert</option>
+                        <option value="check_in_instructions">🏠 Check-in Instructions - Arrival details</option>
+                        <option value="thank_you">🙏 Thank You Message - Post-checkout feedback</option>
+                        <option value="custom">💬 Custom Message - Write your own</option>
+                    </select>
+                </div>
+                
+                <!-- Custom Message (hidden by default) -->
+                <div class="form-group" id="customMessageGroup" style="display: none;">
+                    <label>Custom Message</label>
+                    <textarea id="customMessageText" rows="6" placeholder="Type your message here..." oninput="previewWhatsAppMessage()"></textarea>
+                </div>
+                
+                <!-- Message Preview -->
+                <div style="background: #dcf8c6; padding: 16px; border-radius: 12px; margin-bottom: 20px; max-height: 350px; overflow-y: auto; position: relative;">
+                    <div style="font-size: 11px; color: #128c7e; font-weight: 600; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px;">
+                        📱 Message Preview
+                    </div>
+                    <div id="whatsappPreview" style="white-space: pre-wrap; font-size: 14px; line-height: 1.6; color: #303030;"></div>
+                    <div style="position: absolute; top: 12px; right: 12px; background: white; border-radius: 50%; width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-size: 18px; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                        💬
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div style="display: flex; gap: 12px; margin-bottom: 24px;">
+                    <button class="btn btn-secondary" onclick="closeWhatsAppModal()" style="flex: 1;">
+                        Cancel
+                    </button>
+                    <button class="btn btn-success" onclick="confirmSendWhatsApp()" style="flex: 2; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                        <span style="font-size: 18px;">📱</span>
+                        <span>Open WhatsApp</span>
+                    </button>
+                </div>
+                
+                <!-- Communication History -->
+                <div style="padding-top: 20px; border-top: 1px solid var(--border);">
+                    <h4 style="font-size: 14px; font-weight: 600; margin-bottom: 12px; display: flex; align-items: center; gap: 8px;">
+                        <span>📜</span>
+                        <span>Communication History</span>
+                    </h4>
+                    <div id="communicationHistory" style="font-size: 13px; max-height: 200px; overflow-y: auto;">
+                        <div style="color: var(--text-secondary); font-style: italic;">Loading...</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> 
+ 
 
 <!-- Property Settings Modal -->
 <div id="propertySettingsModal" class="modal" style="display: none;">
@@ -3994,6 +4196,114 @@
         let allPayments = [];
         let selectedReservations = new Set();
         let currentUser = null;
+        let currentWhatsAppBooking = null;
+
+        // WhatsApp Message Templates
+        const whatsappTemplates = {
+            booking_confirmation: (booking) => `🏠 *Booking Confirmation - ResIQ by Hostizzy*
+
+    Hi ${booking.guest_name}! 👋
+
+    Your booking is *CONFIRMED* ✅
+
+    📋 *Booking Details:*
+    🆔 Booking ID: *${booking.booking_id}*
+    🏡 Property: *${booking.property_name}*
+    📅 Check-in: *${formatDate(booking.check_in)}*
+    📅 Check-out: *${formatDate(booking.check_out)}*
+    🛏️ Nights: *${booking.nights}*
+    👥 Guests: *${booking.number_of_guests}*
+
+    💰 *Payment Summary:*
+    Total Amount: ₹${Math.round(booking.total_amount).toLocaleString('en-IN')}
+    Paid: ₹${Math.round(booking.paid_amount || 0).toLocaleString('en-IN')}
+    ${(booking.paid_amount || 0) < booking.total_amount ? 
+    `Balance Due: ₹${Math.round(booking.total_amount - (booking.paid_amount || 0)).toLocaleString('en-IN')}` : 
+    'Fully Paid ✅'}
+
+    📍 Property address & directions will be shared 24 hours before check-in.
+
+    For any queries, reply here or call us! 📞
+
+    Thank you for choosing Hostizzy! 🙏
+    _Powered by ResIQ_`,
+
+                payment_reminder: (booking) => `💰 *Payment Reminder*
+
+    Hi ${booking.guest_name},
+
+    This is a friendly reminder for your upcoming booking:
+
+    🆔 Booking ID: *${booking.booking_id}*
+    🏡 Property: *${booking.property_name}*
+    📅 Check-in: *${formatDate(booking.check_in)}*
+
+    💳 *Payment Details:*
+    Total Amount: ₹${Math.round(booking.total_amount).toLocaleString('en-IN')}
+    Already Paid: ₹${Math.round(booking.paid_amount || 0).toLocaleString('en-IN')}
+    *Pending Balance: ₹${Math.round(booking.total_amount - (booking.paid_amount || 0)).toLocaleString('en-IN')}*
+
+    Please complete the payment at your earliest convenience.
+
+    🏦 *Payment Options:*
+    - UPI: hostizzy@paytm
+    - Bank Transfer
+    - Cash on arrival
+
+    Reply with payment confirmation! ✅
+
+    Thank you! 🙏`,
+
+                check_in_instructions: (booking) => `🏠 *Check-in Instructions*
+
+    Hi ${booking.guest_name}! 👋
+
+    Your check-in is scheduled for *${formatDate(booking.check_in)}*
+
+    📍 *Property:*
+    ${booking.property_name}
+
+    🔑 *Check-in Process:*
+    ⏰ Check-in time: 2:00 PM
+    📞 Call our property manager 30 mins before arrival
+    🚗 Parking: Available on premises
+
+    🏠 *Property Manager Contact:*
+    We'll share contact details closer to check-in date.
+
+    Have a wonderful stay! 🌟
+
+    Need any help? Just reply to this message! 📱`,
+
+                thank_you: (booking) => `🙏 *Thank You for Staying with Us!*
+
+    Hi ${booking.guest_name},
+
+    Thank you for choosing *${booking.property_name}* for your stay! 
+
+    We hope you had a wonderful experience! ⭐
+
+    📝 *We'd love your feedback:*
+    Your review helps us improve and helps other guests make informed decisions.
+
+    🎁 *Special Offer:*
+    Book your next stay with us and get 10% OFF! 
+    Use code: *RETURNGUEST10*
+
+    Looking forward to hosting you again! 🏠
+
+    Warm regards,
+    Team Hostizzy 💚`,
+
+                custom: (booking) => `Hi ${booking.guest_name},
+
+    [Type your message here]
+
+    Booking ID: ${booking.booking_id}
+    Property: ${booking.property_name}
+
+    Team Hostizzy 🏠`
+            };
         let offlineDB = null;
         let isOnline = navigator.onLine;
         let syncInProgress = false;
@@ -4557,6 +4867,21 @@
                 item.classList.remove('active');
             });
             if (event && event.target) event.target.classList.add('active');
+        }
+
+        function navigateToReservation(booking_id) {
+            // Switch to reservations view
+            showView('reservations');
+            
+            // Wait for view to load, then search for the booking
+            setTimeout(() => {
+                const searchInput = document.getElementById('searchReservations');
+                searchInput.value = booking_id;
+                filterReservations();
+                
+                // Show toast notification
+                showToast('Navigation', `Showing reservation: ${booking_id}`, '🔍');
+            }, 300);
         }
 
         // View Management
@@ -5732,8 +6057,9 @@
                     <td>₹${Math.round(r.total_amount || 0).toLocaleString('en-IN')}</td>
                     <td><span class="badge badge-${r.status}">${r.status}</span></td>
                     <td>
-                        <button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')">💰 Add </button>
+                        <button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')" title="Add Payments">💰</button>
                         <button class="btn btn-success btn-sm" onclick="viewPaymentHistory('${r.booking_id}')" title="View Payments">📜</button>
+                        <button class="btn btn-success btn-sm" onclick="openWhatsAppMenu('${r.booking_id}')" title="Send WhatsApp">📱</button>
                         <button class="btn btn-secondary btn-sm" onclick="editReservation('${r.booking_id}')">Edit</button>
                         <button class="btn btn-danger btn-sm" onclick="deleteReservation('${r.booking_id}')">×</button>
                     </td>
@@ -5786,6 +6112,255 @@
                 reservationCodeInput.value = ''; // Clear value when hidden
             }
         }
+    // ============================================
+    // WHATSAPP AUTOMATION FUNCTIONS
+    // ============================================
+
+        window.generateWhatsAppLink = function(booking, template = 'booking_confirmation', customMessage = null) {
+            // Clean phone number (remove spaces, dashes, etc.)
+            let phone = (booking.guest_phone || '').replace(/[^0-9]/g, '');
+            
+            // Add country code if not present
+            if (!phone.startsWith('91') && phone.length === 10) {
+                phone = '91' + phone;
+            }
+            
+            // Generate message from template
+            const message = customMessage || whatsappTemplates[template](booking);
+            
+            // Encode for URL
+            const encodedMessage = encodeURIComponent(message);
+            
+            // Return WhatsApp Web/App link
+            return `https://wa.me/${phone}?text=${encodedMessage}`;
+        };
+
+        window.sendWhatsAppMessage = async function(booking_id, template = 'booking_confirmation', customMessage = null) {
+            try {
+                console.log('sendWhatsAppMessage called:', booking_id, template);
+                
+                // Get booking data
+                const booking = allReservations.find(r => r.booking_id === booking_id);
+                
+                if (!booking) {
+                    showToast('Error', 'Booking not found', '❌');
+                    return;
+                }
+                
+                if (!booking.guest_phone) {
+                    showToast('Error', 'Guest phone number not available', '❌');
+                    return;
+                }
+                
+                // Generate WhatsApp link
+                const whatsappUrl = generateWhatsAppLink(booking, template, customMessage);
+                console.log('WhatsApp URL:', whatsappUrl);
+                
+                // Open WhatsApp in new tab
+                window.open(whatsappUrl, '_blank');
+                
+                // Log communication
+                const message = customMessage || whatsappTemplates[template](booking);
+                await logCommunication({
+                    booking_id: booking_id,
+                    guest_name: booking.guest_name,
+                    guest_phone: booking.guest_phone,
+                    message_type: 'whatsapp',
+                    template_used: template,
+                    message_content: message,
+                    sent_by: currentUser?.email || 'system'
+                });
+                
+                // Show success notification
+                showToast('WhatsApp Opened', `Message ready for ${booking.guest_name}`, '📱');
+                
+                // Haptic feedback
+                if ('vibrate' in navigator) {
+                    navigator.vibrate([10, 50, 10]);
+                }
+                
+            } catch (error) {
+                console.error('WhatsApp error:', error);
+                showToast('Error', 'Failed to open WhatsApp: ' + error.message, '❌');
+            }
+        };
+
+        window.logCommunication = async function(data) {
+            try {
+                const { data: result, error } = await supabase
+                    .from('communications')
+                    .insert([data]);
+                
+                if (error) throw error;
+                
+                console.log('Communication logged:', result);
+            } catch (error) {
+                console.error('Error logging communication:', error);
+                // Don't show error to user, just log it
+            }
+        };
+
+        window.openWhatsAppMenu = function(booking_id) {
+            const booking = allReservations.find(r => r.booking_id === booking_id);
+            
+            if (!booking) {
+                showToast('Error', 'Booking not found', '❌');
+                return;
+            }
+            
+            if (!booking.guest_phone) {
+                showToast('Error', 'Guest phone number not available', '❌');
+                return;
+            }
+            
+            currentWhatsAppBooking = booking;
+            
+            // Populate guest info
+            document.getElementById('whatsappGuestName').textContent = booking.guest_name;
+            document.getElementById('whatsappGuestPhone').textContent = booking.guest_phone;
+            document.getElementById('whatsappBookingId').textContent = booking.booking_id;
+            
+            // Reset form
+            const templateSelect = document.getElementById('whatsappTemplate');
+            const customGroup = document.getElementById('customMessageGroup');
+            const customText = document.getElementById('customMessageText');
+            
+            if (templateSelect) templateSelect.value = 'booking_confirmation';
+            if (customGroup) customGroup.style.display = 'none';
+            if (customText) customText.value = '';
+            
+            // Preview message
+            previewWhatsAppMessage();
+            
+            // Load communication history
+            loadCommunicationHistory(booking_id);
+            
+            // Show modal
+            const modal = document.getElementById('whatsappModal');
+            console.log('Modal element:', modal);
+            
+            if (modal) {
+                modal.classList.add('show');
+                console.log('Modal classes:', modal.className);
+            } else {
+                console.error('Modal element not found!');
+            }
+            
+            console.log('=== openWhatsAppMenu END ===');
+        };
+
+        window.closeWhatsAppModal = function() {
+            const modal = document.getElementById('whatsappModal');
+            if (modal) {
+                modal.classList.remove('show');
+            }
+            currentWhatsAppBooking = null;
+        };
+
+        window.previewWhatsAppMessage = function() {
+            if (!currentWhatsAppBooking) {
+                console.log('No current booking');
+                return;
+            }
+            
+            const template = document.getElementById('whatsappTemplate')?.value;
+            const customMessageGroup = document.getElementById('customMessageGroup');
+            const preview = document.getElementById('whatsappPreview');
+            
+            if (!template || !preview) return;
+            
+            if (template === 'custom') {
+                if (customMessageGroup) customMessageGroup.style.display = 'block';
+                const customText = document.getElementById('customMessageText')?.value;
+                preview.textContent = customText || whatsappTemplates.custom(currentWhatsAppBooking);
+            } else {
+                if (customMessageGroup) customMessageGroup.style.display = 'none';
+                preview.textContent = whatsappTemplates[template](currentWhatsAppBooking);
+            }
+        };
+
+        window.confirmSendWhatsApp = function() {
+            if (!currentWhatsAppBooking) {
+                showToast('Error', 'No booking selected', '❌');
+                return;
+            }
+            
+            const template = document.getElementById('whatsappTemplate')?.value || 'booking_confirmation';
+            let customMessage = null;
+            
+            if (template === 'custom') {
+                customMessage = document.getElementById('customMessageText')?.value.trim();
+                if (!customMessage) {
+                    showToast('Error', 'Please enter a custom message', '❌');
+                    return;
+                }
+            }
+            
+            sendWhatsAppMessage(currentWhatsAppBooking.booking_id, template, customMessage);
+            closeWhatsAppModal();
+        };
+
+        window.loadCommunicationHistory = async function(booking_id) {
+            try {
+                const { data, error } = await supabase
+                    .from('communications')
+                    .select('*')
+                    .eq('booking_id', booking_id)
+                    .order('sent_at', { ascending: false })
+                    .limit(10);
+                
+                if (error) throw error;
+                
+                const historyDiv = document.getElementById('communicationHistory');
+                if (!historyDiv) return;
+                
+                if (!data || data.length === 0) {
+                    historyDiv.innerHTML = '<div style="color: var(--text-secondary); font-style: italic; font-size: 13px;">No messages sent yet</div>';
+                    return;
+                }
+                
+                historyDiv.innerHTML = data.map(comm => `
+                    <div style="padding: 12px; background: #f8fafc; border-radius: 8px; margin-bottom: 8px;">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 4px;">
+                            <span style="font-weight: 600; font-size: 13px;">📱 ${getTemplateLabel(comm.template_used)}</span>
+                            <span style="font-size: 11px; color: var(--text-secondary);">${formatDateTime(comm.sent_at)}</span>
+                        </div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">
+                            Sent by: ${comm.sent_by || 'Unknown'}
+                        </div>
+                    </div>
+                `).join('');
+                
+            } catch (error) {
+                console.error('Error loading history:', error);
+                const historyDiv = document.getElementById('communicationHistory');
+                if (historyDiv) {
+                    historyDiv.innerHTML = '<div style="color: var(--danger); font-size: 13px;">Failed to load history</div>';
+                }
+            }
+        };
+
+        window.getTemplateLabel = function(template) {
+            const labels = {
+                'booking_confirmation': 'Booking Confirmation',
+                'payment_reminder': 'Payment Reminder',
+                'check_in_instructions': 'Check-in Instructions',
+                'thank_you': 'Thank You Message',
+                'custom': 'Custom Message'
+            };
+            return labels[template] || 'Message';
+        };
+
+        window.formatDateTime = function(dateString) {
+            const date = new Date(dateString);
+            return date.toLocaleString('en-IN', {
+                day: 'numeric',
+                month: 'short',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+        };
+ 
 
         // Reservation Modal Functions
         function openReservationModal(booking_id = null) {
@@ -5946,7 +6521,7 @@
                     showToast('Validation Error', 'Please enter the OTA reservation code', '❌');
                     return;
                 }
-                
+
                 // Calculate number of nights
                 const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
                 
@@ -6129,7 +6704,12 @@
                 
                 return `
                     <tr>
-                        <td><strong>${r.booking_id || 'N/A'}</strong></td>
+                        <td>
+                            <strong style="color: var(--primary); cursor: pointer; text-decoration: underline;" 
+                                    onclick="navigateToReservation('${r.booking_id}')">
+                                ${r.booking_id || 'N/A'}
+                            </strong>
+                        </td>
                         <td>${r.guest_name}</td>
                         <td>${r.property_name}</td>
                         <td>${formatDate(r.check_in)}</td>
@@ -6143,6 +6723,7 @@
                             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                                 ${balance > 0 ? `<button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')">💰 Add</button>` : ''}
                                 <button class="btn btn-success btn-sm" onclick="viewPaymentHistory('${r.booking_id}')">📜 History</button>
+                                ${balance > 0 ? `<button class="btn btn-success btn-sm" onclick="openWhatsAppMenu('${r.booking_id}')" title="Send Payment Reminder">📱 Remind</button>` : ''}
                             </div>
                         </td>
                     </tr>
@@ -9886,6 +10467,137 @@
             }
         }
     });
+
+    // Close modals on ESC key
+    document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') {
+            // Close any open modal
+            document.querySelectorAll('.modal.active, .modal.show').forEach(modal => {
+                modal.classList.remove('active', 'show');
+            });
+        }
+    });
+
+    // ============================================
+    // PULL TO REFRESH
+    // ============================================
+
+    let touchStartY = 0;
+    let touchEndY = 0;
+    let isPulling = false;
+    let isRefreshing = false;
+    const pullThreshold = 80; // pixels to pull before refresh
+
+    const pullIndicator = document.getElementById('pullToRefreshIndicator');
+    const pullArrow = document.getElementById('pullToRefreshArrow');
+
+    document.addEventListener('touchstart', (e) => {
+        if (window.scrollY === 0 && !isRefreshing) {
+            touchStartY = e.touches[0].clientY;
+            isPulling = true;
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchmove', (e) => {
+        if (!isPulling || isRefreshing) return;
+        
+        touchEndY = e.touches[0].clientY;
+        const pullDistance = touchEndY - touchStartY;
+        
+        if (pullDistance > 0 && window.scrollY === 0) {
+            // Show indicator
+            const progress = Math.min(pullDistance / pullThreshold, 1);
+            pullIndicator.style.top = `${-60 + (130 * progress)}px`;
+            pullIndicator.style.opacity = progress;
+            
+            // Flip arrow when threshold reached
+            if (pullDistance >= pullThreshold) {
+                pullArrow.classList.add('flip');
+                pullArrow.textContent = '🔄';
+            } else {
+                pullArrow.classList.remove('flip');
+                pullArrow.textContent = '⬇️';
+            }
+        }
+    }, { passive: true });
+
+    document.addEventListener('touchend', async (e) => {
+        if (!isPulling || isRefreshing) return;
+        
+        const pullDistance = touchEndY - touchStartY;
+        
+        if (pullDistance >= pullThreshold && window.scrollY === 0) {
+            // Trigger refresh
+            isRefreshing = true;
+            pullIndicator.classList.add('active', 'loading');
+            pullArrow.textContent = '⏳';
+            
+            // Haptic feedback
+            if ('vibrate' in navigator) {
+                navigator.vibrate([10, 50, 10]);
+            }
+            
+            // Refresh current view
+            await refreshCurrentView();
+            
+            // Hide indicator after delay
+            setTimeout(() => {
+                pullIndicator.classList.remove('active', 'loading');
+                pullArrow.textContent = '⬇️';
+                pullArrow.classList.remove('flip');
+                isRefreshing = false;
+                isPulling = false;
+            }, 1000);
+        } else {
+            // Reset indicator
+            pullIndicator.style.top = '-60px';
+            pullIndicator.style.opacity = '0';
+            pullArrow.classList.remove('flip');
+            pullArrow.textContent = '⬇️';
+            isPulling = false;
+        }
+        
+        touchStartY = 0;
+        touchEndY = 0;
+    });
+
+    async function refreshCurrentView() {
+        // Determine which view is active
+        const views = ['home', 'dashboard', 'reservations', 'payments', 'availability', 'properties', 'performance'];
+        
+        for (const view of views) {
+            const viewElement = document.getElementById(`${view}View`);
+            if (viewElement && !viewElement.classList.contains('hidden')) {
+                // Refresh the active view
+                switch(view) {
+                    case 'home':
+                        await loadInitialData();
+                        await updateHomeScreenStats();
+                        break;
+                    case 'dashboard':
+                        await loadDashboard();
+                        break;
+                    case 'reservations':
+                        await loadReservations();
+                        break;
+                    case 'payments':
+                        await loadPayments();
+                        break;
+                    case 'availability':
+                        await loadAvailabilityCalendar();
+                        break;
+                    case 'properties':
+                        await loadProperties();
+                        break;
+                    case 'performance':
+                        await initializePerformanceView();
+                        break;
+                }
+                showToast('Refreshed', 'Data updated successfully', '✅');
+                break;
+            }
+        }
+    }    
 
     // ============================================
     // VOICE COMMANDS FOR QUICK ACTIONS
