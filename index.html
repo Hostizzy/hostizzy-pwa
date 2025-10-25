@@ -10561,6 +10561,7 @@
             // Trigger refresh
             isRefreshing = true;
             pullIndicator.classList.add('active', 'loading');
+            pullIndicator.style.borderColor = 'var(--success)';
             pullArrow.textContent = '⏳';
             
             // Haptic feedback
@@ -10571,18 +10572,27 @@
             // Refresh current view
             await refreshCurrentView();
             
+            // Show success state
+            pullArrow.textContent = '✅';
+            
             // Hide indicator after delay
             setTimeout(() => {
                 pullIndicator.classList.remove('active', 'loading');
+                pullIndicator.style.top = '-80px';
+                pullIndicator.style.opacity = '0';
+                pullIndicator.style.transform = 'translateX(-50%) scale(1)';
+                pullIndicator.style.borderColor = 'var(--primary)';
                 pullArrow.textContent = '⬇️';
                 pullArrow.classList.remove('flip');
                 isRefreshing = false;
                 isPulling = false;
-            }, 1000);
+            }, 1500); // Increased from 1000ms
         } else {
-            // Reset indicator
-            pullIndicator.style.top = '-60px';
+            // Reset indicator smoothly
+            pullIndicator.style.top = '-80px';
             pullIndicator.style.opacity = '0';
+            pullIndicator.style.transform = 'translateX(-50%) scale(1)';
+            pullIndicator.style.borderColor = 'var(--primary)';
             pullArrow.classList.remove('flip');
             pullArrow.textContent = '⬇️';
             isPulling = false;
@@ -10591,6 +10601,7 @@
         touchStartY = 0;
         touchEndY = 0;
     });
+
 
     async function refreshCurrentView() {
         // Determine which view is active
