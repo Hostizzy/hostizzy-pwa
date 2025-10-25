@@ -996,9 +996,15 @@
                 display: block;
             }
             
-            .container {
-                padding: 16px;
-                padding-bottom: 80px;
+            .container { padding-bottom: 120px; } /* was 80px */
+
+            @media (max-width: 768px){
+            .container{
+                padding-bottom: calc(120px + env(safe-area-inset-bottom));
+            }
+            .mobile-nav{
+                padding-bottom: env(safe-area-inset-bottom);
+            }
             }
 
             /* Quick Filters */
@@ -2986,6 +2992,7 @@
                                 <th>Booking ID</th>
                                 <th>Guest</th>
                                 <th>Property</th>
+                                <th>Check-in</th>
                                 <th>Total</th>
                                 <th>Paid</th>
                                 <th>Balance</th>
@@ -3221,6 +3228,9 @@
                         <option value="cancelled">Cancelled</option>
                     </select>
                 </div>
+            </div>
+
+            <div class="form-row">
                 <div class="form-group">
                     <label>Booking Type *</label>
                     <select id="bookingType" required>
@@ -3231,6 +3241,27 @@
                         <option value="CORPORATE_STAY">💼 Corporate Stay</option>
                         <option value="SHOOT">📸 Shoot</option>
                     </select>
+                </div>
+            
+                <div class="form-group">
+                    <label>Booking Source</label>
+                    <select id="bookingSource" onchange="toggleReservationCodeField()">
+                        <option value="DIRECT">Direct</option>
+                        <option value="AIRBNB">Airbnb</option>
+                        <option value="AGODA/BOOKING.COM">Agoda/Booking.com</option>
+                        <option value="MMT/GOIBIBO">MMT/Goibibo</option>
+                        <option value="OTHER">Other</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-row" id="reservationCodeRow" style="display: none;">
+                <div class="form-group">
+                    <label>Reservation Code / OTA Booking ID *</label>
+                    <input type="text" id="reservationCode" placeholder="Enter OTA booking code">
+                    <small style="font-size: 12px; color: var(--text-secondary); display: block; margin-top: 4px;">
+                        Enter the booking code from Airbnb, MMT, Agoda, etc.
+                    </small>
                 </div>
             </div>
 
@@ -3274,22 +3305,10 @@
 
             <div class="form-row">
                 <div class="form-group">
-                    <label>Booking Source</label>
-                    <select id="bookingSource">
-                        <option value="DIRECT">Direct</option>
-                        <option value="AIRBNB">Airbnb</option>
-                        <option value="AGODA/BOOKING.COM">Agoda/Booking.com</option>
-                        <option value="MMT/GOIBIBO">MMT/Goibibo</option>
-                        <option value="OTHER">Other</option>
-                    </select>
-                </div>
-                <div class="form-group">
                     <label>Number of Rooms</label>
                     <input type="number" id="numberOfRooms" min="1" value="1">
                 </div>
-            </div>
 
-            <div class="form-row">
                 <div class="form-group">
                     <label>Adults *</label>
                     <input type="number" id="adults" min="1" value="2" required>
@@ -5750,6 +5769,24 @@
             displayReservations(allReservations);
         }
 
+        function toggleReservationCodeField() {
+            const bookingSource = document.getElementById('bookingSource').value;
+            const reservationCodeRow = document.getElementById('reservationCodeRow');
+            const reservationCodeInput = document.getElementById('reservationCode');
+            
+            // Show field for OTA bookings
+            const otaSources = ['AIRBNB', 'AGODA/BOOKING.COM', 'MMT/GOIBIBO'];
+            
+            if (otaSources.includes(bookingSource)) {
+                reservationCodeRow.style.display = 'flex';
+                reservationCodeInput.required = true;
+            } else {
+                reservationCodeRow.style.display = 'none';
+                reservationCodeInput.required = false;
+                reservationCodeInput.value = ''; // Clear value when hidden
+            }
+        }
+
         // Reservation Modal Functions
         function openReservationModal(booking_id = null) {
             const modal = document.getElementById('reservationModal');
@@ -5795,6 +5832,8 @@
                 });
                 document.getElementById('bookingStatus').value = 'pending';
                 document.getElementById('bookingSource').value = 'DIRECT';
+                document.getElementById('reservationCode').value = '';
+                toggleReservationCodeField(); // Reset visibility
             }
             modal.classList.add('active');
         }
@@ -5897,6 +5936,17 @@
                     showToast('Validation Error', 'Check-out date must be after check-in date', '❌');
                     return;
                 }
+                
+                // Validate reservation code for OTA bookings
+                const bookingSource = document.getElementById('bookingSource').value;
+                const reservationCode = document.getElementById('reservationCode').value.trim();
+                const otaSources = ['AIRBNB', 'AGODA/BOOKING.COM', 'MMT/GOIBIBO'];
+                
+                if (otaSources.includes(bookingSource) && !reservationCode) {
+                    showToast('Validation Error', 'Please enter the OTA reservation code', '❌');
+                    return;
+                }
+                
                 // Calculate number of nights
                 const nights = Math.ceil((new Date(checkOut) - new Date(checkIn)) / (1000 * 60 * 60 * 24));
                 
@@ -5970,14 +6020,24 @@
                 
                 // Generate booking_id for new reservations
                 if (!editId) {
-                    const year = new Date().getFullYear().toString().slice(-2);
-                    const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-                    const bytes = crypto.getRandomValues(new Uint8Array(6));
-                    let rand = "";
-                    for (const b of bytes) {
-                        rand += alphabet[b % alphabet.length];
+                    const bookingSource = document.getElementById('bookingSource').value;
+                    const reservationCode = document.getElementById('reservationCode').value.trim();
+                    const otaSources = ['AIRBNB', 'AGODA/BOOKING.COM', 'MMT/GOIBIBO'];
+                    
+                    if (otaSources.includes(bookingSource) && reservationCode) {
+                        // Use OTA reservation code as booking ID
+                        reservation.booking_id = reservationCode;
+                    } else {
+                        // Generate system booking ID for direct bookings
+                        const year = new Date().getFullYear().toString().slice(-2);
+                        const alphabet = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
+                        const bytes = crypto.getRandomValues(new Uint8Array(6));
+                        let rand = "";
+                        for (const b of bytes) {
+                            rand += alphabet[b % alphabet.length];
+                        }
+                        reservation.booking_id = `HST${year}${rand}`;
                     }
-                    reservation.booking_id = `HST${year}${rand}`;
                 }
                 
                 if (navigator.onLine) {
@@ -6072,6 +6132,7 @@
                         <td><strong>${r.booking_id || 'N/A'}</strong></td>
                         <td>${r.guest_name}</td>
                         <td>${r.property_name}</td>
+                        <td>${formatDate(r.check_in)}</td>
                         <td>₹${Math.round(total).toLocaleString('en-IN')}</td>
                         <td style="color: var(--success); font-weight: 600;">₹${Math.round(paid).toLocaleString('en-IN')}</td>
                         <td style="color: ${balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight: 600;">
