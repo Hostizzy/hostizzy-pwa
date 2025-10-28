@@ -3421,15 +3421,9 @@
 
             <div class="form-row" id="otaServiceFeeRow" style="display: none;">
                 <div class="form-group">
-                    <label>OTA Service Fee</label>
-                    <div class="ota-fee-inputs">
-                        <select id="otaServiceFeeType" onchange="updateOtaServiceFeeInputs()">
-                            <option value="amount">Fixed Amount (₹)</option>
-                            <option value="percentage">Percentage (%)</option>
-                        </select>
-                        <input type="number" id="otaServiceFeeValue" min="0" step="0.01" value="0" oninput="enforceOtaServiceFeeBounds()">
-                    </div>
-                    <small id="otaServiceFeeHelp" style="font-size: 12px; color: var(--text-secondary); display: block; margin-top: 4px;">
+                    <label>OTA Service Fee (₹)</label>
+                    <input type="number" id="otaServiceFee" min="0" step="0.01" value="0">
+                    <small style="font-size: 12px; color: var(--text-secondary); display: block; margin-top: 4px;">
                         Enter the commission or service fee deducted by the OTA.
                     </small>
                 </div>
@@ -4246,18 +4240,7 @@
         function getOtaServiceFee(reservation) {
             if (!reservation) return 0;
             const fee = parseFloat(reservation.ota_service_fee);
-            if (Number.isFinite(fee) && fee > 0) {
-                return fee;
-            }
-
-            const type = reservation.ota_service_fee_type;
-            const rawValue = parseFloat(reservation.ota_service_fee_value);
-            if (isOtaSource(reservation.booking_source) && type === 'percentage' && Number.isFinite(rawValue) && rawValue > 0) {
-                const total = parseFloat(reservation.total_amount) || 0;
-                return Math.max(0, (total * rawValue) / 100);
-            }
-
-            return 0;
+            return Number.isFinite(fee) ? fee : 0;
         }
 
         function getNetTotalAmount(reservation) {
@@ -4271,29 +4254,6 @@
             if (!reservation) return 0;
             const paid = parseFloat(reservation.paid_amount) || 0;
             return Math.max(0, getNetTotalAmount(reservation) - paid);
-        }
-
-        function getOtaFeeMeta(reservation) {
-            const total = parseFloat(reservation?.total_amount) || 0;
-            const amount = isOtaSource(reservation?.booking_source) ? getOtaServiceFee(reservation) : 0;
-            const type = reservation?.ota_service_fee_type;
-            const rawValue = parseFloat(reservation?.ota_service_fee_value);
-
-            let descriptor = '';
-            if (amount > 0) {
-                if (type === 'percentage' && Number.isFinite(rawValue) && rawValue > 0) {
-                    descriptor = `${rawValue}% commission`;
-                } else if (type === 'amount' && Number.isFinite(rawValue) && rawValue > 0) {
-                    descriptor = 'Fixed fee';
-                }
-            }
-
-            return {
-                total,
-                amount,
-                net: Math.max(0, total - amount),
-                descriptor
-            };
         }
 
         // Target occupancy nights per property per year
@@ -6271,23 +6231,19 @@
             const reservationCodeRow = document.getElementById('reservationCodeRow');
             const reservationCodeInput = document.getElementById('reservationCode');
             const otaServiceFeeRow = document.getElementById('otaServiceFeeRow');
-            const otaServiceFeeType = document.getElementById('otaServiceFeeType');
-            const otaServiceFeeValue = document.getElementById('otaServiceFeeValue');
+            const otaServiceFeeInput = document.getElementById('otaServiceFee');
 
             if (isOtaSource(bookingSource)) {
                 reservationCodeRow.style.display = 'flex';
                 reservationCodeInput.required = true;
                 if (otaServiceFeeRow) otaServiceFeeRow.style.display = 'flex';
-                updateOtaServiceFeeInputs();
             } else {
                 reservationCodeRow.style.display = 'none';
                 reservationCodeInput.required = false;
                 reservationCodeInput.value = '';
                 if (otaServiceFeeRow) {
                     otaServiceFeeRow.style.display = 'none';
-                    if (otaServiceFeeType) otaServiceFeeType.value = 'amount';
-                    if (otaServiceFeeValue) otaServiceFeeValue.value = 0;
-                    updateOtaServiceFeeInputs();
+                    if (otaServiceFeeInput) otaServiceFeeInput.value = 0;
                 }
             }
         }
@@ -6562,24 +6518,7 @@
                 document.getElementById('guestEmail').value = r.guest_email || '';
                 document.getElementById('guestCity').value = r.guest_city || '';
                 document.getElementById('bookingSource').value = r.booking_source || 'DIRECT';
-                const otaFeeTypeEl = document.getElementById('otaServiceFeeType');
-                const otaFeeValueEl = document.getElementById('otaServiceFeeValue');
-                const storedFeeType = r.ota_service_fee_type || 'amount';
-                const storedFeeValue = parseFloat(r.ota_service_fee_value);
-                if (otaFeeTypeEl) otaFeeTypeEl.value = storedFeeType;
-                if (otaFeeValueEl) {
-                    if (storedFeeType === 'percentage' && Number.isFinite(storedFeeValue)) {
-                        otaFeeValueEl.value = storedFeeValue;
-                    } else {
-                        otaFeeValueEl.value = parseFloat(r.ota_service_fee) || 0;
-                    }
-                }
-                updateOtaServiceFeeInputs();
-                if (isOtaSource(r.booking_source)) {
-                    document.getElementById('reservationCode').value = r.booking_id || '';
-                } else {
-                    document.getElementById('reservationCode').value = '';
-                }
+                document.getElementById('otaServiceFee').value = parseFloat(r.ota_service_fee) || 0;
                 document.getElementById('numberOfRooms').value = r.number_of_rooms || 1;
                 document.getElementById('adults').value = r.adults || 2;
                 document.getElementById('kids').value = r.kids || 0;
@@ -6606,9 +6545,7 @@
                 document.getElementById('bookingStatus').value = 'pending';
                 document.getElementById('bookingSource').value = 'DIRECT';
                 document.getElementById('reservationCode').value = '';
-                document.getElementById('otaServiceFeeType').value = 'amount';
-                document.getElementById('otaServiceFeeValue').value = 0;
-                updateOtaServiceFeeInputs();
+                document.getElementById('otaServiceFee').value = 0;
                 toggleReservationCodeField(); // Reset visibility
             }
             modal.classList.add('active');
@@ -6739,9 +6676,9 @@
                 const bonfireOther = parseFloat(document.getElementById('bonfireOther').value) || 0;
                 const taxes = parseFloat(document.getElementById('taxes').value) || 0;
                 const damages = parseFloat(document.getElementById('damages').value) || 0;
-                const otaServiceFeeType = document.getElementById('otaServiceFeeType')?.value || 'amount';
-                const otaServiceFeeValueInput = parseFloat(document.getElementById('otaServiceFeeValue')?.value);
-                const otaServiceFeeValue = Number.isFinite(otaServiceFeeValueInput) ? otaServiceFeeValueInput : 0;
+                const otaServiceFee = isOtaSource(bookingSource)
+                    ? (parseFloat(document.getElementById('otaServiceFee').value) || 0)
+                    : 0;
                 
                 // Meals Revenue includes both meals_chef and bonfire_other (calculated, not stored)
                 const mealsRevenue = mealsChef + bonfireOther;
@@ -6775,9 +6712,7 @@
                     guest_city: document.getElementById('guestCity').value || null,
                     status: document.getElementById('bookingStatus').value,
                     booking_source: document.getElementById('bookingSource').value,
-                    ota_service_fee_type: isOtaSource(bookingSource) ? otaServiceFeeType : null,
-                    ota_service_fee_value: isOtaSource(bookingSource) ? otaServiceFeeValue : 0,
-                    ota_service_fee: 0,
+                    ota_service_fee: otaServiceFee,
                     number_of_rooms: parseInt(document.getElementById('numberOfRooms').value) || 1,
                     adults: adults,
                     kids: kids,
@@ -6912,12 +6847,12 @@
             }
             
             tbody.innerHTML = reservations.map(r => {
-                const feeMeta = getOtaFeeMeta(r);
-                const total = feeMeta.net;
+                const total = getNetTotalAmount(r);
                 const paid = parseFloat(r.paid_amount) || 0;
                 const balance = getOutstandingBalance(r);
-                const serviceFeeNote = feeMeta.amount > 0
-                    ? `<div style="font-size: 11px; color: var(--text-secondary);">After OTA fee of ₹${Math.round(feeMeta.amount).toLocaleString('en-IN')}${feeMeta.descriptor ? ` (${feeMeta.descriptor})` : ''}</div>`
+                const serviceFee = isOtaSource(r.booking_source) ? getOtaServiceFee(r) : 0;
+                const serviceFeeNote = serviceFee > 0
+                    ? `<div style="font-size: 11px; color: var(--text-secondary);">After OTA fee of ₹${Math.round(serviceFee).toLocaleString('en-IN')}</div>`
                     : '';
                 const status = r.payment_status || 'pending';
 
@@ -6982,15 +6917,15 @@
                 return;
             }
             
-            const feeMeta = getOtaFeeMeta(reservation);
-            const total = feeMeta.net;
+            const total = getNetTotalAmount(reservation);
             const paid = parseFloat(reservation.paid_amount) || 0;
             const balance = getOutstandingBalance(reservation);
+            const serviceFee = isOtaSource(reservation.booking_source) ? getOtaServiceFee(reservation) : 0;
 
             const totalAmountEl = document.getElementById('paymentTotalAmount');
             totalAmountEl.textContent = '₹' + Math.round(total).toLocaleString('en-IN');
-            if (feeMeta.amount > 0) {
-                totalAmountEl.textContent += ` (after ₹${Math.round(feeMeta.amount).toLocaleString('en-IN')} OTA fee${feeMeta.descriptor ? `, ${feeMeta.descriptor}` : ''})`;
+            if (serviceFee > 0) {
+                totalAmountEl.textContent += ` (after ₹${Math.round(serviceFee).toLocaleString('en-IN')} OTA fee)`;
             }
             document.getElementById('paymentPaidAmount').textContent = '₹' + Math.round(paid).toLocaleString('en-IN');
             document.getElementById('paymentBalance').textContent = '₹' + Math.round(balance).toLocaleString('en-IN');
@@ -7680,15 +7615,15 @@
                 
                 const payments = await db.getPayments(bookingId);
                 
-                const feeMeta = getOtaFeeMeta(reservation);
-                const total = feeMeta.net;
+                const total = getNetTotalAmount(reservation);
                 const paid = parseFloat(reservation.paid_amount) || 0;
                 const balance = getOutstandingBalance(reservation);
+                const serviceFee = isOtaSource(reservation.booking_source) ? getOtaServiceFee(reservation) : 0;
 
                 const historyTotalEl = document.getElementById('historyTotalAmount');
                 historyTotalEl.textContent = '₹' + Math.round(total).toLocaleString('en-IN');
-                if (feeMeta.amount > 0) {
-                    historyTotalEl.textContent += ` (after ₹${Math.round(feeMeta.amount).toLocaleString('en-IN')} OTA fee${feeMeta.descriptor ? `, ${feeMeta.descriptor}` : ''})`;
+                if (serviceFee > 0) {
+                    historyTotalEl.textContent += ` (after ₹${Math.round(serviceFee).toLocaleString('en-IN')} OTA fee)`;
                 }
                 document.getElementById('historyPaidAmount').textContent = '₹' + Math.round(paid).toLocaleString('en-IN');
                 document.getElementById('historyBalance').textContent = '₹' + Math.round(balance).toLocaleString('en-IN');
