@@ -16,19 +16,41 @@
         }
 
         :root {
-            --primary: #2563eb;
-            --primary-dark: #1e40af;
+            --primary: #6366f1;
+            --primary-dark: #4f46e5;
+            --primary-light: #818cf8;
             --secondary: #64748b;
             --success: #10b981;
+            --success-light: #34d399;
             --danger: #ef4444;
+            --danger-light: #f87171;
             --warning: #f59e0b;
+            --warning-light: #fbbf24;
             --background: #f8fafc;
+            --background-alt: #f1f5f9;
             --surface: #ffffff;
+            --surface-elevated: #ffffff;
             --text-primary: #0f172a;
             --text-secondary: #64748b;
+            --text-tertiary: #94a3b8;
             --border: #e2e8f0;
+            --border-light: #f1f5f9;
             --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1);
+            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+            --gradient-primary: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            --gradient-success: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            --gradient-warning: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            --gradient-danger: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            --gradient-ocean: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+            --gradient-sunset: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+            --gradient-purple: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+            --radius-sm: 8px;
+            --radius-md: 12px;
+            --radius-lg: 16px;
+            --radius-xl: 20px;
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         body {
@@ -247,14 +269,37 @@
         .btn {
             padding: 12px 24px;
             border: none;
-            border-radius: 12px;
+            border-radius: var(--radius-md);
             font-size: 14px;
             font-weight: 600;
             cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            transition: var(--transition);
             text-decoration: none;
-            display: inline-block;
-            box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: var(--shadow);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+
+        .btn:hover::before {
+            width: 300px;
+            height: 300px;
         }
 
         .btn:active {
@@ -262,33 +307,59 @@
         }
 
         .btn-primary {
-            background: var(--primary);
+            background: var(--gradient-primary);
             color: white;
+            box-shadow: 0 4px 14px 0 rgba(99, 102, 241, 0.4);
         }
 
         .btn-primary:hover {
-            background: var(--primary-dark);
-            transform: translateY(-1px);
+            box-shadow: 0 6px 20px 0 rgba(99, 102, 241, 0.6);
+            transform: translateY(-2px);
         }
 
         .btn-secondary {
             background: var(--secondary);
             color: white;
+            box-shadow: 0 4px 14px 0 rgba(100, 116, 139, 0.3);
+        }
+
+        .btn-secondary:hover {
+            background: #475569;
+            box-shadow: 0 6px 20px 0 rgba(100, 116, 139, 0.5);
+            transform: translateY(-2px);
         }
 
         .btn-danger {
-            background: var(--danger);
+            background: var(--gradient-danger);
             color: white;
+            box-shadow: 0 4px 14px 0 rgba(239, 68, 68, 0.4);
+        }
+
+        .btn-danger:hover {
+            box-shadow: 0 6px 20px 0 rgba(239, 68, 68, 0.6);
+            transform: translateY(-2px);
         }
 
         .btn-success {
-            background: var(--success);
+            background: var(--gradient-success);
             color: white;
+            box-shadow: 0 4px 14px 0 rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-success:hover {
+            box-shadow: 0 6px 20px 0 rgba(16, 185, 129, 0.6);
+            transform: translateY(-2px);
         }
 
         .btn-warning {
-            background: var(--warning);
+            background: var(--gradient-warning);
             color: white;
+            box-shadow: 0 4px 14px 0 rgba(245, 158, 11, 0.4);
+        }
+
+        .btn-warning:hover {
+            box-shadow: 0 6px 20px 0 rgba(245, 158, 11, 0.6);
+            transform: translateY(-2px);
         }
 
         #globalVoiceBtn {
@@ -426,21 +497,46 @@
         .stat-card {
             background: white;
             padding: 24px;
-            border-radius: 12px;
-            box-shadow: var(--shadow);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
             border-left: 4px solid var(--primary);
-            transition: transform 0.2s;
+            transition: var(--transition);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 100px;
+            height: 100px;
+            background: var(--gradient-primary);
+            opacity: 0.05;
+            border-radius: 50%;
+            transform: translate(30%, -30%);
+            transition: var(--transition);
         }
 
         .stat-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--shadow-lg);
+            transform: translateY(-4px);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .stat-card:hover::before {
+            transform: translate(25%, -25%) scale(1.2);
+            opacity: 0.08;
         }
 
         .stat-label {
             font-size: 14px;
             color: var(--text-secondary);
             margin-bottom: 8px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
             font-weight: 500;
         }
 
@@ -1178,11 +1274,11 @@
                 display: block;
             }
             
-            .container { padding-bottom: 80px; } /* was 80px */
+            .container { padding-bottom: 100px; } /* Increased padding for mobile nav */
 
             @media (max-width: 768px){
             .container{
-                padding-bottom: calc(120px + env(safe-area-inset-bottom));
+                padding-bottom: calc(140px + env(safe-area-inset-bottom)); /* More padding for mobile */
             }
             .mobile-nav{
                 padding-bottom: env(safe-area-inset-bottom);
@@ -1757,38 +1853,115 @@
             position: fixed;
             bottom: 100px;
             right: 24px;
-            width: 56px;
-            height: 56px;
+            width: 64px;
+            height: 64px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+            background: var(--gradient-primary);
             color: white;
             border: none;
-            font-size: 24px;
+            font-size: 28px;
             cursor: pointer;
-            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
-            transition: all 0.3s;
+            box-shadow: 0 8px 24px rgba(99, 102, 241, 0.5);
+            transition: var(--transition);
             z-index: 999;
             display: flex;
             align-items: center;
             justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .quick-action-fab::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.3), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: var(--transition);
         }
 
         .quick-action-fab:hover {
-            transform: scale(1.1);
-            box-shadow: 0 6px 20px rgba(37, 99, 235, 0.6);
+            transform: scale(1.1) rotate(5deg);
+            box-shadow: 0 12px 32px rgba(99, 102, 241, 0.7);
+        }
+
+        .quick-action-fab:hover::before {
+            opacity: 1;
         }
 
         .quick-action-fab:active {
             transform: scale(0.95);
         }
 
+        /* Keyboard shortcuts button - desktop only */
+        .keyboard-shortcuts-fab {
+            position: fixed;
+            bottom: 180px; /* Stack above quick action button */
+            right: 24px;
+            width: 64px;
+            height: 64px;
+            border-radius: 50%;
+            background: var(--gradient-purple);
+            color: white;
+            border: none;
+            font-size: 28px;
+            cursor: pointer;
+            box-shadow: 0 8px 24px rgba(139, 92, 246, 0.5);
+            transition: var(--transition);
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(10px);
+            border: 2px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .keyboard-shortcuts-fab::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 50%;
+            padding: 2px;
+            background: linear-gradient(45deg, rgba(255, 255, 255, 0.3), transparent);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .keyboard-shortcuts-fab:hover {
+            transform: scale(1.1) rotate(-5deg);
+            box-shadow: 0 12px 32px rgba(139, 92, 246, 0.7);
+        }
+
+        .keyboard-shortcuts-fab:hover::before {
+            opacity: 1;
+        }
+
+        .keyboard-shortcuts-fab:active {
+            transform: scale(0.95);
+        }
+
         @media (max-width: 768px) {
+            /* Hide keyboard shortcuts button on mobile */
+            .keyboard-shortcuts-fab {
+                display: none !important;
+            }
+            
             .quick-action-fab {
-                bottom: 80px;
+                bottom: 90px; /* Above mobile nav bar */
                 right: 16px;
-                width: 48px;
-                height: 48px;
-                font-size: 20px;
+                width: 56px;
+                height: 56px;
+                font-size: 24px;
             }
             
             .quick-actions-panel {
@@ -2403,52 +2576,62 @@
         left: 0;
         width: 100%;
         height: 100vh;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
         display: flex;
         flex-direction: column;
         justify-content: center;
         align-items: center;
         z-index: 10000;
         transition: opacity 0.5s ease-out;
+        overflow: hidden;
     ">
         
-        <div style="text-align: center; animation: fadeInUp 0.8s ease-out;">
+        <!-- Animated background particles -->
+        <div style="position: absolute; inset: 0; background: radial-gradient(circle at 20% 50%, rgba(255,255,255,0.1) 0%, transparent 50%), radial-gradient(circle at 80% 30%, rgba(255,255,255,0.08) 0%, transparent 50%);"></div>
+        
+        <div style="text-align: center; animation: fadeInUp 0.8s ease-out; position: relative; z-index: 1;">
             <div style="
-                width: 140px;
-                height: 140px;
-                background: white;
-                border-radius: 28px;
+                width: 160px;
+                height: 160px;
+                background: rgba(255, 255, 255, 0.15);
+                backdrop-filter: blur(20px);
+                border-radius: 32px;
                 display: flex;
                 align-items: center;
                 justify-content: center;
-                margin: 0 auto 32px;
+                margin: 0 auto 40px;
                 animation: scaleIn 0.6s ease-out, pulseGlow 2s ease-in-out infinite;
+                box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                border: 3px solid rgba(255, 255, 255, 0.2);
             ">
                 <!-- Replace with your actual logo -->
-                <img src="assets/logo.png" alt="ResIQ Logo" style="width: 90px; height: 90px; object-fit: contain;" 
+                <img src="assets/logo.png" alt="ResIQ Logo" style="width: 100px; height: 100px; object-fit: contain;" 
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 <!-- Fallback if logo doesn't load -->
-                <div style="display: none; font-size: 48px; font-weight: 800; color: #667eea;">H</div>
+                <div style="display: none; font-size: 64px; font-weight: 800; background: linear-gradient(135deg, #6366f1, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">R</div>
             </div>
             
             <h1 style="
                 color: white;
-                font-size: 42px;
-                font-weight: 700;
-                margin-bottom: 8px;
-                letter-spacing: -0.5px;
+                font-size: 52px;
+                font-weight: 800;
+                margin-bottom: 12px;
+                letter-spacing: -1px;
                 animation: fadeInUp 0.8s ease-out 0.2s both;
+                text-shadow: 0 4px 20px rgba(0,0,0,0.2);
             ">ResIQ</h1>
             
             <p style="
                 color: rgba(255,255,255,0.95);
-                font-size: 18px;
-                font-weight: 500;
+                font-size: 20px;
+                font-weight: 600;
                 animation: fadeInUp 0.8s ease-out 0.4s both;
+                letter-spacing: 2px;
+                text-transform: uppercase;
             ">by Hostizzy</p>
             
             <div style="
-                margin-top: 48px;
+                margin-top: 56px;
                 animation: fadeInUp 0.8s ease-out 0.6s both;
             ">
                 <div style="
@@ -11748,9 +11931,8 @@
         ⚡
     </button>
 
-    <!-- Keyboard Shortcuts Help Button -->
-    <button class="quick-action-fab" onclick="showKeyboardShortcuts()" 
-            style="bottom: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" 
+    <!-- Keyboard Shortcuts Help Button (Desktop Only) -->
+    <button class="keyboard-shortcuts-fab" onclick="showKeyboardShortcuts()" 
             title="Keyboard Shortcuts (?)">
         ⌨️
     </button>
