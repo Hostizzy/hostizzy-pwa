@@ -38,6 +38,56 @@
             line-height: 1.6;
         }
 
+        /* Loading Spinner */
+        .loading-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: white;
+            animation: spin 0.8s linear infinite;
+        }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading-content {
+            background: white;
+            padding: 24px 32px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 16px;
+        }
+
+        .loading-content .spinner {
+            width: 40px;
+            height: 40px;
+            border: 4px solid var(--primary);
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+
         /* Pull to Refresh Indicator */
         .pull-to-refresh-indicator {
             position: fixed;
@@ -2933,9 +2983,19 @@
             </div>
 
             <!-- Action Center -->
-                <div class="card" id="actionCenterCard" style="display: none;">
-                <div class="card-header" onclick="toggleCollapse('actionCenterContent','actionCenterIcon')" style="cursor: pointer;">
-                    <h3 class="card-title">⚡ Action Center <span id="actionCenterIcon">🔽</span></h3>
+            <div class="card" id="actionCenterCard" style="display: none;">
+                <div class="card-header" style="cursor:pointer" onclick="toggleCollapse('actionCenterContent','actionCenterIcon')">
+                    <h3 class="card-title">
+                        ⚡ Action Center 
+                        <span id="actionCenterTotalBadge" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px; margin-left: 8px;">0</span>
+                        <span id="actionCenterIcon">🔽</span>
+                    </h3>
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <label style="font-size: 12px; color: var(--text-secondary); display: flex; align-items: center; gap: 4px; margin: 0;">
+                            <input type="checkbox" id="actionCenterShowAll" onchange="toggleActionCenterRange()" style="width: auto; margin: 0;">
+                            Show all history
+                        </label>
+                    </div>
                 </div>
 
                 <!-- NEW WRAPPER that gets collapsed -->
@@ -2956,7 +3016,14 @@
 
                     <!-- Urgent / Today / Upcoming lists stay the same -->
                     <div id="urgentActions" class="action-tab-content">
-                    <div id="urgentActionsList"></div>
+                        <div class="action-section-header" onclick="toggleOverdueActions(event)" style="cursor: pointer; padding: 12px; background: #fef2f2; border-radius: 8px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
+                            <div>
+                                <span style="font-weight: 600; color: var(--danger);">🚨 Overdue & Urgent</span>
+                                <span id="urgentBadge" style="background: var(--danger); color: white; padding: 2px 8px; border-radius: 12px; font-size: 11px; margin-left: 8px;">0</span>
+                            </div>
+                            <span id="overdueToggleIcon">🔽</span>
+                        </div>
+                        <div id="urgentActionsList"></div>
                     </div>
 
                     <div id="todayActions" class="action-tab-content" style="display: none;">
@@ -3109,6 +3176,12 @@
                     <button class="btn btn-primary btn-sm" onclick="filterPayments()" style="white-space: nowrap;">
                         🔍 Search
                     </button>
+                    <div class="filter-item" style="max-width: 200px;">
+                        <select id="paymentPropertyFilter" onchange="filterPayments()">
+                            <option value="">All Properties</option>
+                            <!-- Will be populated dynamically -->
+                        </select>
+                    </div>
                     <div class="filter-item" style="max-width: 200px;">
                         <select id="paymentStatusFilter" onchange="filterPayments()">
                             <option value="">All Status</option>
@@ -4985,6 +5058,275 @@
             }, 300);
         }
 
+        /**
+         * Load initial data in background without blocking UI
+         */
+        async function loadInitialData() {
+            try {
+                // Load data asynchronously without blocking
+                const [reservations, properties, payments] = await Promise.all([
+                    db.getReservations(),
+                    db.getProperties(),
+                    db.getAllPayments()
+                ]);
+                
+                // Update global state
+                state.reservations = reservations;
+                state.properties = properties;
+                state.payments = payments;
+                allReservations = reservations;
+                allPayments = payments;
+                
+                console.log('Initial data loaded:', {
+                    reservations: reservations.length,
+                    properties: properties.length,
+                    payments: payments.length
+                });
+            } catch (error) {
+                console.error('Error loading initial data:', error);
+            }
+        }
+
+        /**
+         * Update greeting based on time of day
+         */
+        function updateGreeting() {
+            const hour = new Date().getHours();
+            const greetingTimeEl = document.getElementById('greetingTime');
+            const greetingUserEl = document.getElementById('greetingUser');
+            
+            let greeting = 'Good Evening';
+            let emoji = '🌙';
+            
+            if (hour < 12) {
+                greeting = 'Good Morning';
+                emoji = '☀️';
+            } else if (hour < 17) {
+                greeting = 'Good Afternoon';
+                emoji = '🌤️';
+            }
+            
+            greetingTimeEl.textContent = `${emoji} ${greeting}`;
+            
+            if (currentUser && currentUser.email) {
+                const userName = currentUser.email.split('@')[0];
+                greetingUserEl.textContent = `Welcome, ${userName}!`;
+            }
+        }
+
+        /**
+         * Update home screen statistics
+         */
+        async function updateHomeScreenStats() {
+            try {
+                // Update greeting
+                updateGreeting();
+                
+                // Ensure we have data
+                if (!state.reservations || state.reservations.length === 0) {
+                    // Load data if not available
+                    state.reservations = await db.getReservations();
+                    state.properties = await db.getProperties();
+                    state.payments = await db.getAllPayments();
+                }
+                
+                // Calculate stats
+                const totalReservations = state.reservations.length;
+                const activeReservations = state.reservations.filter(r => r.status === 'confirmed' || r.status === 'checked_in').length;
+                const upcomingReservations = state.reservations.filter(r => {
+                    const checkIn = new Date(r.check_in);
+                    const today = new Date();
+                    return checkIn > today && r.status === 'confirmed';
+                }).length;
+                
+                const pendingPayments = state.reservations.filter(r => 
+                    r.payment_status === 'pending' || r.payment_status === 'partial'
+                ).length;
+                
+                const totalProperties = state.properties ? state.properties.length : 0;
+                
+                // Calculate this month's revenue
+                const now = new Date();
+                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+                const thisMonthRevenue = state.reservations
+                    .filter(r => new Date(r.created_at) >= firstDay)
+                    .reduce((sum, r) => sum + (parseFloat(r.paid_amount) || 0), 0);
+                
+                // Update UI - with safe checks
+                const homeStatReservations = document.getElementById('homeStatReservations');
+                const homeStatActive = document.getElementById('homeStatActive');
+                const homeStatPending = document.getElementById('homeStatPending');
+                const homeStatUpcoming = document.getElementById('homeStatUpcoming');
+                const homeStatProperties = document.getElementById('homeStatProperties');
+                const homeStatRevenue = document.getElementById('homeStatRevenue');
+                
+                if (homeStatReservations) homeStatReservations.textContent = totalReservations;
+                if (homeStatActive) homeStatActive.textContent = activeReservations;
+                if (homeStatPending) homeStatPending.textContent = pendingPayments;
+                if (homeStatUpcoming) homeStatUpcoming.textContent = upcomingReservations;
+                if (homeStatProperties) homeStatProperties.textContent = totalProperties;
+                if (homeStatRevenue) homeStatRevenue.textContent = '₹' + Math.round(thisMonthRevenue / 1000) + 'K';
+                
+                // Update recent activity
+                updateRecentActivity();
+                
+            } catch (error) {
+                console.error('Error updating home screen:', error);
+                // Set default values on error
+                const homeStatReservations = document.getElementById('homeStatReservations');
+                const homeStatActive = document.getElementById('homeStatActive');
+                const homeStatPending = document.getElementById('homeStatPending');
+                const homeStatUpcoming = document.getElementById('homeStatUpcoming');
+                const homeStatProperties = document.getElementById('homeStatProperties');
+                const homeStatRevenue = document.getElementById('homeStatRevenue');
+                
+                if (homeStatReservations) homeStatReservations.textContent = '0';
+                if (homeStatActive) homeStatActive.textContent = '0';
+                if (homeStatPending) homeStatPending.textContent = '0';
+                if (homeStatUpcoming) homeStatUpcoming.textContent = '0';
+                if (homeStatProperties) homeStatProperties.textContent = '0';
+                if (homeStatRevenue) homeStatRevenue.textContent = '₹0';
+            }
+        }
+
+        /**
+         * Update recent activity feed
+         */
+        function updateRecentActivity() {
+            const activityList = document.getElementById('recentActivityList');
+            
+            // Get recent reservations (last 5)
+            const recentReservations = (state.reservations || [])
+                .slice() // copy before sort
+                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
+                .slice(0, 5);
+            
+            if (recentReservations.length === 0) {
+                activityList.innerHTML = '<div style="color: #94a3b8; font-style: italic;">No recent activity</div>';
+                return;
+            }
+            
+            let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
+            
+            recentReservations.forEach(r => {
+                const timeAgo = getTimeAgo(new Date(r.created_at));
+                const statusColor = r.payment_status === 'paid' ? '#10b981' : '#f59e0b';
+                const statusIcon = r.payment_status === 'paid' ? '✅' : '⏳';
+                
+                html += `
+                    <div style="
+                        display: flex;
+                        align-items: center;
+                        gap: 12px;
+                        padding: 12px;
+                        background: #f8fafc;
+                        border-radius: 8px;
+                        cursor: pointer;
+                    " onclick="showView('reservations')">
+                        <div style="font-size: 24px;">${statusIcon}</div>
+                        <div style="flex: 1;">
+                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 2px;">
+                                ${r.guest_name}
+                            </div>
+                            <div style="font-size: 12px; color: #64748b;">
+                                ${r.property_name} • ${timeAgo}
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="font-weight: 600; color: ${statusColor};">
+                                ₹${Math.round(r.total_amount).toLocaleString('en-IN')}
+                            </div>
+                            <div style="font-size: 11px; color: #64748b; text-transform: capitalize;">
+                                ${r.payment_status}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            activityList.innerHTML = html;
+        }
+
+        /**
+         * Get time ago string
+         */
+        function getTimeAgo(date) {
+            const seconds = Math.floor((new Date() - date) / 1000);
+            
+            let interval = seconds / 31536000;
+            if (interval > 1) return Math.floor(interval) + ' years ago';
+            
+            interval = seconds / 2592000;
+            if (interval > 1) return Math.floor(interval) + ' months ago';
+            
+            interval = seconds / 86400;
+            if (interval > 1) return Math.floor(interval) + ' days ago';
+            
+            interval = seconds / 3600;
+            if (interval > 1) return Math.floor(interval) + ' hours ago';
+            
+            interval = seconds / 60;
+            if (interval > 1) return Math.floor(interval) + ' minutes ago';
+            
+            return 'Just now';
+        }
+
+        /**
+         * Show loading overlay
+         */
+        function showLoading(message = 'Loading...') {
+            const existing = document.getElementById('loadingOverlay');
+            if (existing) return;
+            
+            const overlay = document.createElement('div');
+            overlay.id = 'loadingOverlay';
+            overlay.className = 'loading-overlay';
+            overlay.innerHTML = `
+                <div class="loading-content">
+                    <div class="spinner"></div>
+                    <div style="color: var(--text-primary); font-weight: 500;">${message}</div>
+                </div>
+            `;
+            document.body.appendChild(overlay);
+        }
+
+        /**
+         * Hide loading overlay
+         */
+        function hideLoading() {
+            const overlay = document.getElementById('loadingOverlay');
+            if (overlay) {
+                overlay.remove();
+            }
+        }
+
+        /**
+         * Save/load collapse state functions
+         */
+        function saveCollapseState(elementId, isExpanded) {
+            try {
+                localStorage.setItem(`collapse_${elementId}`, isExpanded ? 'expanded' : 'collapsed');
+            } catch (error) {
+                console.error('Error saving collapse state:', error);
+            }
+        }
+
+        function loadCollapseState(elementId, iconId) {
+            try {
+                const state = localStorage.getItem(`collapse_${elementId}`);
+                const element = document.getElementById(elementId);
+                const icon = document.getElementById(iconId);
+                
+                if (element && icon && state === 'collapsed') {
+                    element.style.display = 'none';
+                    icon.textContent = '▶️';
+                }
+            } catch (error) {
+                console.error('Error loading collapse state:', error);
+            }
+        }
+
         // View Management
         async function showView(viewName) {
             document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
@@ -4995,6 +5337,13 @@
             });
             
             if (event && event.target) event.target.classList.add('active');
+            
+            // Save current view to localStorage for persistence on refresh
+            try {
+                localStorage.setItem('lastView', viewName);
+            } catch (error) {
+                console.error('Error saving view state:', error);
+            }
             
             if (viewName === 'home') {
                 await loadInitialData();        // ensure data loaded first
@@ -5231,7 +5580,11 @@
                         
                         const checkInDate = new Date(r.check_in);
                         checkInDate.setHours(0, 0, 0, 0);
-                        const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                        const total = parseFloat(r.total_amount) || 0;
+                        const paid = parseFloat(r.paid_amount) || 0;
+                        const otaFee = parseFloat(r.ota_service_fee) || 0;
+                        const isOTA = r.booking_source && r.booking_source !== 'DIRECT';
+                        const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
                         
                         // Overdue payments or today's check-in with pending payment
                         return (balance > 0 && checkInDate < today) || 
@@ -5665,7 +6018,12 @@
             const pendingPayments = reservations.filter(r => {
                 const checkInDate = new Date(r.check_in);
                 checkInDate.setHours(0, 0, 0, 0);
-                const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                // Calculate balance based on booking source
+                const total = parseFloat(r.total_amount) || 0;
+                const paid = parseFloat(r.paid_amount) || 0;
+                const otaFee = parseFloat(r.ota_service_fee) || 0;
+                const isOTA = r.booking_source && r.booking_source !== 'DIRECT';
+                const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
                 
                 return balance > 1 && // More than ₹1 balance (tolerance)
                     r.status !== 'cancelled' &&
@@ -5712,7 +6070,11 @@
                     ${pendingPayments.map(r => {
                         const checkInDate = new Date(r.check_in);
                         const daysUntilCheckIn = Math.ceil((checkInDate - today) / (1000 * 60 * 60 * 24));
-                        const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                        const total = parseFloat(r.total_amount) || 0;
+                        const paid = parseFloat(r.paid_amount) || 0;
+                        const otaFee = parseFloat(r.ota_service_fee) || 0;
+                        const isOTA = r.booking_source && r.booking_source !== 'DIRECT';
+                        const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
                         const isUrgent = daysUntilCheckIn <= 3;
                         
                         return `
@@ -5815,6 +6177,13 @@
             const todayActions = [];
             const upcomingActions = [];
             
+            // Calculate date range for Action Center (future + current month + past month only)
+            const showAllCheckbox = document.getElementById('actionCenterShowAll');
+            const showAll = showAllCheckbox ? showAllCheckbox.checked : false;
+            const oneMonthAgo = new Date(today);
+            oneMonthAgo.setMonth(oneMonthAgo.getMonth() - 1);
+            oneMonthAgo.setHours(0, 0, 0, 0);
+
             reservations.forEach(r => {
                 if (r.status === 'cancelled') return;
                 
@@ -5824,16 +6193,24 @@
                 const checkOutDate = new Date(r.check_out);
                 checkOutDate.setHours(0, 0, 0, 0);
                 
-                const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                // Calculate balance based on booking source
+                const total = parseFloat(r.total_amount) || 0;
+                const paid = parseFloat(r.paid_amount) || 0;
+                const otaFee = parseFloat(r.ota_service_fee) || 0;
+                const isOTA = r.booking_source && r.booking_source !== 'DIRECT';
+                const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
                 
-                // URGENT: Overdue payments
+                // Skip reservations older than 1 month ONLY if "Show all" is NOT enabled
+                if (!showAll && checkInDate < oneMonthAgo) return;
+                
+                // URGENT: Overdue payments (only from past month onwards)
                 if (balance > 0 && checkInDate < today) {
                     urgentActions.push({
                         type: 'overdue_payment',
                         priority: 1,
                         reservation: r,
                         title: `💸 Overdue Payment - ${r.guest_name}`,
-                        details: `₹${Math.round(balance).toLocaleString('en-IN')} pending • Check-in was ${formatDate(r.check_in)}`,
+                        details: `₹${Math.round(balance).toLocaleString('en-IN')} ${isOTA ? 'net payout' : 'pending'} • Check-in was ${formatDate(r.check_in)}`,
                         badge: 'overdue',
                         bookingId: r.booking_id
                     });
@@ -5900,6 +6277,13 @@
             document.getElementById('todayCount').textContent = todayActions.length;
             document.getElementById('upcomingCount').textContent = upcomingActions.length;
             
+            // Update badges
+            const urgentBadge = document.getElementById('urgentBadge');
+            if (urgentBadge) urgentBadge.textContent = urgentActions.length;
+            
+            const totalBadge = document.getElementById('actionCenterTotalBadge');
+            if (totalBadge) totalBadge.textContent = urgentActions.length + todayActions.length + upcomingActions.length;
+            
             // Show/hide Action Center
             const totalActions = urgentActions.length + todayActions.length + upcomingActions.length;
             const actionCenterCard = document.getElementById('actionCenterCard');
@@ -5907,6 +6291,14 @@
                 actionCenterCard.style.display = 'block';
             } else {
                 actionCenterCard.style.display = 'none';
+            }
+            
+            // Auto-collapse overdue section if more than 5 items
+            const urgentList = document.getElementById('urgentActionsList');
+            const overdueIcon = document.getElementById('overdueToggleIcon');
+            if (urgentActions.length > 5 && urgentList && overdueIcon) {
+                urgentList.style.display = 'none';
+                overdueIcon.textContent = '▶️';
             }
             
             // Render each tab
@@ -5964,7 +6356,11 @@
                     return;
                 }
                 
-                const balance = (parseFloat(reservation.total_amount) || 0) - (parseFloat(reservation.paid_amount) || 0);
+                const total = parseFloat(reservation.total_amount) || 0;
+                const paid = parseFloat(reservation.paid_amount) || 0;
+                const otaFee = parseFloat(reservation.ota_service_fee) || 0;
+                const isOTA = reservation.booking_source && reservation.booking_source !== 'DIRECT';
+                const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
                 const phone = reservation.guest_phone.replace(/[^0-9]/g, '');
                 
                 let message = `Hello ${reservation.guest_name}!\n\n`;
@@ -5995,6 +6391,31 @@
                 
                 showToast('Booking Found', `Showing details for ${bookingId}`, '👁️');
             }
+            function toggleOverdueActions(event) {
+                const list = document.getElementById('urgentActionsList');
+                const icon = document.getElementById('overdueToggleIcon');
+                
+                if (list.style.display === 'none') {
+                    list.style.display = 'block';
+                    icon.textContent = '🔽';
+                } else {
+                    list.style.display = 'none';
+                    icon.textContent = '▶️';
+                }
+            }
+            function toggleActionCenterRange() {
+                const showAll = document.getElementById('actionCenterShowAll').checked;
+                
+                if (showAll) {
+                    showToast('Action Center', 'Showing all historical data', 'ℹ️');
+                } else {
+                    showToast('Action Center', 'Showing last 30 days only', 'ℹ️');
+                }
+                
+                // Re-render Action Center with all reservations (not just confirmed)
+                // This will now show all historical data when checkbox is enabled
+                renderActionCenter(allReservations);
+            }
 
         // Bulk Payment Collection
         function openBulkPaymentModal() {
@@ -6009,7 +6430,11 @@
             
             let totalDue = 0;
             const listHTML = selectedBookings.map(r => {
-                const balance = (parseFloat(r.total_amount) || 0) - (parseFloat(r.paid_amount) || 0);
+                const total = parseFloat(r.total_amount) || 0;
+                const paid = parseFloat(r.paid_amount) || 0;
+                const otaFee = parseFloat(r.ota_service_fee) || 0;
+                const isOTA = r.booking_source && r.booking_source !== 'DIRECT';
+                const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
                 totalDue += balance;
                 return `
                     <div style="padding: 12px; background: var(--background); border-radius: 6px; margin-bottom: 8px; display: flex; justify-content: space-between; align-items: center;">
@@ -6204,6 +6629,9 @@
             `).join('');
         }
 
+        // Store filtered reservations for CSV export
+        let filteredReservationsForExport = [];
+
         function filterReservations() {
             const search = document.getElementById('searchReservations').value.toLowerCase();
             const status = document.getElementById('statusFilter').value;
@@ -6211,7 +6639,7 @@
             const bookingSource = document.getElementById('bookingSourceFilter').value;
             const month = document.getElementById('monthFilter').value;
             
-            let filtered = allReservations.filter(r => {
+            filteredReservationsForExport = allReservations.filter(r => {
                 const matchesSearch = !search || 
                     (r.guest_name || '').toLowerCase().includes(search) ||
                     (r.booking_id || '').toLowerCase().includes(search) ||
@@ -6219,20 +6647,18 @@
                     (r.property_name || '').toLowerCase().includes(search);
                 
                 const matchesStatus = !status || r.status === status;
-                const matchesProperty = !property || r.property_id === property;
+                const matchesProperty = !property || r.property_id == property;
                 const matchesBookingSource = !bookingSource || r.booking_source === bookingSource;
                 
                 let matchesMonth = true;
                 if (month) {
-                    const checkIn = new Date(r.check_in);
-                    const filterMonth = checkIn.toISOString().slice(0, 7);
-                    matchesMonth = filterMonth === month;
+                matchesMonth = r.month === month;
                 }
                 
                 return matchesSearch && matchesStatus && matchesProperty && matchesBookingSource && matchesMonth;
             });
             
-            displayReservations(filtered);
+            displayReservations(filteredReservationsForExport);
         }
 
         function clearFilters() {
@@ -6241,6 +6667,7 @@
             document.getElementById('propertyFilter').value = '';
             document.getElementById('bookingSourceFilter').value = '';
             document.getElementById('monthFilter').value = '';
+            filteredReservationsForExport = [];
             displayReservations(allReservations);
             showToast('Filters Cleared', 'Showing all reservations', 'ℹ️');
         }
@@ -6832,6 +7259,14 @@
             try {
                 allReservations = await db.getReservations();
                 
+                // Populate property filter dropdown
+                const propertyFilter = document.getElementById('paymentPropertyFilter');
+                if (propertyFilter) {
+                    const uniqueProperties = [...new Set(allReservations.map(r => r.property_name))].sort();
+                    propertyFilter.innerHTML = '<option value="">All Properties</option>' + 
+                        uniqueProperties.map(p => `<option value="${p}">${p}</option>`).join('');
+                }
+                
                 // Filter confirmed reservations (reuse later for reminders)
                 const confirmedReservations = allReservations.filter(r => r.status !== 'cancelled');
                 
@@ -6922,7 +7357,11 @@
                 const otaFee = parseFloat(r.ota_service_fee) || 0;
                 const netAmount = total - otaFee;
                 const paid = parseFloat(r.paid_amount) || 0;
-                const balance = netAmount - paid;
+                // Calculate balance based on booking source
+                const isOTA = r.booking_source && r.booking_source !== 'DIRECT';
+                // For OTA: Balance = Net Amount - Paid
+                // For Direct: Balance = Total - Paid (ignore OTA fee calc)
+                const balance = isOTA ? (netAmount - paid) : (total - paid);
                 const status = r.payment_status || 'pending';
                 
                 return `
@@ -6953,7 +7392,12 @@
                         <td style="color: ${balance > 0 ? 'var(--danger)' : 'var(--success)'}; font-weight: 600;">
                             ${formatCurrency(balance, {compact: false})}
                         </td>
-                        <td><span class="payment-status ${status}">${status.toUpperCase()}</span></td>
+                        <td>
+                            <span class="payment-status ${status}">${status.toUpperCase()}</span>
+                            ${r.booking_source && r.booking_source !== 'DIRECT' ? 
+                                '<div style="font-size: 10px; color: var(--warning); margin-top: 4px;">💳 Guest Prepaid via OTA</div>' 
+                                : ''}
+                        </td>
                         <td>
                             <div style="display: flex; gap: 4px; flex-wrap: wrap;">
                                 ${balance > 0 ? `<button class="btn btn-primary btn-sm" onclick="openPaymentModal('${r.booking_id}')">💰 Add</button>` : ''}
@@ -6966,25 +7410,33 @@
             }).join('');
         }
 
+        // Store filtered payments for CSV export
+        let filteredPayments = [];
+
         function filterPayments() {
             const search = document.getElementById('searchPayments').value.toLowerCase();
             const status = document.getElementById('paymentStatusFilter').value;
+            const property = document.getElementById('paymentPropertyFilter').value;
             
-            let filtered = allReservations.filter(r => {
+            filteredPayments = allReservations.filter(r => {
                 const matchesSearch = !search || 
                     (r.guest_name || '').toLowerCase().includes(search) ||
                     (r.booking_id || '').toLowerCase().includes(search);
                 const matchesStatus = !status || r.payment_status === status;
-                return matchesSearch && matchesStatus;
+                const matchesProperty = !property || r.property_name === property;
+                return matchesSearch && matchesStatus && matchesProperty;
             });
             
-            displayPayments(filtered);
+            displayPayments(filteredPayments);
         }
+        
         function clearPaymentFilters() {
             document.getElementById('searchPayments').value = '';
             document.getElementById('paymentStatusFilter').value = '';
+            document.getElementById('paymentPropertyFilter').value = '';
+            filteredPayments = [];
             displayPayments(allReservations);
-            showToast('Filters cleared', 'info');
+            showToast('Filters Cleared', 'All filters have been reset', 'ℹ️');
         }
 
 
@@ -7002,7 +7454,8 @@
             const otaFee = parseFloat(reservation.ota_service_fee) || 0;
             const netAmount = total - otaFee;
             const paid = parseFloat(reservation.paid_amount) || 0;
-            const balance = total - paid;
+            const isOTA = reservation.booking_source && reservation.booking_source !== 'DIRECT';
+            const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
             
             let amountDisplay = formatCurrency(total, {compact: false});
             if (otaFee > 0) {
@@ -7446,7 +7899,9 @@
                 // Auto-fill amount with balance if available
                 const total = parseFloat(reservation.total_amount) || 0;
                 const paid = parseFloat(reservation.paid_amount) || 0;
-                const balance = total - paid;
+                const otaFee = parseFloat(reservation.ota_service_fee) || 0;
+                const isOTA = reservation.booking_source && reservation.booking_source !== 'DIRECT';
+                const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
                 
                 if (balance > 0 && !document.getElementById(`amount_${rowId}`).value) {
                     document.getElementById(`amount_${rowId}`).value = Math.round(balance);
@@ -7705,7 +8160,9 @@
                 
                 const total = parseFloat(reservation.total_amount) || 0;
                 const paid = parseFloat(reservation.paid_amount) || 0;
-                const balance = total - paid;
+                const otaFee = parseFloat(reservation.ota_service_fee) || 0;
+                const isOTA = reservation.booking_source && reservation.booking_source !== 'DIRECT';
+                const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
                 
                 document.getElementById('historyTotalAmount').textContent = '₹' + Math.round(total).toLocaleString('en-IN');
                 document.getElementById('historyPaidAmount').textContent = '₹' + Math.round(paid).toLocaleString('en-IN');
@@ -9950,7 +10407,14 @@
 
         // Export Functions with Payment Recipient
         async function exportCSV() {
-            const reservations = allReservations;
+            // Use filtered data if filters are active, otherwise use all reservations
+            const reservations = filteredReservationsForExport.length > 0 ? filteredReservationsForExport : allReservations;
+            
+            if (reservations.length === 0) {
+                showToast('No Data', 'No reservations to export', '⚠️');
+                return;
+            }
+            
             let csv = 'Booking ID,Property,Status,Booking Type,Booking Date,Check-in,Check-out,Nights,Guest,Phone,Email,City,Source,Rooms,Adults,Kids,Stay Amount,Extra Guest Charges,Meals/Chef Charges,Bonfire/Other Charges,Taxes,Damages,Total Amount,Hostizzy Revenue,GST Status,Payment Status,Paid Amount,Balance,Created Date\n';
             
             reservations.forEach(r => {
@@ -9995,28 +10459,45 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `hostizzy-reservations-${new Date().toISOString().split('T')[0]}.csv`;
+            const filename = filteredReservationsForExport.length > 0 ? 
+                `hostizzy-reservations-filtered-${new Date().toISOString().split('T')[0]}.csv` :
+                `hostizzy-reservations-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = filename;
             a.click();
-            showToast('Exported', 'CSV file downloaded successfully', '📥');
+            showToast('Exported', `${reservations.length} reservations exported successfully`, '📥');
         }
 
         async function exportPaymentsCSV() {
-            const payments = await db.getAllPayments();
-            let csv = 'Date,Booking ID,Guest,Property,Amount,Method,Recipient,Reference,Status,Notes\n';
+            // Use filtered payments if filters are active
+            const reservationsToExport = filteredPayments.length > 0 ? filteredPayments : allReservations;
             
-            for (const p of payments) {
-                const reservation = allReservations.find(r => r.booking_id === p.booking_id);
+            if (reservationsToExport.length === 0) {
+                showToast('No Data', 'No payments to export', '⚠️');
+                return;
+            }
+            
+            let csv = 'Booking ID,Guest,Property,Check-in,Total Amount,OTA Fee,Net Amount,Paid Amount,Balance,Payment Status,Source\n';
+            
+            for (const r of reservationsToExport) {
+                const total = parseFloat(r.total_amount) || 0;
+                const otaFee = parseFloat(r.ota_service_fee) || 0;
+                const netAmount = total - otaFee;
+                const paid = parseFloat(r.paid_amount) || 0;
+                const isOTA = r.booking_source && r.booking_source !== 'DIRECT';
+                const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
+                
                 csv += [
-                    p.payment_date,
-                    p.booking_id || '',
-                    reservation?.guest_name || '',
-                    reservation?.property_name || '',
-                    p.amount || 0,
-                    p.payment_method || '',
-                    p.payment_recipient || '',
-                    p.reference_number || '',
-                    reservation?.payment_status || '',
-                    p.notes || ''
+                    r.booking_id || '',
+                    r.guest_name || '',
+                    r.property_name || '',
+                    r.check_in || '',
+                    total.toFixed(2),
+                    otaFee.toFixed(2),
+                    netAmount.toFixed(2),
+                    paid.toFixed(2),
+                    balance.toFixed(2),
+                    r.payment_status || 'pending',
+                    r.booking_source || 'DIRECT'
                 ].map(v => `"${v}"`).join(',') + '\n';
             }
             
@@ -10024,9 +10505,12 @@
             const url = URL.createObjectURL(blob);
             const a = document.createElement('a');
             a.href = url;
-            a.download = `hostizzy-payments-${new Date().toISOString().split('T')[0]}.csv`;
+            const filename = filteredPayments.length > 0 ? 
+                `hostizzy-payments-filtered-${new Date().toISOString().split('T')[0]}.csv` :
+                `hostizzy-payments-${new Date().toISOString().split('T')[0]}.csv`;
+            a.download = filename;
             a.click();
-            showToast('Exported', 'Payment CSV downloaded successfully', '📥');
+            showToast('Exported', `${reservationsToExport.length} payment records exported successfully`, '📥');
         }
 
         // Utilities
@@ -10076,7 +10560,9 @@
                     loadInitialData();
                     
                     initializeSplashScreen();
-                    setTimeout(() => showView('home'), 1000);
+                    // Restore last view or default to home
+                    const lastView = localStorage.getItem('lastView') || 'home';
+                    setTimeout(() => showView(lastView), 1000);
                     
                     if (navigator.onLine) {
                         setTimeout(autoSync, 2000);
@@ -10110,34 +10596,6 @@
                 }, 2000);
             }
 
-        /**
-         * Load initial data in background without blocking UI
-         */
-        async function loadInitialData() {
-            try {
-                // Load data asynchronously without blocking
-                const [reservations, properties, payments] = await Promise.all([
-                    db.getReservations(),
-                    db.getProperties(),
-                    db.getAllPayments()
-                ]);
-                
-                // Update global state
-                state.reservations = reservations;
-                state.properties = properties;
-                state.payments = payments;
-                allReservations = reservations;
-                allPayments = payments;
-                
-                console.log('Initial data loaded:', {
-                    reservations: reservations.length,
-                    properties: properties.length,
-                    payments: payments.length
-                });
-            } catch (error) {
-                console.error('Error loading initial data:', error);
-            }
-        }
         // ==========================================
         // SPLASH SCREEN & HOME SCREEN
         // ==========================================
@@ -10153,190 +10611,15 @@
                 
                 setTimeout(() => {
                     splash.style.display = 'none';
-                    // Show home view immediately (already has data from loadInitialData)
-                    showView('home');
-                    // Update home stats with already-loaded data
-                    updateHomeScreenStats();
+                    // Restore last view or default to home
+                    const lastView = localStorage.getItem('lastView') || 'home';
+                    showView(lastView);
+                    // Update home stats if on home view
+                    if (lastView === 'home') {
+                        updateHomeScreenStats();
+                    }
                 }, 500);
             }, 2500);
-        }
-
-        /**
-         * Update greeting based on time of day
-         */
-        function updateGreeting() {
-            const hour = new Date().getHours();
-            const greetingTimeEl = document.getElementById('greetingTime');
-            const greetingUserEl = document.getElementById('greetingUser');
-            
-            let greeting = 'Good Evening';
-            let emoji = '🌙';
-            
-            if (hour < 12) {
-                greeting = 'Good Morning';
-                emoji = '☀️';
-            } else if (hour < 17) {
-                greeting = 'Good Afternoon';
-                emoji = '🌤️';
-            }
-            
-            greetingTimeEl.textContent = `${emoji} ${greeting}`;
-            
-            if (currentUser && currentUser.email) {
-                const userName = currentUser.email.split('@')[0];
-                greetingUserEl.textContent = `Welcome, ${userName}!`;
-            }
-        }
-
-        /**
-         * Update home screen statistics
-         */
-        async function updateHomeScreenStats() {
-            try {
-                // Update greeting
-                updateGreeting();
-                
-                // Ensure we have data
-                if (!state.reservations || state.reservations.length === 0) {
-                    // Load data if not available
-                    state.reservations = await db.getReservations();
-                    state.properties = await db.getProperties();
-                    state.payments = await db.getAllPayments();
-                }
-                
-                // Calculate stats
-                const totalReservations = state.reservations.length;
-                const activeReservations = state.reservations.filter(r => r.status === 'confirmed' || r.status === 'checked_in').length;
-                const upcomingReservations = state.reservations.filter(r => {
-                    const checkIn = new Date(r.check_in);
-                    const today = new Date();
-                    return checkIn > today && r.status === 'confirmed';
-                }).length;
-                
-                const pendingPayments = state.reservations.filter(r => 
-                    r.payment_status === 'pending' || r.payment_status === 'partial'
-                ).length;
-                
-                const totalProperties = state.properties ? state.properties.length : 0;
-                
-                // Calculate this month's revenue
-                const now = new Date();
-                const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
-                const thisMonthRevenue = state.reservations
-                    .filter(r => new Date(r.created_at) >= firstDay)
-                    .reduce((sum, r) => sum + (parseFloat(r.paid_amount) || 0), 0);
-                
-                // Update UI - with safe checks
-                const homeStatReservations = document.getElementById('homeStatReservations');
-                const homeStatActive = document.getElementById('homeStatActive');
-                const homeStatPending = document.getElementById('homeStatPending');
-                const homeStatUpcoming = document.getElementById('homeStatUpcoming');
-                const homeStatProperties = document.getElementById('homeStatProperties');
-                const homeStatRevenue = document.getElementById('homeStatRevenue');
-                
-                if (homeStatReservations) homeStatReservations.textContent = totalReservations;
-                if (homeStatActive) homeStatActive.textContent = activeReservations;
-                if (homeStatPending) homeStatPending.textContent = pendingPayments;
-                if (homeStatUpcoming) homeStatUpcoming.textContent = upcomingReservations;
-                if (homeStatProperties) homeStatProperties.textContent = totalProperties;
-                if (homeStatRevenue) homeStatRevenue.textContent = '₹' + Math.round(thisMonthRevenue / 1000) + 'K';
-                
-                // Update recent activity
-                updateRecentActivity();
-                
-            } catch (error) {
-                console.error('Error updating home screen:', error);
-                // Set default values on error
-                document.getElementById('homeStatReservations').textContent = '0';
-                document.getElementById('homeStatActive').textContent = '0';
-                document.getElementById('homeStatPending').textContent = '0';
-                document.getElementById('homeStatUpcoming').textContent = '0';
-                document.getElementById('homeStatProperties').textContent = '0';
-                document.getElementById('homeStatRevenue').textContent = '₹0';
-            }
-        }
-
-        /**
-         * Update recent activity feed
-         */
-        function updateRecentActivity() {
-            const activityList = document.getElementById('recentActivityList');
-            
-            // Get recent reservations (last 5)
-            const recentReservations = (state.reservations || [])
-                .slice() // copy before sort
-                .sort((a, b) => new Date(b.created_at) - new Date(a.created_at))
-                .slice(0, 5);
-            
-            if (recentReservations.length === 0) {
-                activityList.innerHTML = '<div style="color: #94a3b8; font-style: italic;">No recent activity</div>';
-                return;
-            }
-            
-            let html = '<div style="display: flex; flex-direction: column; gap: 12px;">';
-            
-            recentReservations.forEach(r => {
-                const timeAgo = getTimeAgo(new Date(r.created_at));
-                const statusColor = r.payment_status === 'paid' ? '#10b981' : '#f59e0b';
-                const statusIcon = r.payment_status === 'paid' ? '✅' : '⏳';
-                
-                html += `
-                    <div style="
-                        display: flex;
-                        align-items: center;
-                        gap: 12px;
-                        padding: 12px;
-                        background: #f8fafc;
-                        border-radius: 8px;
-                        cursor: pointer;
-                    " onclick="showView('reservations')">
-                        <div style="font-size: 24px;">${statusIcon}</div>
-                        <div style="flex: 1;">
-                            <div style="font-weight: 600; color: #0f172a; margin-bottom: 2px;">
-                                ${r.guest_name}
-                            </div>
-                            <div style="font-size: 12px; color: #64748b;">
-                                ${r.property_name} • ${timeAgo}
-                            </div>
-                        </div>
-                        <div style="text-align: right;">
-                            <div style="font-weight: 600; color: ${statusColor};">
-                                ₹${Math.round(r.total_amount).toLocaleString('en-IN')}
-                            </div>
-                            <div style="font-size: 11px; color: #64748b; text-transform: capitalize;">
-                                ${r.payment_status}
-                            </div>
-                        </div>
-                    </div>
-                `;
-            });
-            
-            html += '</div>';
-            activityList.innerHTML = html;
-        }
-
-        /**
-         * Get time ago string
-         */
-        function getTimeAgo(date) {
-            const seconds = Math.floor((new Date() - date) / 1000);
-            
-            let interval = seconds / 31536000;
-            if (interval > 1) return Math.floor(interval) + ' years ago';
-            
-            interval = seconds / 2592000;
-            if (interval > 1) return Math.floor(interval) + ' months ago';
-            
-            interval = seconds / 86400;
-            if (interval > 1) return Math.floor(interval) + ' days ago';
-            
-            interval = seconds / 3600;
-            if (interval > 1) return Math.floor(interval) + ' hours ago';
-            
-            interval = seconds / 60;
-            if (interval > 1) return Math.floor(interval) + ' minutes ago';
-            
-            return 'Just now';
         }
 
         // Push Notifications
@@ -10763,6 +11046,81 @@
             });
         }
     });
+
+    // Enhanced keyboard shortcuts for navigation
+    document.addEventListener('keydown', (e) => {
+        // Only trigger if not typing in an input field
+        if (e.target.tagName === 'INPUT' || e.target.tagName === 'TEXTAREA' || e.target.tagName === 'SELECT') {
+            return;
+        }
+        
+        // Alt + Number shortcuts for quick navigation
+        if (e.altKey && !e.ctrlKey && !e.metaKey && !e.shiftKey) {
+            e.preventDefault();
+            switch(e.key) {
+                case '1':
+                    showView('home');
+                    showToast('Navigation', 'Home View', '🏠');
+                    break;
+                case '2':
+                    showView('dashboard');
+                    showToast('Navigation', 'Dashboard View', '📊');
+                    break;
+                case '3':
+                    showView('reservations');
+                    showToast('Navigation', 'Reservations View', '📋');
+                    break;
+                case '4':
+                    showView('payments');
+                    showToast('Navigation', 'Payments View', '💰');
+                    break;
+                case '5':
+                    showView('availability');
+                    showToast('Navigation', 'Availability View', '📅');
+                    break;
+                case '6':
+                    showView('properties');
+                    showToast('Navigation', 'Properties View', '🏡');
+                    break;
+                case '7':
+                    showView('performance');
+                    showToast('Navigation', 'Performance View', '📈');
+                    break;
+                case '8':
+                    showView('team');
+                    showToast('Navigation', 'Team View', '👥');
+                    break;
+            }
+        }
+        
+        // Ctrl/Cmd + S to save (when in forms)
+        if ((e.ctrlKey || e.metaKey) && e.key === 's') {
+            const activeModal = document.querySelector('.modal.active, .modal.show');
+            if (activeModal) {
+                e.preventDefault();
+                // Find and click the save/submit button in the modal
+                const saveButton = activeModal.querySelector('button[type="submit"], button.btn-primary');
+                if (saveButton) {
+                    saveButton.click();
+                    showToast('Saved', 'Form submitted', '✅');
+                }
+            }
+        }
+        
+        // ? key to show keyboard shortcuts
+        if (e.key === '?' && !e.shiftKey && !e.ctrlKey && !e.metaKey && !e.altKey) {
+            showKeyboardShortcuts();
+        }
+    });
+
+    // Keyboard shortcuts modal functions
+    function showKeyboardShortcuts() {
+        document.getElementById('keyboardShortcutsModal').classList.add('show');
+    }
+
+    function closeKeyboardShortcuts() {
+        document.getElementById('keyboardShortcutsModal').classList.remove('show');
+    }
 
     // ============================================
     // PULL TO REFRESH
@@ -11389,6 +11747,86 @@
     <button class="quick-action-fab" onclick="openQuickActions()" title="Quick Actions (Ctrl+K)">
         ⚡
     </button>
+
+    <!-- Keyboard Shortcuts Help Button -->
+    <button class="quick-action-fab" onclick="showKeyboardShortcuts()" 
+            style="bottom: 100px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);" 
+            title="Keyboard Shortcuts (?)">
+        ⌨️
+    </button>
+
+    <!-- Keyboard Shortcuts Modal -->
+    <div id="keyboardShortcutsModal" class="modal">
+        <div class="modal-content" style="max-width: 600px;">
+            <div class="modal-header">
+                <h2>⌨️ Keyboard Shortcuts</h2>
+                <button class="close-modal" onclick="closeKeyboardShortcuts()">×</button>
+            </div>
+            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+                <div style="display: grid; gap: 20px;">
+                    <div>
+                        <h3 style="color: var(--primary); margin-bottom: 12px;">Navigation</h3>
+                        <div style="display: grid; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Home View</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Alt + 1</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Dashboard</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Alt + 2</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Reservations</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Alt + 3</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Payments</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Alt + 4</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Availability</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Alt + 5</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Properties</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Alt + 6</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Performance</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Alt + 7</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Team</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Alt + 8</kbd>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div>
+                        <h3 style="color: var(--primary); margin-bottom: 12px;">Actions</h3>
+                        <div style="display: grid; gap: 8px;">
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Quick Actions</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Ctrl/Cmd + K</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Save Form</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Ctrl/Cmd + S</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Close Modal</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">Esc</kbd>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; padding: 8px; background: #f8fafc; border-radius: 6px;">
+                                <span>Show Shortcuts</span>
+                                <kbd style="background: white; padding: 4px 8px; border-radius: 4px; border: 1px solid #e2e8f0;">?</kbd>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
 </body>
 </html>
