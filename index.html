@@ -537,8 +537,6 @@
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
-            font-weight: 500;
-        }
 
         .stat-value {
             font-size: 32px;
@@ -2608,7 +2606,7 @@
                 <img src="assets/logo.png" alt="ResIQ Logo" style="width: 100px; height: 100px; object-fit: contain;" 
                     onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
                 <!-- Fallback if logo doesn't load -->
-                <div style="display: none; font-size: 64px; font-weight: 800; background: linear-gradient(135deg, #6366f1, #ec4899); -webkit-background-clip: text; -webkit-text-fill-color: transparent;">R</div>
+               <div style="display: none; font-size: 64px; font-weight: 800; background: linear-gradient(135deg, #6366f1, #ec4899); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;">R</div>
             </div>
             
             <h1 style="
@@ -2763,6 +2761,7 @@
                     <a class="nav-link active" onclick="showView('home')">Home</a>
                     <a class="nav-link active" onclick="showView('dashboard')">Dashboard</a>
                     <a class="nav-link" onclick="showView('reservations')">Reservations</a>
+                    <a class="nav-link" onclick="showView('guests')">Guests</a>
                     <a class="nav-link" onclick="showView('payments')">Payments</a>
                     <a class="nav-link" onclick="showView('availability')">Availability</a>
                     <a class="nav-link" onclick="showView('properties')">Properties</a>
@@ -2789,6 +2788,10 @@
                 <a class="mobile-nav-item" onclick="showView('reservations')">
                     <div class="mobile-nav-icon">📅</div>
                     <div>Bookings</div>
+                </a>
+                <a class="mobile-nav-item" onclick="showView('guests')">
+                    <div class="mobile-nav-icon">👥</div>
+                    <div>Guests</div>
                 </a>
                 <a class="mobile-nav-item" onclick="showView('payments')">
                     <div class="mobile-nav-icon">💰</div>
@@ -2888,8 +2891,18 @@
                     <div class="icon-card-label">Total Properties</div>
                 </div>
 
+                <!-- Guests Card -->
+                <div class="icon-card" onclick="showView('guests')" style="animation: cardPop 0.5s ease-out 0.6s both;">
+                    <div class="icon-card-icon" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                        👥
+                    </div>
+                    <div class="icon-card-title">Guests</div>
+                    <div class="icon-card-stat" id="homeStatGuests">--</div>
+                    <div class="icon-card-label">Total Guests</div>
+                </div>
+
                 <!-- Performance Card -->
-                <div class="icon-card" onclick="showView('performance')" style="animation: cardPop 0.5s ease-out 0.6s both;">
+                <div class="icon-card" onclick="showView('performance')" style="animation: cardPop 0.5s ease-out 0.7s both;">
                     <div class="icon-card-icon" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
                         📈
                     </div>
@@ -3030,24 +3043,153 @@
         <div id="dashboardView" class="container">
             <h2 style="margin-bottom: 24px;">Dashboard Overview</h2>
 
-            <!-- Quick Filters -->
+            <!-- Enhanced Quick Filters -->
             <div class="quick-filters-container" style="margin-bottom: 24px;">
-                <div class="quick-filters">
-                    <button class="filter-chip active" data-filter="all" onclick="applyQuickFilter('all')">
-                        📊 All Data
+                <div style="display: flex; gap: 12px; align-items: center; flex-wrap: wrap;">
+                    <!-- Quick Filter Chips -->
+                    <div class="quick-filters">
+                        <button class="filter-chip active" data-filter="all" onclick="applyQuickFilter('all')">
+                            📊 All Data
+                        </button>
+                        <button class="filter-chip" data-filter="next-7-days" onclick="applyQuickFilter('next-7-days')">
+                            📅 Next 7 Days
+                        </button>
+                        <button class="filter-chip" data-filter="today" onclick="applyQuickFilter('today')">
+                            🏠 Today
+                        </button>
+                        <button class="filter-chip" data-filter="payment-due" onclick="applyQuickFilter('payment-due')">
+                            💰 Payment Due
+                        </button>
+                        <button class="filter-chip" data-filter="this-month" onclick="applyQuickFilter('this-month')">
+                            📆 This Month
+                        </button>
+                        <button class="filter-chip" data-filter="needs-attention" onclick="applyQuickFilter('needs-attention')">
+                            ⚠️ Needs Attention
+                        </button>
+                    </div>
+                    
+                    <!-- Date Range Quick Selector -->
+                    <div style="display: flex; gap: 8px; align-items: center; margin-left: auto;">
+                        <span style="font-size: 13px; color: var(--text-secondary); font-weight: 500;">Quick Range:</span>
+                        <select id="quickDateRange" onchange="applyDateRange(this.value)" style="
+                            padding: 6px 12px;
+                            border: 1px solid var(--border);
+                            border-radius: 8px;
+                            font-size: 13px;
+                            cursor: pointer;
+                            background: white;
+                        ">
+                            <option value="">Select period...</option>
+                            <option value="today">Today</option>
+                            <option value="yesterday">Yesterday</option>
+                            <option value="last-7">Last 7 Days</option>
+                            <option value="last-30">Last 30 Days</option>
+                            <option value="this-week">This Week</option>
+                            <option value="last-week">Last Week</option>
+                            <option value="this-month">This Month</option>
+                            <option value="last-month">Last Month</option>
+                            <option value="this-quarter">This Quarter</option>
+                            <option value="this-year">This Year</option>
+                        </select>
+                        
+                        <!-- Advanced Filters Toggle -->
+                        <button class="btn btn-secondary btn-sm" onclick="toggleAdvancedFilters()" style="white-space: nowrap;">
+                            🔍 More Filters
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Active Filter Info -->
+                <div id="activeFilterInfo" style="display: none; margin-top: 12px; padding: 8px 16px; background: #e0e7ff; border-radius: 8px; font-size: 13px; color: #4338ca;">
+                    <span id="activeFilterText"></span>
+                    <button onclick="clearAllFilters()" style="margin-left: 12px; color: #4338ca; text-decoration: underline; background: none; border: none; cursor: pointer; font-weight: 600;">
+                        Clear
                     </button>
-                    <button class="filter-chip" data-filter="this-month" onclick="applyQuickFilter('this-month')">
-                        📅 This Month
-                    </button>
-                    <button class="filter-chip" data-filter="pending-payments" onclick="applyQuickFilter('pending-payments')">
-                        💰 Pending Payments
-                    </button>
-                    <button class="filter-chip" data-filter="active-only" onclick="applyQuickFilter('active-only')">
-                        🔄 Active Only
-                    </button>
-                    <button class="filter-chip" data-filter="urgent" onclick="applyQuickFilter('urgent')">
-                        🔴 Urgent Actions
-                    </button>
+                </div>
+            </div>
+            
+            <!-- Advanced Filters Panel (Collapsible) -->
+            <div id="advancedFiltersPanel" class="card" style="display: none; margin-bottom: 24px;">
+                <div class="card-header">
+                    <h3 class="card-title">🔍 Advanced Filters</h3>
+                    <button class="btn btn-sm btn-secondary" onclick="toggleAdvancedFilters()">Close</button>
+                </div>
+                <div style="padding: 20px; display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                    <!-- Date Range -->
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">
+                            📅 Date Range
+                        </label>
+                        <input type="date" id="advFilterStartDate" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 6px;">
+                        <input type="date" id="advFilterEndDate" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                    </div>
+                    
+                    <!-- Status -->
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">
+                            📋 Status
+                        </label>
+                        <select id="advFilterStatus" multiple style="width: 100%; height: 80px; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                            <option value="confirmed">Confirmed</option>
+                            <option value="pending">Pending</option>
+                            <option value="checked-in">Checked In</option>
+                            <option value="checked-out">Checked Out</option>
+                            <option value="cancelled">Cancelled</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Property -->
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">
+                            🏠 Property
+                        </label>
+                        <select id="advFilterProperty" multiple style="width: 100%; height: 80px; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                            <!-- Populated dynamically -->
+                        </select>
+                    </div>
+                    
+                    <!-- Payment Status -->
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">
+                            💰 Payment
+                        </label>
+                        <select id="advFilterPayment" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                            <option value="">All</option>
+                            <option value="paid">Paid</option>
+                            <option value="partial">Partial</option>
+                            <option value="pending">Pending</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Booking Source -->
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">
+                            📱 Source
+                        </label>
+                        <select id="advFilterSource" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                            <option value="">All Sources</option>
+                            <option value="DIRECT">🟢 Direct</option>
+                            <option value="AIRBNB">🔵 Airbnb</option>
+                            <option value="AGODA/BOOKING.COM">🟡 Agoda/Booking</option>
+                            <option value="MMT/GOIBIBO">🟠 MMT/Goibibo</option>
+                            <option value="OTHER">⚪ Other</option>
+                        </select>
+                    </div>
+                    
+                    <!-- Amount Range -->
+                    <div>
+                        <label style="display: block; font-size: 13px; font-weight: 600; margin-bottom: 6px; color: var(--text-secondary);">
+                            💵 Amount Range
+                        </label>
+                        <input type="number" id="advFilterMinAmount" placeholder="Min ₹" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px; margin-bottom: 6px;">
+                        <input type="number" id="advFilterMaxAmount" placeholder="Max ₹" style="width: 100%; padding: 8px; border: 1px solid var(--border); border-radius: 6px;">
+                    </div>
+                </div>
+                
+                <!-- Action Buttons -->
+                <div style="padding: 0 20px 20px; display: flex; gap: 12px; justify-content: flex-end;">
+                    <button class="btn btn-secondary" onclick="clearAdvancedFilters()">Clear All</button>
+                    <button class="btn btn-primary" onclick="applyAdvancedFilters()">Apply Filters</button>
                 </div>
             </div>
             
@@ -3219,28 +3361,175 @@
                 </div>
                 </div>
 
-            <!-- Recent Reservations -->
+            <!-- AI-Powered Insights Section -->
+            <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; color: white; margin-bottom: 24px;">
+                <div class="card-header" style="border-bottom: 1px solid rgba(255,255,255,0.2); cursor: pointer;" onclick="toggleCollapse('aiInsightsContent','aiInsightsIcon')">
+                    <h3 class="card-title" style="color: white; display: flex; align-items: center; gap: 8px;">
+                        🤖 AI-Powered Insights <span style="background: rgba(255,255,255,0.2); padding: 2px 8px; border-radius: 12px; font-size: 10px;">SMART</span>
+                        <span id="aiInsightsIcon">🔽</span>
+                    </h3>
+                    <div style="font-size: 13px; opacity: 0.9;">Intelligent recommendations for your business</div>
+                </div>
+                <div id="aiInsightsContent">
+                    <div id="aiInsightsContainer" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 16px; padding: 20px;">
+                        <!-- AI insights will be loaded here -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Top 15 Properties Performance -->
             <div class="card">
                 <div class="card-header">
-                    <h3 class="card-title">Recent Reservations</h3>
-                    <button class="btn btn-primary btn-sm" onclick="showView('reservations')">View All</button>
+                    <h3 class="card-title">🏆 Top 15 Properties Performance</h3>
+                    <button class="btn btn-primary btn-sm" onclick="showView('properties')">View All Properties</button>
                 </div>
-                <div class="table-container">
-                    <table>
-                        <thead>
-                            <tr>
-                                <th>Booking ID</th>
-                                <th>Guest</th>
-                                <th>Property</th>
-                                <th>Check-in</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recentReservationsTable">
-                            <tr><td colspan="6" class="text-center">Loading...</td></tr>
-                        </tbody>
-                    </table>
+                <div style="padding: 20px;">
+                    <div style="margin-bottom: 16px; display: flex; gap: 12px; flex-wrap: wrap;">
+                        <button class="btn btn-sm" id="sortByRevenue" onclick="sortPropertiesBy('revenue')" style="background: var(--primary); color: white;">
+                            💰 By Revenue
+                        </button>
+                        <button class="btn btn-sm" id="sortByBookings" onclick="sortPropertiesBy('bookings')" style="background: var(--secondary); color: white;">
+                            📊 By Bookings
+                        </button>
+                        <button class="btn btn-sm" id="sortByNights" onclick="sortPropertiesBy('nights')" style="background: var(--secondary); color: white;">
+                            🌙 By Nights
+                        </button>
+                        <button class="btn btn-sm" id="sortByGuests" onclick="sortPropertiesBy('guests')" style="background: var(--secondary); color: white;">
+                            👥 By Guests
+                        </button>
+                        <button class="btn btn-sm" id="sortByOccupancy" onclick="sortPropertiesBy('occupancy')" style="background: var(--secondary); color: white;">
+                            📈 By Occupancy
+                        </button>
+                    </div>
+                    <div id="topPropertiesStats">
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            Loading property statistics...
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Guests View -->
+        <div id="guestsView" class="container hidden">
+            <div class="card-header">
+                <h2>👥 Guest Directory</h2>
+                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                    <button class="btn btn-secondary btn-sm" onclick="exportGuestsCSV()">📥 Export CSV</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <!-- Filters and Search -->
+                <div class="filters">
+                    <div class="filter-item" style="flex: 1; max-width: 400px;">
+                        <input type="text" id="searchGuests" placeholder="🔍 Search by name, phone, or email..." onkeyup="searchGuests()" style="width: 100%;">
+                    </div>
+                    
+                    <!-- View Toggle -->
+                    <div style="display: flex; gap: 8px; align-items: center;">
+                        <button class="btn btn-sm" id="tableViewBtn" onclick="switchGuestView('table')" style="background: var(--primary); color: white;">
+                            📊 Table
+                        </button>
+                        <button class="btn btn-sm" id="cardViewBtn" onclick="switchGuestView('cards')" style="background: var(--secondary); color: white;">
+                            🎴 Cards
+                        </button>
+                    </div>
+                    
+                    <div class="filter-item" style="max-width: 180px;">
+                        <select id="guestTypeFilter" onchange="filterGuests()">
+                            <option value="">All Guests</option>
+                            <option value="repeat">🌟 Repeat Guests</option>
+                            <option value="new">✨ New Guests</option>
+                            <option value="vip">👑 VIP (5+ Stays)</option>
+                            <option value="highvalue">💎 High Value (₹50K+)</option>
+                        </select>
+                    </div>
+                    
+                    <div class="filter-item" style="max-width: 140px;">
+                        <select id="guestsPerPage" onchange="changeGuestsPerPage()">
+                            <option value="25">Show 25</option>
+                            <option value="50" selected>Show 50</option>
+                            <option value="100">Show 100</option>
+                            <option value="all">Show All</option>
+                        </select>
+                    </div>
+                    
+                    <button class="btn btn-secondary btn-sm" onclick="clearGuestFilters()">Clear</button>
+                </div>
+
+                <!-- Guest Statistics Summary -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; padding: 20px; background: var(--background-alt); border-radius: 8px; margin-bottom: 20px;">
+                    <div style="text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: var(--primary);" id="guestStatTotal">0</div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">Total Guests</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: var(--success);" id="guestStatRepeat">0</div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">Repeat Guests</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: var(--warning);" id="guestStatVIP">0</div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">VIP (5+ Stays)</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: #ec4899;" id="guestStatHighValue">0</div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">High Value (₹50K+)</div>
+                    </div>
+                    <div style="text-align: center;">
+                        <div style="font-size: 28px; font-weight: 700; color: #06b6d4;" id="guestStatAvgStays">0</div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">Avg Stays/Guest</div>
+                    </div>
+                </div>
+
+                <!-- Table View Container -->
+                <div id="guestTableView" style="display: block;">
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th onclick="sortGuestsTable('name')" style="cursor: pointer;">
+                                        Guest Name <span id="sortIconName">↕️</span>
+                                    </th>
+                                    <th onclick="sortGuestsTable('phone')" style="cursor: pointer;">
+                                        Contact <span id="sortIconPhone">↕️</span>
+                                    </th>
+                                    <th onclick="sortGuestsTable('lastVisit')" style="cursor: pointer;">
+                                        Last Visit <span id="sortIconLastVisit">↕️</span>
+                                    </th>
+                                    <th onclick="sortGuestsTable('stays')" style="cursor: pointer;">
+                                        Stays <span id="sortIconStays">↕️</span>
+                                    </th>
+                                    <th onclick="sortGuestsTable('spent')" style="cursor: pointer;">
+                                        Total Spent <span id="sortIconSpent">↕️</span>
+                                    </th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="guestTableBody">
+                                <tr><td colspan="6" class="text-center">Loading guests...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <!-- Pagination -->
+                    <div id="guestPagination" style="display: flex; justify-content: space-between; align-items: center; padding: 16px; border-top: 1px solid var(--border);">
+                        <div style="font-size: 14px; color: var(--text-secondary);">
+                            Showing <span id="guestShowingStart">0</span>-<span id="guestShowingEnd">0</span> of <span id="guestShowingTotal">0</span> guests
+                        </div>
+                        <div style="display: flex; gap: 8px;" id="guestPaginationButtons">
+                            <!-- Populated by JavaScript -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Card View Container -->
+                <div id="guestCardView" style="display: none; padding: 20px;">
+                    <div id="guestListContainer">
+                        <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                            Loading guests...
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -5341,6 +5630,7 @@
                 const homeStatPending = document.getElementById('homeStatPending');
                 const homeStatUpcoming = document.getElementById('homeStatUpcoming');
                 const homeStatProperties = document.getElementById('homeStatProperties');
+                const homeStatGuests = document.getElementById('homeStatGuests');
                 const homeStatRevenue = document.getElementById('homeStatRevenue');
                 
                 if (homeStatReservations) homeStatReservations.textContent = totalReservations;
@@ -5348,6 +5638,7 @@
                 if (homeStatPending) homeStatPending.textContent = pendingPayments;
                 if (homeStatUpcoming) homeStatUpcoming.textContent = upcomingReservations;
                 if (homeStatProperties) homeStatProperties.textContent = totalProperties;
+                if (homeStatGuests) homeStatGuests.textContent = calculateUniqueGuests(allReservations);
                 if (homeStatRevenue) homeStatRevenue.textContent = '₹' + Math.round(thisMonthRevenue / 1000) + 'K';
                 
                 // Update recent activity
@@ -5361,6 +5652,7 @@
                 const homeStatPending = document.getElementById('homeStatPending');
                 const homeStatUpcoming = document.getElementById('homeStatUpcoming');
                 const homeStatProperties = document.getElementById('homeStatProperties');
+                const homeStatGuests = document.getElementById('homeStatGuests');
                 const homeStatRevenue = document.getElementById('homeStatRevenue');
                 
                 if (homeStatReservations) homeStatReservations.textContent = '0';
@@ -5368,6 +5660,7 @@
                 if (homeStatPending) homeStatPending.textContent = '0';
                 if (homeStatUpcoming) homeStatUpcoming.textContent = '0';
                 if (homeStatProperties) homeStatProperties.textContent = '0';
+                if (homeStatGuests) homeStatGuests.textContent = '0';
                 if (homeStatRevenue) homeStatRevenue.textContent = '₹0';
             }
         }
@@ -5534,6 +5827,7 @@
             }
             if (viewName === 'dashboard') loadDashboard();
             if (viewName === 'reservations') loadReservations();
+            if (viewName === 'guests') loadGuests();
             if (viewName === 'payments') loadPayments();
             if (viewName === 'availability') loadAvailabilityCalendar();
             if (viewName === 'properties') loadProperties();
@@ -5593,6 +5887,40 @@
         }).join('');
 
         target.innerHTML = html;
+        }
+
+        /**
+         * Calculate total guests from reservations
+         */
+        function calculateTotalGuests(reservations) {
+            return reservations.reduce((sum, r) => {
+                const adults = parseInt(r.adults) || 0;
+                const children = parseInt(r.children) || 0;
+                return sum + adults + children;
+            }, 0);
+        }
+
+        /**
+         * Calculate unique guests (by phone/email)
+         */
+        function calculateUniqueGuests(reservations) {
+            const uniqueGuests = new Set();
+            reservations.forEach(r => {
+                const identifier = r.guest_phone || r.guest_email || r.guest_name;
+                if (identifier) {
+                    uniqueGuests.add(identifier.toLowerCase().trim());
+                }
+            });
+            return uniqueGuests.size;
+        }
+
+        /**
+         * Calculate average group size
+         */
+        function calculateAvgGroupSize(reservations) {
+            if (reservations.length === 0) return '0.0';
+            const totalGuests = calculateTotalGuests(reservations);
+            return (totalGuests / reservations.length).toFixed(1);
         }
 
         // Dashboard
@@ -5674,6 +6002,18 @@
                         <div class="metric-label">Active Now</div>
                         <div class="metric-trend">${upcomingBookings} upcoming</div>
                     </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                        <div class="metric-icon">👥</div>
+                        <div class="metric-value">${calculateTotalGuests(confirmedReservations)}</div>
+                        <div class="metric-label">Total Guests</div>
+                        <div class="metric-trend">${calculateUniqueGuests(confirmedReservations)} unique</div>
+                    </div>
+                    <div class="metric-card" style="background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);">
+                        <div class="metric-icon">👨‍👩‍👧‍👦</div>
+                        <div class="metric-value">${calculateAvgGroupSize(confirmedReservations)}</div>
+                        <div class="metric-label">Avg Group Size</div>
+                        <div class="metric-trend">Per booking</div>
+                    </div>
                 `;
                 
                 document.getElementById('enhancedMetrics').innerHTML = enhancedHTML;
@@ -5694,18 +6034,11 @@
                 // Calculate monthly metrics
                 calculateMonthlyMetrics();
                 
-                // Recent reservations
-                const recent = allReservations.slice(0, 10);
-                document.getElementById('recentReservationsTable').innerHTML = recent.map(r => `
-                    <tr>
-                        <td><strong>${r.booking_id || 'N/A'}</strong></td>
-                        <td>${r.guest_name}</td>
-                        <td>${r.property_name}</td>
-                        <td>${formatDate(r.check_in)}</td>
-                        <td>${formatCurrency(r.total_amount, {compact: false})}</td>
-                        <td><span class="badge badge-${r.status}">${r.status}</span></td>
-                    </tr>
-                `).join('');
+                // Load AI Insights
+                loadAIInsights(confirmedReservations, properties);
+                
+                // Load Top 15 Properties Stats
+                updateTopPropertiesStats();
             } catch (error) {
                 console.error('Dashboard error:', error);
                 showToast('Dashboard Error', error.message, '❌');
@@ -5735,30 +6068,52 @@
             
             // Apply filter logic
             switch(filter) {
+                case 'next-7-days':
+                    const next7Days = new Date(today);
+                    next7Days.setDate(today.getDate() + 7);
+                    filteredReservations = filteredReservations.filter(r => {
+                        const checkIn = new Date(r.check_in);
+                        return checkIn >= today && checkIn <= next7Days && r.status !== 'cancelled';
+                    });
+                    updateFilterInfo(`📅 Next 7 Days (${filteredReservations.length} bookings)`);
+                    break;
+                    
+                case 'today':
+                    filteredReservations = filteredReservations.filter(r => {
+                        const checkIn = new Date(r.check_in);
+                        const checkOut = new Date(r.check_out);
+                        checkIn.setHours(0, 0, 0, 0);
+                        checkOut.setHours(0, 0, 0, 0);
+                        today.setHours(0, 0, 0, 0);
+                        return (checkIn.getTime() === today.getTime() || checkOut.getTime() === today.getTime()) 
+                            && r.status !== 'cancelled';
+                    });
+                    updateFilterInfo(`🏠 Today's Activity (${filteredReservations.length} check-ins/outs)`);
+                    break;
+                    
+                case 'payment-due':
+                    filteredReservations = filteredReservations.filter(r => {
+                        if (r.status === 'cancelled') return false;
+                        const total = parseFloat(r.total_amount) || 0;
+                        const paid = parseFloat(r.paid_amount) || 0;
+                        const otaFee = parseFloat(r.ota_service_fee) || 0;
+                        const isOTA = r.booking_source && r.booking_source !== 'DIRECT';
+                        const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
+                        return balance > 0;
+                    });
+                    updateFilterInfo(`💰 Payment Due (${filteredReservations.length} with outstanding balance)`);
+                    break;
+                    
                 case 'this-month':
                     filteredReservations = filteredReservations.filter(r => {
                         const checkIn = new Date(r.check_in);
                         return checkIn >= startOfMonth && checkIn <= endOfMonth;
                     });
-                    showToast('Filtered', `Showing ${filteredReservations.length} bookings this month`, 'ℹ️');
+                    updateFilterInfo(`📆 This Month (${filteredReservations.length} bookings)`);
                     break;
                     
-                case 'pending-payments':
-                    filteredReservations = filteredReservations.filter(r => 
-                        r.payment_status !== 'paid' && r.status !== 'cancelled'
-                    );
-                    showToast('Filtered', `Showing ${filteredReservations.length} with pending payments`, 'ℹ️');
-                    break;
-                    
-                case 'active-only':
-                    filteredReservations = filteredReservations.filter(r => 
-                        r.status === 'confirmed' || r.status === 'checked-in'
-                    );
-                    showToast('Filtered', `Showing ${filteredReservations.length} active bookings`, 'ℹ️');
-                    break;
-                    
-                case 'urgent':
-                    const urgentReservations = filteredReservations.filter(r => {
+                case 'needs-attention':
+                    filteredReservations = filteredReservations.filter(r => {
                         if (r.status === 'cancelled') return false;
                         
                         const checkInDate = new Date(r.check_in);
@@ -5769,17 +6124,26 @@
                         const isOTA = r.booking_source && r.booking_source !== 'DIRECT';
                         const balance = isOTA ? ((total - otaFee) - paid) : (total - paid);
                         
-                        // Overdue payments or today's check-in with pending payment
-                        return (balance > 0 && checkInDate < today) || 
-                            (checkInDate.getTime() === today.getTime() && balance > 0);
+                        // Needs attention if:
+                        // 1. Overdue payment
+                        // 2. Check-in today/tomorrow with pending payment
+                        // 3. Missing guest contact info
+                        const tomorrow = new Date(today);
+                        tomorrow.setDate(today.getDate() + 1);
+                        
+                        const overduePayment = balance > 0 && checkInDate < today;
+                        const soonCheckinUnpaid = (checkInDate.getTime() === today.getTime() || 
+                                                  checkInDate.getTime() === tomorrow.getTime()) && balance > 0;
+                        const missingInfo = !r.guest_phone || !r.guest_email;
+                        
+                        return overduePayment || soonCheckinUnpaid || missingInfo;
                     });
-                    filteredReservations = urgentReservations;
-                    showToast('Filtered', `Showing ${filteredReservations.length} urgent actions`, 'ℹ️');
+                    updateFilterInfo(`⚠️ Needs Attention (${filteredReservations.length} items)`);
                     break;
                     
                 case 'all':
                 default:
-                    showToast('Filter Reset', 'Showing all data', 'ℹ️');
+                    updateFilterInfo('');
                     break;
             }
             
@@ -5854,6 +6218,18 @@
                     <div class="metric-label">Active Now</div>
                     <div class="metric-trend">${upcomingBookings} upcoming</div>
                 </div>
+                <div class="metric-card" style="background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);">
+                    <div class="metric-icon">👥</div>
+                    <div class="metric-value">${calculateTotalGuests(confirmedReservations)}</div>
+                    <div class="metric-label">Total Guests</div>
+                    <div class="metric-trend">${calculateUniqueGuests(confirmedReservations)} unique</div>
+                </div>
+                <div class="metric-card" style="background: linear-gradient(135deg, #14b8a6 0%, #0d9488 100%);">
+                    <div class="metric-icon">👨‍👩‍👧‍👦</div>
+                    <div class="metric-value">${calculateAvgGroupSize(confirmedReservations)}</div>
+                    <div class="metric-label">Avg Group Size</div>
+                    <div class="metric-trend">Per booking</div>
+                </div>
             `;
             
             document.getElementById('enhancedMetrics').innerHTML = enhancedHTML;
@@ -5867,89 +6243,352 @@
             // Recalculate monthly metrics with filtered data
             calculateMonthlyMetricsFiltered(filteredReservations);
             
-            // Update recent reservations table
-            const recent = filteredReservations.slice(0, 10);
-            document.getElementById('recentReservationsTable').innerHTML = recent.map(r => `
-                <tr>
-                    <td><strong>${r.booking_id || 'N/A'}</strong></td>
-                    <td>${r.guest_name}</td>
-                    <td>${r.property_name}</td>
-                    <td>${formatDate(r.check_in)}</td>
-                    <td>${formatCurrency(r.total_amount, {compact: false})}</td>
-                    <td><span class="badge badge-${r.status}">${r.status}</span></td>
-                </tr>
-            `).join('') || '<tr><td colspan="6" class="text-center">No reservations found</td></tr>';
+            // Load AI Insights with filtered data
+            loadAIInsights(confirmedReservations, properties);
+            
+            // Update top 15 properties with filtered data
+            updateTopPropertiesStats(filteredReservations);
         }
 
-
+                /**
+         * Update filter info display
+         */
+        function updateFilterInfo(text) {
+            const infoDiv = document.getElementById('activeFilterInfo');
+            const textSpan = document.getElementById('activeFilterText');
+            
+            if (text) {
+                textSpan.textContent = text;
+                infoDiv.style.display = 'block';
+            } else {
+                infoDiv.style.display = 'none';
+            }
+        }
 
         /**
-         * Calculate and display this month's performance with comparison to last month
+         * Apply date range filter
          */
-        function calculateMonthlyMetrics() {
-            try {
-                const now = new Date();
-                const currentMonth = now.getMonth();
-                const currentYear = now.getFullYear();
-                
-                // Update month label
-                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
-                                'July', 'August', 'September', 'October', 'November', 'December'];
-                document.getElementById('currentMonthLabel').textContent = `${monthNames[currentMonth]} ${currentYear}`;
-                
-                // Filter current month reservations (based on check-in date)
-                const currentMonthReservations = allReservations.filter(r => {
-                    const checkIn = new Date(r.check_in);
-                    return checkIn.getMonth() === currentMonth && checkIn.getFullYear() === currentYear;
-                });
-                
-                // Filter last month reservations
-                const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
-                const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
-                
-                const lastMonthReservations = allReservations.filter(r => {
-                    const checkIn = new Date(r.check_in);
-                    return checkIn.getMonth() === lastMonth && checkIn.getFullYear() === lastMonthYear;
-                });
-                
-                // Calculate Nights
-                const currentNights = currentMonthReservations.reduce((sum, r) => sum + (parseInt(r.nights) || 0), 0);
-                const lastNights = lastMonthReservations.reduce((sum, r) => sum + (parseInt(r.nights) || 0), 0);
-                const nightsChange = lastNights > 0 ? ((currentNights - lastNights) / lastNights * 100) : 0;
-                
-                // Calculate Revenue
-                const currentRevenue = currentMonthReservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0);
-                const lastRevenue = lastMonthReservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0);
-                const revenueChange = lastRevenue > 0 ? ((currentRevenue - lastRevenue) / lastRevenue * 100) : 0;
-                
-                // Calculate Hostizzy Revenue
-                const currentHostizzy = currentMonthReservations.reduce((sum, r) => sum + (parseFloat(r.hostizzy_revenue) || 0), 0);
-                const lastHostizzy = lastMonthReservations.reduce((sum, r) => sum + (parseFloat(r.hostizzy_revenue) || 0), 0);
-                const hostizzyChange = lastHostizzy > 0 ? ((currentHostizzy - lastHostizzy) / lastHostizzy * 100) : 0;
-                
-                // Update UI - Nights
-                document.getElementById('monthNights').textContent = currentNights;
-                updateTrendDisplay('monthNightsChange', nightsChange);
-                
-                // Update UI - Revenue
-                if (currentRevenue >= 100000) {
-                    document.getElementById('monthRevenue').textContent = '₹' + (currentRevenue / 100000).toFixed(2) + 'L';
-                } else {
-                    document.getElementById('monthRevenue').textContent = '₹' + (currentRevenue / 1000).toFixed(1) + 'K';
-                }
-                updateTrendDisplay('monthRevenueChange', revenueChange);
-                
-                // Update UI - Hostizzy Revenue
-                if (currentHostizzy >= 100000) {
-                    document.getElementById('monthHostizzyRevenue').textContent = '₹' + (currentHostizzy / 100000).toFixed(2) + 'L';
-                } else {
-                    document.getElementById('monthHostizzyRevenue').textContent = '₹' + (currentHostizzy / 1000).toFixed(1) + 'K';
-                }
-                updateTrendDisplay('monthHostizzyChange', hostizzyChange);
-                
-            } catch (error) {
-                console.error('Error calculating monthly metrics:', error);
+        async function applyDateRange(range) {
+            if (!range) return;
+            
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            let startDate, endDate;
+            
+            switch(range) {
+                case 'today':
+                    startDate = new Date(today);
+                    endDate = new Date(today);
+                    break;
+                case 'yesterday':
+                    startDate = new Date(today);
+                    startDate.setDate(today.getDate() - 1);
+                    endDate = new Date(startDate);
+                    break;
+                case 'last-7':
+                    startDate = new Date(today);
+                    startDate.setDate(today.getDate() - 7);
+                    endDate = new Date(today);
+                    break;
+                case 'last-30':
+                    startDate = new Date(today);
+                    startDate.setDate(today.getDate() - 30);
+                    endDate = new Date(today);
+                    break;
+                case 'this-week':
+                    startDate = new Date(today);
+                    startDate.setDate(today.getDate() - today.getDay());
+                    endDate = new Date(today);
+                    break;
+                case 'last-week':
+                    startDate = new Date(today);
+                    startDate.setDate(today.getDate() - today.getDay() - 7);
+                    endDate = new Date(startDate);
+                    endDate.setDate(endDate.getDate() + 6);
+                    break;
+                case 'this-month':
+                    startDate = new Date(today.getFullYear(), today.getMonth(), 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth() + 1, 0);
+                    break;
+                case 'last-month':
+                    startDate = new Date(today.getFullYear(), today.getMonth() - 1, 1);
+                    endDate = new Date(today.getFullYear(), today.getMonth(), 0);
+                    break;
+                case 'this-quarter':
+                    const quarter = Math.floor(today.getMonth() / 3);
+                    startDate = new Date(today.getFullYear(), quarter * 3, 1);
+                    endDate = new Date(today.getFullYear(), (quarter + 1) * 3, 0);
+                    break;
+                case 'this-year':
+                    startDate = new Date(today.getFullYear(), 0, 1);
+                    endDate = new Date(today.getFullYear(), 11, 31);
+                    break;
             }
+            
+            // Filter reservations by date range
+            let filteredReservations = allReservations.filter(r => {
+                const checkIn = new Date(r.check_in);
+                checkIn.setHours(0, 0, 0, 0);
+                return checkIn >= startDate && checkIn <= endDate;
+            });
+            
+            // Clear active quick filter
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            currentQuickFilter = 'custom';
+            
+            // Show filter info
+            const rangeLabels = {
+                'today': 'Today',
+                'yesterday': 'Yesterday',
+                'last-7': 'Last 7 Days',
+                'last-30': 'Last 30 Days',
+                'this-week': 'This Week',
+                'last-week': 'Last Week',
+                'this-month': 'This Month',
+                'last-month': 'Last Month',
+                'this-quarter': 'This Quarter',
+                'this-year': 'This Year'
+            };
+            updateFilterInfo(`📅 ${rangeLabels[range]} (${filteredReservations.length} bookings)`);
+            
+            // Update dashboard with filtered data
+            await updateDashboardWithFilteredData(filteredReservations);
+        }
+
+        /**
+         * Toggle advanced filters panel
+         */
+        async function toggleAdvancedFilters() {
+            const panel = document.getElementById('advancedFiltersPanel');
+            
+            if (panel.style.display === 'none') {
+                // Populate property dropdown
+                const properties = await db.getProperties();
+                const propertySelect = document.getElementById('advFilterProperty');
+                propertySelect.innerHTML = properties.map(p => 
+                    `<option value="${p.id}">${p.name}</option>`
+                ).join('');
+                
+                panel.style.display = 'block';
+            } else {
+                panel.style.display = 'none';
+            }
+        }
+
+        /**
+         * Apply advanced filters
+         */
+        async function applyAdvancedFilters() {
+            let filteredReservations = [...allReservations];
+            const filterLabels = [];
+            
+            // Date range
+            const startDate = document.getElementById('advFilterStartDate').value;
+            const endDate = document.getElementById('advFilterEndDate').value;
+            if (startDate || endDate) {
+                filteredReservations = filteredReservations.filter(r => {
+                    const checkIn = new Date(r.check_in);
+                    const start = startDate ? new Date(startDate) : new Date('1900-01-01');
+                    const end = endDate ? new Date(endDate) : new Date('2100-12-31');
+                    return checkIn >= start && checkIn <= end;
+                });
+                if (startDate && endDate) {
+                    filterLabels.push(`📅 ${startDate} to ${endDate}`);
+                } else if (startDate) {
+                    filterLabels.push(`📅 From ${startDate}`);
+                } else {
+                    filterLabels.push(`📅 Until ${endDate}`);
+                }
+            }
+            
+            // Status
+            const statusOptions = Array.from(document.getElementById('advFilterStatus').selectedOptions);
+            if (statusOptions.length > 0) {
+                const statuses = statusOptions.map(o => o.value);
+                filteredReservations = filteredReservations.filter(r => statuses.includes(r.status));
+                filterLabels.push(`📋 Status: ${statuses.join(', ')}`);
+            }
+            
+            // Property
+            const propertyOptions = Array.from(document.getElementById('advFilterProperty').selectedOptions);
+            if (propertyOptions.length > 0) {
+                const propertyIds = propertyOptions.map(o => parseInt(o.value));
+                filteredReservations = filteredReservations.filter(r => propertyIds.includes(r.property_id));
+                filterLabels.push(`🏠 ${propertyOptions.length} properties`);
+            }
+            
+            // Payment status
+            const paymentStatus = document.getElementById('advFilterPayment').value;
+            if (paymentStatus) {
+                filteredReservations = filteredReservations.filter(r => r.payment_status === paymentStatus);
+                filterLabels.push(`💰 Payment: ${paymentStatus}`);
+            }
+            
+            // Booking source
+            const source = document.getElementById('advFilterSource').value;
+            if (source) {
+                filteredReservations = filteredReservations.filter(r => r.booking_source === source);
+                filterLabels.push(`📱 Source: ${source}`);
+            }
+            
+            // Amount range
+            const minAmount = document.getElementById('advFilterMinAmount').value;
+            const maxAmount = document.getElementById('advFilterMaxAmount').value;
+            if (minAmount || maxAmount) {
+                filteredReservations = filteredReservations.filter(r => {
+                    const amount = parseFloat(r.total_amount) || 0;
+                    const min = minAmount ? parseFloat(minAmount) : 0;
+                    const max = maxAmount ? parseFloat(maxAmount) : Infinity;
+                    return amount >= min && amount <= max;
+                });
+                if (minAmount && maxAmount) {
+                    filterLabels.push(`💵 ₹${minAmount} - ₹${maxAmount}`);
+                } else if (minAmount) {
+                    filterLabels.push(`💵 Min ₹${minAmount}`);
+                } else {
+                    filterLabels.push(`💵 Max ₹${maxAmount}`);
+                }
+            }
+            
+            // Clear active quick filter
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            currentQuickFilter = 'advanced';
+            
+            // Show filter info
+            if (filterLabels.length > 0) {
+                updateFilterInfo(`🔍 Advanced: ${filterLabels.join(' • ')}`);
+            }
+            
+            // Close panel
+            toggleAdvancedFilters();
+            
+            // Update dashboard
+            await updateDashboardWithFilteredData(filteredReservations);
+            
+            showToast('Filters Applied', `Showing ${filteredReservations.length} matching bookings`, '✅');
+        }
+
+        /**
+         * Clear advanced filters
+         */
+        function clearAdvancedFilters() {
+            document.getElementById('advFilterStartDate').value = '';
+            document.getElementById('advFilterEndDate').value = '';
+            document.getElementById('advFilterStatus').selectedIndex = -1;
+            document.getElementById('advFilterProperty').selectedIndex = -1;
+            document.getElementById('advFilterPayment').value = '';
+            document.getElementById('advFilterSource').value = '';
+            document.getElementById('advFilterMinAmount').value = '';
+            document.getElementById('advFilterMaxAmount').value = '';
+        }
+
+        /**
+         * Clear all filters and reset
+         */
+        async function clearAllFilters() {
+            // Clear quick filters
+            document.querySelectorAll('.filter-chip').forEach(chip => chip.classList.remove('active'));
+            document.querySelector('[data-filter="all"]').classList.add('active');
+            currentQuickFilter = 'all';
+            
+            // Clear date range
+            document.getElementById('quickDateRange').value = '';
+            
+            // Clear advanced filters
+            clearAdvancedFilters();
+            
+            // Hide filter info
+            updateFilterInfo('');
+            
+            // Reload full dashboard
+            await loadDashboard();
+            
+            showToast('Filters Cleared', 'Showing all data', 'ℹ️');
+        }
+
+        /**
+         * Update dashboard with filtered data (extracted for reuse)
+         */
+        async function updateDashboardWithFilteredData(filteredReservations) {
+            const confirmedReservations = filteredReservations.filter(r => r.status !== 'cancelled');
+            
+            // Calculate all metrics with filtered data
+            const totalRevenue = confirmedReservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0);
+            const totalOtaFees = confirmedReservations.reduce((sum, r) => sum + (parseFloat(r.ota_service_fee) || 0), 0);
+            const netRevenue = totalRevenue - totalOtaFees;
+            const activeBookings = filteredReservations.filter(r => r.status === 'checked-in').length;
+            const upcomingBookings = filteredReservations.filter(r => r.status === 'confirmed').length;
+            const completedBookings = filteredReservations.filter(r => r.status === 'checked-out').length;
+            const avgBookingValue = confirmedReservations.length > 0 ? totalRevenue / confirmedReservations.length : 0;
+            
+            // Update primary stats
+            document.getElementById('totalReservations').textContent = filteredReservations.length;
+            document.getElementById('activeReservations').textContent = activeBookings;
+            document.getElementById('upcomingReservations').textContent = upcomingBookings;
+            document.getElementById('completedReservations').textContent = completedBookings;
+            document.getElementById('avgBookingValue').textContent = Math.round(avgBookingValue).toLocaleString('en-IN');
+            
+            // Calculate enhanced metrics with filtered data
+            const properties = await db.getProperties();
+            const hostizzyRevenue = confirmedReservations.reduce((sum, r) => sum + (parseFloat(r.hostizzy_revenue) || 0), 0);
+            const totalNights = confirmedReservations.reduce((sum, r) => sum + (r.nights || 0), 0);
+            const targetNights = properties.length * TARGET_OCCUPANCY_NIGHTS;
+            const occupancyRate = targetNights > 0 ? ((totalNights / targetNights) * 100).toFixed(1) : 0;
+            
+            // Update Enhanced Metrics cards
+            let enhancedHTML = `
+                <div class="metric-card" style="background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);">
+                    <div class="metric-icon">💰</div>
+                    <div class="metric-value">${formatCurrency(totalRevenue)}</div>
+                    <div class="metric-label">Total Revenue</div>
+                    <div class="metric-trend">From ${confirmedReservations.length} bookings</div>
+                </div>`;
+            
+            if (totalOtaFees > 0) {
+                enhancedHTML += `
+                <div class="metric-card" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                    <div class="metric-icon">🏢</div>
+                    <div class="metric-value">${formatCurrency(totalOtaFees)}</div>
+                    <div class="metric-label">OTA Fees</div>
+                    <div class="metric-trend">Commission deductions</div>
+                </div>
+                <div class="metric-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <div class="metric-icon">💵</div>
+                    <div class="metric-value">${formatCurrency(netRevenue)}</div>
+                    <div class="metric-label">Net Revenue</div>
+                    <div class="metric-trend">After OTA fees</div>
+                </div>`;
+            }
+            
+            enhancedHTML += `
+                <div class="metric-card" style="background: linear-gradient(135deg, #10b981 0%, #059669 100%);">
+                    <div class="metric-icon">📊</div>
+                    <div class="metric-value">${occupancyRate}%</div>
+                    <div class="metric-label">Occupancy Rate</div>
+                    <div class="metric-trend">${totalNights}/${targetNights} nights booked</div>
+                </div>
+                <div class="metric-card" style="background: linear-gradient(135deg, #8b5cf6 0%, #7c3aed 100%);">
+                    <div class="metric-icon">🏆</div>
+                    <div class="metric-value">${formatCurrency(hostizzyRevenue)}</div>
+                    <div class="metric-label">Hostizzy Revenue</div>
+                    <div class="metric-trend">${totalRevenue > 0 ? ((hostizzyRevenue/totalRevenue)*100).toFixed(1) : 0}% of total</div>
+                </div>
+                <div class="metric-card" style="background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);">
+                    <div class="metric-icon">📅</div>
+                    <div class="metric-value">${activeBookings}</div>
+                    <div class="metric-label">Active Now</div>
+                    <div class="metric-trend">${upcomingBookings} upcoming</div>
+                </div>
+            `;
+            
+            document.getElementById('enhancedMetrics').innerHTML = enhancedHTML;
+            
+            // Update other sections
+            renderRevenueSplit(allPayments, confirmedReservations);
+            renderActionCenter(filteredReservations);
+            calculateMonthlyMetricsFiltered(filteredReservations);
+            loadAIInsights(confirmedReservations, properties);
+            updateTopPropertiesStats(filteredReservations);
         }
 
         /**
@@ -6018,6 +6657,75 @@
                 
             } catch (error) {
                 console.error('Error calculating monthly metrics (filtered):', error);
+            }
+        }
+
+        /**
+         * Calculate and display this month's performance with comparison to last month
+         */
+        function calculateMonthlyMetrics() {
+            try {
+                const now = new Date();
+                const currentMonth = now.getMonth();
+                const currentYear = now.getFullYear();
+                
+                // Update month label
+                const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                                'July', 'August', 'September', 'October', 'November', 'December'];
+                document.getElementById('currentMonthLabel').textContent = `${monthNames[currentMonth]} ${currentYear}`;
+                
+                // Filter current month reservations (based on check-in date)
+                const currentMonthReservations = allReservations.filter(r => {
+                    const checkIn = new Date(r.check_in);
+                    return checkIn.getMonth() === currentMonth && checkIn.getFullYear() === currentYear;
+                });
+                
+                // Filter last month reservations
+                const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1;
+                const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear;
+                
+                const lastMonthReservations = allReservations.filter(r => {
+                    const checkIn = new Date(r.check_in);
+                    return checkIn.getMonth() === lastMonth && checkIn.getFullYear() === lastMonthYear;
+                });
+                
+                // Calculate Nights
+                const currentNights = currentMonthReservations.reduce((sum, r) => sum + (parseInt(r.nights) || 0), 0);
+                const lastNights = lastMonthReservations.reduce((sum, r) => sum + (parseInt(r.nights) || 0), 0);
+                const nightsChange = lastNights > 0 ? ((currentNights - lastNights) / lastNights * 100) : 0;
+                
+                // Calculate Revenue
+                const currentRevenue = currentMonthReservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0);
+                const lastRevenue = lastMonthReservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0);
+                const revenueChange = lastRevenue > 0 ? ((currentRevenue - lastRevenue) / lastRevenue * 100) : 0;
+                
+                // Calculate Hostizzy Revenue
+                const currentHostizzy = currentMonthReservations.reduce((sum, r) => sum + (parseFloat(r.hostizzy_revenue) || 0), 0);
+                const lastHostizzy = lastMonthReservations.reduce((sum, r) => sum + (parseFloat(r.hostizzy_revenue) || 0), 0);
+                const hostizzyChange = lastHostizzy > 0 ? ((currentHostizzy - lastHostizzy) / lastHostizzy * 100) : 0;
+                
+                // Update UI - Nights
+                document.getElementById('monthNights').textContent = currentNights;
+                updateTrendDisplay('monthNightsChange', nightsChange);
+                
+                // Update UI - Revenue
+                if (currentRevenue >= 100000) {
+                    document.getElementById('monthRevenue').textContent = '₹' + (currentRevenue / 100000).toFixed(2) + 'L';
+                } else {
+                    document.getElementById('monthRevenue').textContent = '₹' + (currentRevenue / 1000).toFixed(1) + 'K';
+                }
+                updateTrendDisplay('monthRevenueChange', revenueChange);
+                
+                // Update UI - Hostizzy Revenue
+                if (currentHostizzy >= 100000) {
+                    document.getElementById('monthHostizzyRevenue').textContent = '₹' + (currentHostizzy / 100000).toFixed(2) + 'L';
+                } else {
+                    document.getElementById('monthHostizzyRevenue').textContent = '₹' + (currentHostizzy / 1000).toFixed(1) + 'K';
+                }
+                updateTrendDisplay('monthHostizzyChange', hostizzyChange);
+                
+            } catch (error) {
+                console.error('Error calculating monthly metrics:', error);
             }
         }
 
@@ -6124,6 +6832,390 @@
             if (element) {
                 element.innerHTML = html;
             }
+        }
+
+        /**
+         * Top Properties Stats Functions (with sorting)
+         */
+        let currentSortBy = 'revenue';
+        
+        function updateTopPropertiesStats(filteredReservations = null) {
+            sortPropertiesBy(currentSortBy, filteredReservations);
+        }
+        
+        function sortPropertiesBy(sortType, filteredReservations = null) {
+            currentSortBy = sortType;
+            
+            // Update button styles
+            document.getElementById('sortByRevenue').style.background = sortType === 'revenue' ? 'var(--primary)' : 'var(--secondary)';
+            document.getElementById('sortByBookings').style.background = sortType === 'bookings' ? 'var(--primary)' : 'var(--secondary)';
+            document.getElementById('sortByNights').style.background = sortType === 'nights' ? 'var(--primary)' : 'var(--secondary)';
+            document.getElementById('sortByGuests').style.background = sortType === 'guests' ? 'var(--primary)' : 'var(--secondary)';
+            document.getElementById('sortByOccupancy').style.background = sortType === 'occupancy' ? 'var(--primary)' : 'var(--secondary)';
+            
+            try {
+                // Get all properties
+                const properties = state.properties || [];
+                if (properties.length === 0) {
+                    document.getElementById('topPropertiesStats').innerHTML = 
+                        '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">No properties found</div>';
+                    return;
+                }
+                
+                // Show filter indicator if filtered
+                const reservationsToUse = filteredReservations || state.reservations || [];
+                const isFiltered = filteredReservations && filteredReservations.length !== (state.reservations || []).length;
+                
+                // Calculate stats for each property
+                const propertyStats = properties.map(property => {
+                    // Use filtered reservations if provided, otherwise use all
+                    const reservationsToUse = filteredReservations || state.reservations || [];
+                    const propertyReservations = reservationsToUse.filter(r => 
+                        r.property_id === property.id && r.status !== 'cancelled'
+                    );
+                    
+                    const totalRevenue = propertyReservations.reduce((sum, r) => 
+                        sum + (parseFloat(r.total_amount) || 0), 0
+                    );
+                    
+                    const totalBookings = propertyReservations.length;
+                    
+                    // Calculate total nights (all bookings, not just last 90 days)
+                    const totalNights = propertyReservations.reduce((sum, r) => 
+                        sum + (parseInt(r.nights) || 0), 0
+                    );
+                    
+                    // Calculate total guests
+                    const totalGuests = propertyReservations.reduce((sum, r) => {
+                        const adults = parseInt(r.adults) || 0;
+                        const children = parseInt(r.children) || 0;
+                        return sum + adults + children;
+                    }, 0);
+                    
+                    // Calculate occupancy rate (based on last 90 days)
+                    const ninetyDaysAgo = new Date();
+                    ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+                    
+                    const recentBookings = propertyReservations.filter(r => 
+                        new Date(r.check_in) >= ninetyDaysAgo
+                    );
+                    
+                    const recentNights = recentBookings.reduce((sum, r) => 
+                        sum + (parseInt(r.nights) || 0), 0
+                    );
+                    
+                    const occupancyRate = recentNights > 0 ? ((recentNights / 90) * 100).toFixed(1) : 0;
+                    
+                    // Calculate average booking value
+                    const avgBookingValue = totalBookings > 0 ? (totalRevenue / totalBookings) : 0;
+                    
+                    // Get confirmed bookings
+                    const confirmedBookings = propertyReservations.filter(r => 
+                        r.status === 'confirmed' || r.status === 'checked-in'
+                    ).length;
+                    
+                    return {
+                        id: property.id,
+                        name: property.name,
+                        location: property.location || 'N/A',
+                        totalRevenue,
+                        totalBookings,
+                        totalNights,
+                        totalGuests,
+                        confirmedBookings,
+                        occupancyRate: parseFloat(occupancyRate),
+                        avgBookingValue,
+                        propertyType: property.property_type || 'Villa'
+                    };
+                });
+                
+                // Sort based on selected criteria
+                let sortedProperties = [...propertyStats];
+                if (sortType === 'revenue') {
+                    sortedProperties.sort((a, b) => b.totalRevenue - a.totalRevenue);
+                } else if (sortType === 'bookings') {
+                    sortedProperties.sort((a, b) => b.totalBookings - a.totalBookings);
+                } else if (sortType === 'nights') {
+                    sortedProperties.sort((a, b) => b.totalNights - a.totalNights);
+                } else if (sortType === 'guests') {
+                    sortedProperties.sort((a, b) => b.totalGuests - a.totalGuests);
+                } else if (sortType === 'occupancy') {
+                    sortedProperties.sort((a, b) => b.occupancyRate - a.occupancyRate);
+                }
+                
+                // Take top 15
+                const top15 = sortedProperties.slice(0, 15);
+                
+                // Render property cards
+                let html = '';
+                
+                // Add filter indicator if filtered
+                if (isFiltered) {
+                    html += `
+                        <div style="margin-bottom: 16px; padding: 12px 16px; background: #e0e7ff; border-radius: 8px; font-size: 13px; color: #4338ca;">
+                            📊 Showing stats based on filtered data (${reservationsToUse.length} bookings)
+                        </div>
+                    `;
+                }
+                
+                html += '<div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px;">';
+                
+                top15.forEach((prop, index) => {
+                    const rankColor = index < 3 ? 'var(--warning)' : 'var(--text-secondary)';
+                    const rankEmoji = index === 0 ? '🥇' : index === 1 ? '🥈' : index === 2 ? '🥉' : `#${index + 1}`;
+                    
+                    html += `
+                        <div class="stat-card" style="position: relative; overflow: visible;">
+                            <div style="position: absolute; top: -10px; right: -10px; background: ${rankColor}; color: white; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; box-shadow: 0 4px 12px rgba(0,0,0,0.2);">
+                                ${rankEmoji}
+                            </div>
+                            
+                            <div style="margin-bottom: 12px;">
+                                <h3 style="font-size: 18px; font-weight: 700; color: var(--text-primary); margin-bottom: 4px;">
+                                    ${prop.name}
+                                </h3>
+                                <div style="font-size: 12px; color: var(--text-secondary);">
+                                    📍 ${prop.location} • ${prop.propertyType}
+                                </div>
+                            </div>
+                            
+                            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                        Total Revenue
+                                    </div>
+                                    <div style="font-size: 20px; font-weight: 700; color: var(--success);">
+                                        ${formatCurrency(prop.totalRevenue)}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                        Bookings
+                                    </div>
+                                    <div style="font-size: 20px; font-weight: 700; color: var(--primary);">
+                                        ${prop.totalBookings}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                        Total Nights
+                                    </div>
+                                    <div style="font-size: 20px; font-weight: 700; color: var(--primary);">
+                                        ${prop.totalNights}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                        Total Guests
+                                    </div>
+                                    <div style="font-size: 20px; font-weight: 700; color: #06b6d4;">
+                                        ${prop.totalGuests}
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                        Occupancy
+                                    </div>
+                                    <div style="font-size: 20px; font-weight: 700; color: ${prop.occupancyRate >= 70 ? 'var(--success)' : prop.occupancyRate >= 40 ? 'var(--warning)' : 'var(--danger)'};">
+                                        ${prop.occupancyRate}%
+                                    </div>
+                                </div>
+                                
+                                <div>
+                                    <div style="font-size: 11px; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 4px;">
+                                        Avg Value
+                                    </div>
+                                    <div style="font-size: 20px; font-weight: 700; color: var(--text-primary);">
+                                        ${formatCurrency(prop.avgBookingValue)}
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--border);">
+                                <div style="display: flex; justify-content: space-between; align-items: center;">
+                                    <div style="font-size: 12px; color: var(--text-secondary);">
+                                        ${prop.confirmedBookings} confirmed
+                                    </div>
+                                    <button class="btn btn-sm" onclick="viewPropertyDetails(${prop.id})" style="padding: 6px 12px; font-size: 12px;">
+                                        View Details
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                html += '</div>';
+                
+                if (top15.length === 0) {
+                    html = '<div style="text-align: center; padding: 40px; color: var(--text-secondary);">No bookings data available for properties</div>';
+                }
+                
+                document.getElementById('topPropertiesStats').innerHTML = html;
+                
+            } catch (error) {
+                console.error('Error calculating property stats:', error);
+                document.getElementById('topPropertiesStats').innerHTML = 
+                    '<div style="text-align: center; padding: 40px; color: var(--danger);">Error loading property statistics</div>';
+            }
+        }
+        
+        function viewPropertyDetails(propertyId) {
+            // Navigate to properties view and show details for this property
+            showView('properties');
+            // You could add code here to automatically open the property details modal
+            showToast('Navigation', 'Opening property details...', '🏡');
+        }
+
+        /**
+         * Load AI-powered insights based on current data
+         */
+        function loadAIInsights(reservations, properties) {
+            const insights = [];
+            
+            // Calculate various metrics for insights
+            const totalRevenue = reservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0);
+            const avgBookingValue = reservations.length > 0 ? totalRevenue / reservations.length : 0;
+            
+            // Analyze booking sources
+            const sources = {};
+            reservations.forEach(r => {
+                const source = r.booking_source || 'DIRECT';
+                sources[source] = (sources[source] || 0) + 1;
+            });
+            
+            // Calculate property performance
+            const propertyPerformance = {};
+            reservations.forEach(r => {
+                if (!propertyPerformance[r.property_id]) {
+                    propertyPerformance[r.property_id] = {
+                        name: r.property_name,
+                        revenue: 0,
+                        bookings: 0
+                    };
+                }
+                propertyPerformance[r.property_id].revenue += parseFloat(r.total_amount) || 0;
+                propertyPerformance[r.property_id].bookings += 1;
+            });
+            
+            const sortedProps = Object.values(propertyPerformance).sort((a, b) => b.revenue - a.revenue);
+            
+            // Insight 1: Top performer analysis
+            if (sortedProps.length > 0 && sortedProps[0].bookings > 5) {
+                const topProp = sortedProps[0];
+                const avgRevenue = topProp.revenue / topProp.bookings;
+                insights.push({
+                    icon: '🏆',
+                    type: 'Top Performer',
+                    title: 'Revenue Champion',
+                    message: `${topProp.name} is your star property with ${formatCurrency(topProp.revenue)} revenue from ${topProp.bookings} bookings. Average booking value: ${formatCurrency(avgRevenue)}.`,
+                    action: 'View Details',
+                    color: 'rgba(16, 185, 129, 0.15)'
+                });
+            }
+            
+            // Insight 2: Channel optimization
+            const maxSource = Object.entries(sources).sort((a, b) => b[1] - a[1])[0];
+            if (maxSource && maxSource[1] > 3) {
+                const percentage = ((maxSource[1] / reservations.length) * 100).toFixed(0);
+                insights.push({
+                    icon: '📊',
+                    type: 'Channel Insight',
+                    title: 'Booking Channel Leader',
+                    message: `${maxSource[0]} brings ${percentage}% of your bookings. Consider optimizing your presence on this platform for even better results.`,
+                    action: 'Optimize Channel',
+                    color: 'rgba(37, 99, 235, 0.15)'
+                });
+            }
+            
+            // Insight 3: Revenue opportunity (underperforming properties)
+            if (sortedProps.length > 2) {
+                const lowPerformer = sortedProps[sortedProps.length - 1];
+                if (lowPerformer.bookings < 3) {
+                    insights.push({
+                        icon: '💡',
+                        type: 'Growth Opportunity',
+                        title: 'Boost Underutilized Property',
+                        message: `${lowPerformer.name} has potential for growth. Consider improving photos, adjusting pricing, or running targeted promotions.`,
+                        action: 'Create Campaign',
+                        color: 'rgba(245, 158, 11, 0.15)'
+                    });
+                }
+            }
+            
+            // Insight 4: Pricing optimization
+            if (avgBookingValue > 0) {
+                const highValueProps = sortedProps.filter(p => (p.revenue / p.bookings) > avgBookingValue * 1.2);
+                if (highValueProps.length > 0) {
+                    insights.push({
+                        icon: '💰',
+                        type: 'Pricing Strategy',
+                        title: 'Premium Pricing Success',
+                        message: `${highValueProps.length} ${highValueProps.length === 1 ? 'property is' : 'properties are'} achieving 20%+ higher booking values. Apply similar strategies to other properties.`,
+                        action: 'View Pricing',
+                        color: 'rgba(139, 92, 246, 0.15)'
+                    });
+                }
+            }
+            
+            // Insight 5: Occupancy alert
+            const currentMonth = new Date().getMonth();
+            const currentMonthBookings = reservations.filter(r => {
+                const checkIn = new Date(r.check_in);
+                return checkIn.getMonth() === currentMonth;
+            });
+            
+            if (currentMonthBookings.length < properties.length * 2) {
+                insights.push({
+                    icon: '📅',
+                    type: 'Occupancy Alert',
+                    title: 'Increase Monthly Bookings',
+                    message: `Current month has ${currentMonthBookings.length} bookings. Running flash sales or weekend deals could fill more nights.`,
+                    action: 'Run Promotion',
+                    color: 'rgba(239, 68, 68, 0.15)'
+                });
+            }
+            
+            // Insight 6: Guest satisfaction (based on confirmed vs cancelled)
+            const cancelledCount = reservations.filter(r => r.status === 'cancelled').length;
+            const cancelRate = reservations.length > 0 ? (cancelledCount / reservations.length) * 100 : 0;
+            if (cancelRate < 5 && reservations.length > 10) {
+                insights.push({
+                    icon: '⭐',
+                    type: 'Performance Metric',
+                    title: 'Excellent Retention',
+                    message: `Only ${cancelRate.toFixed(1)}% cancellation rate! Your properties are delivering great guest experiences.`,
+                    action: 'Share Testimonials',
+                    color: 'rgba(16, 185, 129, 0.15)'
+                });
+            }
+            
+            // Render insights
+            const html = insights.map(insight => `
+                <div style="background: ${insight.color}; backdrop-filter: blur(10px); border-radius: 12px; padding: 16px; border: 1px solid rgba(255, 255, 255, 0.2);">
+                    <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 8px;">
+                        <div style="font-size: 28px;">${insight.icon}</div>
+                        <div style="flex: 1;">
+                            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 0.5px; opacity: 0.9; font-weight: 600;">${insight.type}</div>
+                            <div style="font-size: 15px; font-weight: 700; margin-top: 2px;">${insight.title}</div>
+                        </div>
+                    </div>
+                    <div style="font-size: 14px; line-height: 1.5; opacity: 0.95; margin-bottom: 12px;">
+                        ${insight.message}
+                    </div>
+                    <button class="btn btn-sm" onclick="showToast('Feature Coming Soon', 'This AI feature will be available soon!', '🚀')" 
+                            style="width: 100%; background: rgba(255, 255, 255, 0.9); color: var(--primary); border: none; font-weight: 600;">
+                        ${insight.action}
+                    </button>
+                </div>
+            `).join('');
+            
+            document.getElementById('aiInsightsContainer').innerHTML = insights.length > 0 ? html : 
+                '<div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.7); grid-column: 1 / -1;">AI insights will appear here as you collect more data.</div>';
         }
 
         function renderTopProperties(reservations, properties, targetElementId = 'topPropertiesChart') {
@@ -11563,7 +12655,10 @@
                         await loadAvailabilityCalendar();
                         break;
                     case 'properties':
-                        await loadProperties();
+                        loadProperties();
+                        break;
+                    case 'guests':
+                        loadGuests();
                         break;
                     case 'performance':
                         await initializePerformanceView();
@@ -12027,6 +13122,815 @@
             icon.textContent = '▼';
         }
     }
+        // ==========================================
+        // GUEST MANAGEMENT FUNCTIONS - OPTION B
+        // ==========================================
+
+        let allGuests = [];
+        let filteredGuests = [];
+        let displayedGuests = [];
+        let currentGuestData = null;
+        let currentGuestView = 'table'; // 'table' or 'cards'
+        let currentGuestPage = 1;
+        let guestsPerPage = 50;
+        let currentSortColumn = 'name';
+        let currentSortDirection = 'asc';
+
+        /**
+         * Load and display all guests
+         */
+        async function loadGuests() {
+            try {
+                console.log('Loading guests...');
+                
+                // Get all reservations
+                const reservations = await db.getReservations();
+                console.log('Reservations loaded:', reservations.length);
+                
+                // Create guest map (group by phone or email)
+                const guestMap = new Map();
+                
+                reservations.forEach(r => {
+                    // Use phone as primary identifier, fallback to email
+                    const guestKey = (r.guest_phone || r.guest_email || r.guest_name || '').toLowerCase().trim();
+                    
+                    if (!guestKey) return;
+                    
+                    if (!guestMap.has(guestKey)) {
+                        guestMap.set(guestKey, {
+                            name: r.guest_name,
+                            phone: r.guest_phone || '',
+                            email: r.guest_email || '',
+                            bookings: [],
+                            key: guestKey
+                        });
+                    }
+                    
+                    guestMap.get(guestKey).bookings.push(r);
+                    
+                    // Update name/phone/email to latest non-empty values
+                    const guest = guestMap.get(guestKey);
+                    if (r.guest_name && r.guest_name !== guest.name) guest.name = r.guest_name;
+                    if (r.guest_phone && r.guest_phone !== guest.phone) guest.phone = r.guest_phone;
+                    if (r.guest_email && r.guest_email !== guest.email) guest.email = r.guest_email;
+                });
+                
+                // Convert to array and calculate stats
+                allGuests = Array.from(guestMap.values()).map(guest => {
+                    const confirmedBookings = guest.bookings.filter(b => b.status !== 'cancelled');
+                    const totalSpent = confirmedBookings.reduce((sum, b) => sum + (parseFloat(b.total_amount) || 0), 0);
+                    const totalNights = confirmedBookings.reduce((sum, b) => sum + (parseInt(b.nights) || 0), 0);
+                    const lastBooking = confirmedBookings.length > 0 
+                        ? new Date(Math.max(...confirmedBookings.map(b => new Date(b.check_in))))
+                        : null;
+                    
+                    return {
+                        ...guest,
+                        totalBookings: confirmedBookings.length,
+                        totalSpent,
+                        totalNights,
+                        lastVisit: lastBooking,
+                        avgBookingValue: confirmedBookings.length > 0 ? totalSpent / confirmedBookings.length : 0,
+                        isRepeat: confirmedBookings.length > 1,
+                        isVIP: confirmedBookings.length >= 5,
+                        isHighValue: totalSpent >= 50000
+                    };
+                });
+                
+                // Update summary statistics
+                document.getElementById('guestStatTotal').textContent = allGuests.length;
+                document.getElementById('guestStatRepeat').textContent = allGuests.filter(g => g.isRepeat).length;
+                document.getElementById('guestStatVIP').textContent = allGuests.filter(g => g.isVIP).length;
+                document.getElementById('guestStatHighValue').textContent = allGuests.filter(g => g.isHighValue).length;
+                
+                const avgStays = allGuests.length > 0 
+                    ? (allGuests.reduce((sum, g) => sum + g.totalBookings, 0) / allGuests.length).toFixed(1)
+                    : '0.0';
+                document.getElementById('guestStatAvgStays').textContent = avgStays;
+                
+                // Load saved view preference
+                const savedView = localStorage.getItem('guestViewPreference') || 'table';
+                currentGuestView = savedView;
+                
+                // Initial display
+                filteredGuests = [...allGuests];
+                currentGuestPage = 1;
+                filterGuests();
+                
+            } catch (error) {
+                console.error('Error loading guests:', error);
+                showToast('Error', 'Failed to load guests: ' + error.message, '❌');
+                
+                // Show error in UI
+                const tableBody = document.getElementById('guestTableBody');
+                if (tableBody) {
+                    tableBody.innerHTML = `
+                        <tr>
+                            <td colspan="6" style="text-align: center; padding: 60px 20px; color: var(--danger);">
+                                <div style="font-size: 48px; margin-bottom: 16px;">⚠️</div>
+                                <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Error Loading Guests</div>
+                                <div style="font-size: 14px; color: var(--text-secondary);">${error.message}</div>
+                            </td>
+                        </tr>
+                    `;
+                }
+            }
+        }
+
+        /**
+         * Search guests by name, phone, or email (instant search)
+         */
+        function searchGuests() {
+            const searchTerm = document.getElementById('searchGuests').value.toLowerCase().trim();
+            
+            if (!searchTerm) {
+                filteredGuests = [...allGuests];
+            } else {
+                filteredGuests = allGuests.filter(g => 
+                    (g.name || '').toLowerCase().includes(searchTerm) ||
+                    (g.phone || '').toLowerCase().includes(searchTerm) ||
+                    (g.email || '').toLowerCase().includes(searchTerm)
+                );
+            }
+            
+            currentGuestPage = 1; // Reset to first page
+            filterGuests();
+        }
+
+        /**
+         * Filter and sort guests
+         */
+        function filterGuests() {
+            let guests = [...filteredGuests];
+            
+            // Apply type filter
+            const typeFilter = document.getElementById('guestTypeFilter').value;
+            if (typeFilter === 'repeat') {
+                guests = guests.filter(g => g.isRepeat);
+            } else if (typeFilter === 'new') {
+                guests = guests.filter(g => !g.isRepeat);
+            } else if (typeFilter === 'vip') {
+                guests = guests.filter(g => g.isVIP);
+            } else if (typeFilter === 'highvalue') {
+                guests = guests.filter(g => g.isHighValue);
+            }
+            
+            // Apply sorting
+            sortGuestArray(guests);
+            
+            // Store for pagination
+            displayedGuests = guests;
+            
+            // Auto-switch to cards if < 20 results, otherwise table
+            if (guests.length > 0 && guests.length <= 20 && currentGuestView === 'table') {
+                // Don't auto-switch, respect user preference
+            }
+            
+            // Render based on current view
+            if (currentGuestView === 'table') {
+                renderGuestTable();
+            } else {
+                renderGuestCards();
+            }
+        }
+
+        /**
+         * Sort guest array by current sort column
+         */
+        function sortGuestArray(guests) {
+            guests.sort((a, b) => {
+                let aVal, bVal;
+                
+                switch(currentSortColumn) {
+                    case 'name':
+                        aVal = (a.name || '').toLowerCase();
+                        bVal = (b.name || '').toLowerCase();
+                        break;
+                    case 'phone':
+                        aVal = a.phone || '';
+                        bVal = b.phone || '';
+                        break;
+                    case 'lastVisit':
+                        aVal = a.lastVisit ? a.lastVisit.getTime() : 0;
+                        bVal = b.lastVisit ? b.lastVisit.getTime() : 0;
+                        break;
+                    case 'stays':
+                        aVal = a.totalBookings;
+                        bVal = b.totalBookings;
+                        break;
+                    case 'spent':
+                        aVal = a.totalSpent;
+                        bVal = b.totalSpent;
+                        break;
+                    default:
+                        aVal = a.name;
+                        bVal = b.name;
+                }
+                
+                if (aVal < bVal) return currentSortDirection === 'asc' ? -1 : 1;
+                if (aVal > bVal) return currentSortDirection === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        /**
+         * Sort guests table by column
+         */
+        function sortGuestsTable(column) {
+            if (currentSortColumn === column) {
+                // Toggle direction
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = column;
+                currentSortDirection = 'asc';
+            }
+            
+            // Update sort icons
+            document.querySelectorAll('[id^="sortIcon"]').forEach(el => el.textContent = '↕️');
+            const icon = currentSortDirection === 'asc' ? '↑' : '↓';
+            const iconId = 'sortIcon' + column.charAt(0).toUpperCase() + column.slice(1);
+            const iconEl = document.getElementById(iconId);
+            if (iconEl) iconEl.textContent = icon;
+            
+            filterGuests();
+        }
+
+        /**
+         * Switch between table and card view
+         */
+        function switchGuestView(view) {
+            currentGuestView = view;
+            
+            // Save preference
+            localStorage.setItem('guestViewPreference', view);
+            
+            // Update button styles
+            document.getElementById('tableViewBtn').style.background = view === 'table' ? 'var(--primary)' : 'var(--secondary)';
+            document.getElementById('cardViewBtn').style.background = view === 'cards' ? 'var(--primary)' : 'var(--secondary)';
+            
+            // Show/hide views
+            document.getElementById('guestTableView').style.display = view === 'table' ? 'block' : 'none';
+            document.getElementById('guestCardView').style.display = view === 'cards' ? 'block' : 'none';
+            
+            // Re-render
+            filterGuests();
+        }
+
+        /**
+         * Change guests per page
+         */
+        function changeGuestsPerPage() {
+            const value = document.getElementById('guestsPerPage').value;
+            guestsPerPage = value === 'all' ? displayedGuests.length : parseInt(value);
+            currentGuestPage = 1;
+            filterGuests();
+        }
+
+        /**
+         * Render guest table with pagination
+         */
+        function renderGuestTable() {
+            const tbody = document.getElementById('guestTableBody');
+            
+            if (displayedGuests.length === 0) {
+                tbody.innerHTML = `
+                    <tr>
+                        <td colspan="6" style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                            <div style="font-size: 48px; margin-bottom: 16px;">👥</div>
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No guests found</div>
+                            <div style="font-size: 14px;">Try adjusting your search or filters</div>
+                        </td>
+                    </tr>
+                `;
+                document.getElementById('guestPagination').style.display = 'none';
+                return;
+            }
+            
+            // Pagination logic
+            const totalGuests = displayedGuests.length;
+            const totalPages = Math.ceil(totalGuests / guestsPerPage);
+            const startIdx = (currentGuestPage - 1) * guestsPerPage;
+            const endIdx = Math.min(startIdx + guestsPerPage, totalGuests);
+            const pageGuests = displayedGuests.slice(startIdx, endIdx);
+            
+            // Update pagination info
+            document.getElementById('guestShowingStart').textContent = totalGuests > 0 ? startIdx + 1 : 0;
+            document.getElementById('guestShowingEnd').textContent = endIdx;
+            document.getElementById('guestShowingTotal').textContent = totalGuests;
+            document.getElementById('guestPagination').style.display = 'flex';
+            
+            // Render table rows
+            let html = '';
+            pageGuests.forEach(guest => {
+                const guestBadge = guest.isVIP ? '<span style="background: var(--warning); color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 6px;">👑 VIP</span>' :
+                                   guest.isRepeat ? '<span style="background: var(--success); color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 6px;">🌟</span>' :
+                                   '<span style="background: var(--primary); color: white; padding: 2px 6px; border-radius: 10px; font-size: 10px; margin-left: 6px;">✨</span>';
+                
+                const lastVisitText = guest.lastVisit ? formatDate(guest.lastVisit) : 'Never';
+                const contactInfo = guest.phone ? `📱 ${guest.phone}` : (guest.email ? `📧 ${guest.email}` : 'No contact');
+                
+                html += `
+                    <tr style="cursor: pointer;" onclick="showGuestDetail('${guest.key.replace(/'/g, "\\'")}')">
+                        <td>
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 36px; height: 36px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white; flex-shrink: 0;">
+                                    ${(guest.name || '?')[0].toUpperCase()}
+                                </div>
+                                <div>
+                                    <strong>${guest.name || 'Unknown Guest'}</strong>
+                                    ${guestBadge}
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-size: 13px;">
+                                ${guest.phone ? `<div>📱 ${guest.phone}</div>` : ''}
+                                ${guest.email ? `<div style="color: var(--text-secondary);">📧 ${guest.email}</div>` : ''}
+                                ${!guest.phone && !guest.email ? '<span style="color: var(--text-secondary);">No contact</span>' : ''}
+                            </div>
+                        </td>
+                        <td>${lastVisitText}</td>
+                        <td><strong>${guest.totalBookings}</strong></td>
+                        <td><strong style="color: var(--success);">${formatCurrency(guest.totalSpent)}</strong></td>
+                        <td>
+                            <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); showGuestDetail('${guest.key.replace(/'/g, "\\'")}')">
+                                👁️ View
+                            </button>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+            
+            // Render pagination buttons
+            renderPaginationButtons(totalPages);
+        }
+
+        /**
+         * Render pagination buttons
+         */
+        function renderPaginationButtons(totalPages) {
+            const container = document.getElementById('guestPaginationButtons');
+            
+            if (totalPages <= 1) {
+                container.innerHTML = '';
+                return;
+            }
+            
+            let html = '';
+            
+            // Previous button
+            html += `
+                <button class="btn btn-sm btn-secondary" 
+                        onclick="changeGuestPage(${currentGuestPage - 1})" 
+                        ${currentGuestPage === 1 ? 'disabled' : ''}>
+                    ◀ Prev
+                </button>
+            `;
+            
+            // Page numbers
+            const maxButtons = 7;
+            let startPage = Math.max(1, currentGuestPage - Math.floor(maxButtons / 2));
+            let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+            
+            if (endPage - startPage < maxButtons - 1) {
+                startPage = Math.max(1, endPage - maxButtons + 1);
+            }
+            
+            if (startPage > 1) {
+                html += `<button class="btn btn-sm btn-secondary" onclick="changeGuestPage(1)">1</button>`;
+                if (startPage > 2) html += `<span style="padding: 0 8px;">...</span>`;
+            }
+            
+            for (let i = startPage; i <= endPage; i++) {
+                const isActive = i === currentGuestPage;
+                html += `
+                    <button class="btn btn-sm" 
+                            onclick="changeGuestPage(${i})"
+                            style="background: ${isActive ? 'var(--primary)' : 'var(--secondary)'}; color: white;">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            if (endPage < totalPages) {
+                if (endPage < totalPages - 1) html += `<span style="padding: 0 8px;">...</span>`;
+                html += `<button class="btn btn-sm btn-secondary" onclick="changeGuestPage(${totalPages})">${totalPages}</button>`;
+            }
+            
+            // Next button
+            html += `
+                <button class="btn btn-sm btn-secondary" 
+                        onclick="changeGuestPage(${currentGuestPage + 1})" 
+                        ${currentGuestPage === totalPages ? 'disabled' : ''}>
+                    Next ▶
+                </button>
+            `;
+            
+            container.innerHTML = html;
+        }
+
+        /**
+         * Change page
+         */
+        function changeGuestPage(page) {
+            const totalPages = Math.ceil(displayedGuests.length / guestsPerPage);
+            if (page < 1 || page > totalPages) return;
+            
+            currentGuestPage = page;
+            renderGuestTable();
+            
+            // Scroll to top of table
+            document.getElementById('guestTableView').scrollIntoView({ behavior: 'smooth', block: 'start' });
+        }
+
+        /**
+         * Render guest cards (compact grid version)
+         */
+        function renderGuestCards() {
+            const container = document.getElementById('guestListContainer');
+            
+            if (displayedGuests.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                        <div style="font-size: 48px; margin-bottom: 16px;">👥</div>
+                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">No guests found</div>
+                        <div style="font-size: 14px;">Try adjusting your search or filters</div>
+                    </div>
+                `;
+                return;
+            }
+            
+            // Pagination for cards
+            const totalGuests = displayedGuests.length;
+            const startIdx = (currentGuestPage - 1) * guestsPerPage;
+            const endIdx = Math.min(startIdx + guestsPerPage, totalGuests);
+            const pageGuests = displayedGuests.slice(startIdx, endIdx);
+            
+            let html = '<div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px;">';
+            
+            pageGuests.forEach(guest => {
+                const guestBadge = guest.isVIP ? '👑 VIP' : guest.isRepeat ? '🌟 Repeat' : '✨ New';
+                const badgeColor = guest.isVIP ? 'var(--warning)' : guest.isRepeat ? 'var(--success)' : 'var(--primary)';
+                const lastVisitText = guest.lastVisit ? formatDate(guest.lastVisit) : 'Never';
+                
+                html += `
+                    <div class="stat-card" style="cursor: pointer; transition: all 0.3s ease;" onclick="showGuestDetail('${guest.key.replace(/'/g, "\\'")}')">
+                        <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 12px;">
+                            <div style="flex: 1;">
+                                <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 8px;">
+                                    <div style="width: 40px; height: 40px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; color: white;">
+                                        ${(guest.name || '?')[0].toUpperCase()}
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <h4 style="font-size: 16px; font-weight: 700; margin: 0 0 4px 0;">${guest.name || 'Unknown'}</h4>
+                                        <div style="display: inline-block; padding: 2px 8px; background: ${badgeColor}; color: white; border-radius: 10px; font-size: 10px; font-weight: 600;">
+                                            ${guestBadge}
+                                        </div>
+                                    </div>
+                                </div>
+                                <div style="font-size: 12px; color: var(--text-secondary);">
+                                    ${guest.phone ? `<div>📱 ${guest.phone}</div>` : ''}
+                                    ${guest.email ? `<div>📧 ${guest.email}</div>` : ''}
+                                </div>
+                            </div>
+                            <div style="text-align: right;">
+                                <div style="font-size: 20px; font-weight: 700; color: var(--success);">${formatCurrency(guest.totalSpent)}</div>
+                                <div style="font-size: 11px; color: var(--text-secondary);">Total</div>
+                            </div>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; padding-top: 12px; border-top: 1px solid var(--border);">
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 700; color: var(--primary);">${guest.totalBookings}</div>
+                                <div style="font-size: 10px; color: var(--text-secondary);">Stays</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 700; color: var(--text-primary);">${guest.totalNights}</div>
+                                <div style="font-size: 10px; color: var(--text-secondary);">Nights</div>
+                            </div>
+                            <div style="text-align: center;">
+                                <div style="font-size: 18px; font-weight: 700; color: var(--text-secondary);">${lastVisitText}</div>
+                                <div style="font-size: 10px; color: var(--text-secondary);">Last</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            
+            // Add pagination for cards if needed
+            const totalPages = Math.ceil(totalGuests / guestsPerPage);
+            if (totalPages > 1) {
+                html += `
+                    <div style="display: flex; justify-content: center; align-items: center; padding: 20px; gap: 8px;">
+                        ${renderCardPaginationHTML(totalPages)}
+                    </div>
+                `;
+            }
+            
+            container.innerHTML = html;
+        }
+
+        /**
+         * Render pagination HTML for cards
+         */
+        function renderCardPaginationHTML(totalPages) {
+            let html = `
+                <button class="btn btn-sm btn-secondary" 
+                        onclick="changeGuestPage(${currentGuestPage - 1})" 
+                        ${currentGuestPage === 1 ? 'disabled' : ''}>
+                    ◀ Prev
+                </button>
+            `;
+            
+            for (let i = 1; i <= Math.min(5, totalPages); i++) {
+                const isActive = i === currentGuestPage;
+                html += `
+                    <button class="btn btn-sm" 
+                            onclick="changeGuestPage(${i})"
+                            style="background: ${isActive ? 'var(--primary)' : 'var(--secondary)'}; color: white;">
+                        ${i}
+                    </button>
+                `;
+            }
+            
+            if (totalPages > 5) {
+                html += `<span>...</span>`;
+            }
+            
+            html += `
+                <button class="btn btn-sm btn-secondary" 
+                        onclick="changeGuestPage(${currentGuestPage + 1})" 
+                        ${currentGuestPage === totalPages ? 'disabled' : ''}>
+                    Next ▶
+                </button>
+            `;
+            
+            return html;
+        }
+
+        /**
+         * Show guest detail modal
+         */
+        function showGuestDetail(guestKey) {
+            const guest = allGuests.find(g => g.key === guestKey);
+            if (!guest) return;
+            
+            currentGuestData = guest;
+            
+            // Update profile section
+            document.getElementById('guestDetailName').textContent = guest.name || 'Unknown Guest';
+            document.getElementById('guestDetailNameHeader').textContent = guest.name || 'Unknown Guest';
+            document.getElementById('guestDetailPhone').textContent = guest.phone || 'No phone';
+            document.getElementById('guestDetailEmail').textContent = guest.email || 'No email';
+            
+            // Update badge
+            const badge = guest.isVIP ? '👑 VIP Guest' : guest.isRepeat ? '🌟 Repeat Guest' : '✨ New Guest';
+            document.getElementById('guestDetailBadge').textContent = badge;
+            
+            // Update statistics
+            document.getElementById('guestDetailTotalBookings').textContent = guest.totalBookings;
+            document.getElementById('guestDetailTotalNights').textContent = guest.totalNights;
+            document.getElementById('guestDetailTotalSpent').textContent = formatCurrency(guest.totalSpent);
+            document.getElementById('guestDetailAvgValue').textContent = formatCurrency(guest.avgBookingValue);
+            document.getElementById('guestDetailLastVisit').textContent = guest.lastVisit 
+                ? formatDate(guest.lastVisit)
+                : 'Never';
+            
+            // Update booking count
+            document.getElementById('guestDetailBookingCount').textContent = guest.totalBookings;
+            
+            // Render booking history
+            const historyHtml = guest.bookings
+                .sort((a, b) => new Date(b.check_in) - new Date(a.check_in))
+                .map(booking => {
+                    const statusColors = {
+                        'confirmed': 'var(--success)',
+                        'pending': 'var(--warning)',
+                        'checked-in': 'var(--primary)',
+                        'checked-out': 'var(--text-secondary)',
+                        'cancelled': 'var(--danger)'
+                    };
+                    
+                    return `
+                        <div style="padding: 16px; background: var(--background-alt); border-radius: 8px; border-left: 4px solid ${statusColors[booking.status] || 'var(--border)'};">
+                            <div style="display: flex; justify-content: space-between; align-items: start; margin-bottom: 8px;">
+                                <div>
+                                    <div style="font-weight: 600; margin-bottom: 4px;">${booking.property_name || 'Property'}</div>
+                                    <div style="font-size: 13px; color: var(--text-secondary);">
+                                        📅 ${formatDate(booking.check_in)} → ${formatDate(booking.check_out)} 
+                                        <span style="color: var(--text-primary); font-weight: 600;">(${booking.nights} nights)</span>
+                                    </div>
+                                    <div style="font-size: 13px; color: var(--text-secondary); margin-top: 4px;">
+                                        Booking ID: ${booking.booking_id || 'N/A'}
+                                    </div>
+                                </div>
+                                <div style="text-align: right;">
+                                    <div style="font-size: 18px; font-weight: 700; color: var(--success);">
+                                        ${formatCurrency(booking.total_amount)}
+                                    </div>
+                                    <div style="font-size: 11px; padding: 3px 8px; background: ${statusColors[booking.status] || 'var(--border)'}; color: white; border-radius: 12px; margin-top: 4px; display: inline-block;">
+                                        ${booking.status}
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">
+                                👥 ${booking.adults || 0} adults${booking.children ? `, ${booking.children} children` : ''}
+                            </div>
+                        </div>
+                    `;
+                }).join('');
+            
+            document.getElementById('guestDetailBookingHistory').innerHTML = historyHtml;
+            
+            // Show modal
+            document.getElementById('guestDetailModal').classList.add('active');
+        }
+
+        /**
+         * Close guest detail modal
+         */
+        function closeGuestDetailModal() {
+            document.getElementById('guestDetailModal').classList.remove('active');
+            currentGuestData = null;
+        }
+
+        /**
+         * Edit guest information
+         */
+        function editGuestInfo() {
+            if (!currentGuestData) return;
+            
+            document.getElementById('editGuestName').value = currentGuestData.name || '';
+            document.getElementById('editGuestPhone').value = currentGuestData.phone || '';
+            document.getElementById('editGuestEmail').value = currentGuestData.email || '';
+            document.getElementById('editGuestOriginalPhone').value = currentGuestData.phone || '';
+            document.getElementById('editGuestOriginalEmail').value = currentGuestData.email || '';
+            
+            document.getElementById('editGuestModal').classList.add('active');
+        }
+
+        /**
+         * Close edit guest modal
+         */
+        function closeEditGuestModal() {
+            document.getElementById('editGuestModal').classList.remove('active');
+        }
+
+        /**
+         * Save guest information
+         */
+        async function saveGuestInfo() {
+            if (!currentGuestData) return;
+            
+            const newName = document.getElementById('editGuestName').value.trim();
+            const newPhone = document.getElementById('editGuestPhone').value.trim();
+            const newEmail = document.getElementById('editGuestEmail').value.trim();
+            
+            if (!newName) {
+                showToast('Validation Error', 'Guest name is required', '❌');
+                return;
+            }
+            
+            try {
+                // Update all bookings for this guest
+                const updates = {
+                    guest_name: newName,
+                    guest_phone: newPhone,
+                    guest_email: newEmail
+                };
+                
+                // Find all booking IDs for this guest
+                const bookingIds = currentGuestData.bookings.map(b => b.booking_id);
+                
+                // Update in database
+                for (const bookingId of bookingIds) {
+                    await supabase
+                        .from('reservations')
+                        .update(updates)
+                        .eq('booking_id', bookingId);
+                }
+                
+                closeEditGuestModal();
+                closeGuestDetailModal();
+                
+                // Reload guests
+                await loadGuests();
+                
+                showToast('Success', `Updated information for ${newName}`, '✅');
+                
+            } catch (error) {
+                console.error('Error updating guest:', error);
+                showToast('Error', 'Failed to update guest information', '❌');
+            }
+        }
+
+        /**
+         * Call guest
+         */
+        function callGuest() {
+            if (!currentGuestData || !currentGuestData.phone) {
+                showToast('No Phone', 'Guest phone number not available', '⚠️');
+                return;
+            }
+            window.location.href = `tel:${currentGuestData.phone}`;
+        }
+
+        /**
+         * WhatsApp guest
+         */
+        function whatsappGuest() {
+            if (!currentGuestData || !currentGuestData.phone) {
+                showToast('No Phone', 'Guest phone number not available', '⚠️');
+                return;
+            }
+            
+            let phone = currentGuestData.phone.replace(/[^0-9]/g, '');
+            if (!phone.startsWith('91') && phone.length === 10) {
+                phone = '91' + phone;
+            }
+            
+            const message = encodeURIComponent(`Hello ${currentGuestData.name}, this is ResIQ by Hostizzy.`);
+            window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+        }
+
+        /**
+         * Email guest
+         */
+        function emailGuest() {
+            if (!currentGuestData || !currentGuestData.email) {
+                showToast('No Email', 'Guest email not available', '⚠️');
+                return;
+            }
+            window.location.href = `mailto:${currentGuestData.email}`;
+        }
+
+        /**
+         * Clear guest filters
+         */
+        function clearGuestFilters() {
+            document.getElementById('searchGuests').value = '';
+            document.getElementById('guestTypeFilter').value = '';
+            currentGuestPage = 1;
+            filteredGuests = [...allGuests];
+            filterGuests();
+        }
+
+        /**
+         * Export guests to CSV
+         */
+        function exportGuestsCSV() {
+            const guestsToExport = displayedGuests.length > 0 ? displayedGuests : allGuests;
+            
+            if (guestsToExport.length === 0) {
+                showToast('No Data', 'No guests to export', '⚠️');
+                return;
+            }
+            
+            // Prepare CSV data
+            const headers = ['Name', 'Phone', 'Email', 'Total Bookings', 'Total Nights', 'Total Spent', 'Avg Booking Value', 'Last Visit', 'Guest Type'];
+            
+            const rows = guestsToExport.map(g => [
+                g.name || '',
+                g.phone || '',
+                g.email || '',
+                g.totalBookings,
+                g.totalNights,
+                g.totalSpent,
+                g.avgBookingValue.toFixed(2),
+                g.lastVisit ? formatDate(g.lastVisit) : 'Never',
+                g.isVIP ? 'VIP' : g.isRepeat ? 'Repeat' : 'New'
+            ]);
+            
+            // Create CSV
+            let csv = headers.join(',') + '\n';
+            rows.forEach(row => {
+                csv += row.map(cell => {
+                    // Escape quotes and wrap in quotes if contains comma
+                    const cellStr = String(cell);
+                    if (cellStr.includes(',') || cellStr.includes('"')) {
+                        return '"' + cellStr.replace(/"/g, '""') + '"';
+                    }
+                    return cellStr;
+                }).join(',') + '\n';
+            });
+            
+            // Download
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `guests_${new Date().toISOString().split('T')[0]}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            
+            showToast('Exported', `${guestsToExport.length} guests exported to CSV`, '✅');
+        }
 
 </script>
     <!-- Quick Actions Panel -->
@@ -12134,6 +14038,129 @@
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+    <!-- Guest Detail Modal -->
+    <div id="guestDetailModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h2 id="guestDetailName">Guest Profile</h2>
+                <button class="close-modal" onclick="closeGuestDetailModal()">×</button>
+            </div>
+            <div class="modal-body" style="max-height: 70vh; overflow-y: auto;">
+                <!-- Guest Profile Card -->
+                <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 24px; border-radius: 12px; margin-bottom: 24px;">
+                    <div style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 16px;">
+                        <div style="flex: 1;">
+                            <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 12px;">
+                                <div style="width: 60px; height: 60px; background: rgba(255,255,255,0.2); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 28px;">
+                                    👤
+                                </div>
+                                <div>
+                                    <h2 style="margin: 0; font-size: 24px;" id="guestDetailNameHeader">Guest Name</h2>
+                                    <div id="guestDetailBadge" style="display: inline-block; padding: 4px 12px; background: rgba(255,255,255,0.2); border-radius: 12px; font-size: 12px; margin-top: 4px;">
+                                        New Guest
+                                    </div>
+                                </div>
+                            </div>
+                            <div style="display: flex; flex-direction: column; gap: 8px; font-size: 14px;">
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span>📱</span>
+                                    <span id="guestDetailPhone">+91-XXXXXXXXXX</span>
+                                    <button onclick="callGuest()" style="background: rgba(255,255,255,0.2); border: none; padding: 4px 12px; border-radius: 6px; color: white; cursor: pointer; font-size: 12px;">
+                                        Call
+                                    </button>
+                                    <button onclick="whatsappGuest()" style="background: rgba(37,211,102,0.8); border: none; padding: 4px 12px; border-radius: 6px; color: white; cursor: pointer; font-size: 12px;">
+                                        WhatsApp
+                                    </button>
+                                </div>
+                                <div style="display: flex; align-items: center; gap: 8px;">
+                                    <span>📧</span>
+                                    <span id="guestDetailEmail">email@example.com</span>
+                                    <button onclick="emailGuest()" style="background: rgba(255,255,255,0.2); border: none; padding: 4px 12px; border-radius: 6px; color: white; cursor: pointer; font-size: 12px;">
+                                        Email
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        <button class="btn" onclick="editGuestInfo()" style="background: rgba(255,255,255,0.2); color: white; border: 1px solid rgba(255,255,255,0.3);">
+                            ✏️ Edit Info
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Guest Statistics -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 16px; margin-bottom: 24px;">
+                    <div style="background: var(--background-alt); padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: var(--primary);" id="guestDetailTotalBookings">0</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Total Bookings</div>
+                    </div>
+                    <div style="background: var(--background-alt); padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: var(--success);" id="guestDetailTotalNights">0</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Total Nights</div>
+                    </div>
+                    <div style="background: var(--background-alt); padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: var(--warning);" id="guestDetailTotalSpent">₹0</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Total Spent</div>
+                    </div>
+                    <div style="background: var(--background-alt); padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: #06b6d4;" id="guestDetailAvgValue">₹0</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Avg Booking Value</div>
+                    </div>
+                    <div style="background: var(--background-alt); padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700; color: var(--text-secondary);" id="guestDetailLastVisit">Never</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-top: 4px;">Last Visit</div>
+                    </div>
+                </div>
+
+                <!-- Booking History -->
+                <div>
+                    <h3 style="margin-bottom: 16px; display: flex; align-items: center; gap: 8px;">
+                        📅 Booking History
+                        <span id="guestDetailBookingCount" style="background: var(--primary); color: white; padding: 2px 8px; border-radius: 12px; font-size: 12px;">0</span>
+                    </h3>
+                    <div id="guestDetailBookingHistory" style="display: flex; flex-direction: column; gap: 12px;">
+                        <!-- Populated by JavaScript -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Guest Modal -->
+    <div id="editGuestModal" class="modal">
+        <div class="modal-content" style="max-width: 500px;">
+            <div class="modal-header">
+                <h2>✏️ Edit Guest Information</h2>
+                <button class="close-modal" onclick="closeEditGuestModal()">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editGuestOriginalPhone">
+                <input type="hidden" id="editGuestOriginalEmail">
+                
+                <div class="form-group">
+                    <label>Guest Name *</label>
+                    <input type="text" id="editGuestName" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>Phone Number *</label>
+                    <input type="tel" id="editGuestPhone" required placeholder="+91-XXXXXXXXXX">
+                </div>
+                
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="editGuestEmail" placeholder="guest@example.com">
+                </div>
+                
+                <div style="margin-top: 16px; padding: 12px; background: #fef3c7; border-radius: 8px; font-size: 13px; color: #92400e;">
+                    ⚠️ Note: This will update guest information for all their bookings.
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeEditGuestModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveGuestInfo()">💾 Save Changes</button>
             </div>
         </div>
     </div>
