@@ -2797,6 +2797,10 @@
                     <div class="mobile-nav-icon">💰</div>
                     <div>Payments</div>
                 </a>
+                <a class="mobile-nav-item" onclick="showView('availability')">
+                    <div class="mobile-nav-icon">🗓️</div>
+                    <div>Calendar</div>
+                </a>
                 <a class="mobile-nav-item" onclick="showView('performance')">
                     <div class="mobile-nav-icon">📊</div>
                     <div>Performance</div>
@@ -5919,6 +5923,106 @@
             return (totalGuests / reservations.length).toFixed(1);
         }
 
+        /**
+         * Auto-update reservation statuses based on dates
+         * Runs silently in background
+         */
+        async function autoUpdateReservationStatuses() {
+            try {
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                const todayTime = today.getTime();
+                
+                let updatedCount = 0;
+                const reservationsToUpdate = [];
+                
+                // Get all reservations
+                const allReservations = state.reservations || [];
+                
+                for (const reservation of allReservations) {
+                    // Skip cancelled reservations
+                    if (reservation.status === 'cancelled') continue;
+                    
+                    const checkIn = new Date(reservation.check_in);
+                    checkIn.setHours(0, 0, 0, 0);
+                    const checkInTime = checkIn.getTime();
+                    
+                    const checkOut = new Date(reservation.check_out);
+                    checkOut.setHours(0, 0, 0, 0);
+                    const checkOutTime = checkOut.getTime();
+                    
+                    let newStatus = null;
+                    
+                    // Logic for status updates
+                    if (reservation.status === 'confirmed' && todayTime >= checkInTime && todayTime < checkOutTime) {
+                        // Check-in date has arrived
+                        newStatus = 'checked-in';
+                    } else if ((reservation.status === 'confirmed' || reservation.status === 'checked-in') && todayTime >= checkOutTime) {
+                        // Check-out date has passed
+                        newStatus = 'checked-out';
+                    }
+                    
+                    // Update if status changed
+                    if (newStatus && newStatus !== reservation.status) {
+                        reservationsToUpdate.push({
+                            bookingId: reservation.booking_id,
+                            oldStatus: reservation.status,
+                            newStatus: newStatus,
+                            propertyName: reservation.property_name,
+                            guestName: reservation.guest_name
+                        });
+                        
+                        // Update in database
+                        const { error } = await supabase
+                            .from('reservations')
+                            .update({ status: newStatus })
+                            .eq('booking_id', reservation.booking_id);
+                        
+                        if (!error) {
+                            // Update in local state
+                            reservation.status = newStatus;
+                            updatedCount++;
+                        }
+                    }
+                }
+                
+                // Silent update - only log to console
+                if (updatedCount > 0) {
+                    console.log(`✅ Auto-updated ${updatedCount} reservation status(es):`);
+                    reservationsToUpdate.forEach(r => {
+                        console.log(`  - ${r.guestName} at ${r.propertyName}: ${r.oldStatus} → ${r.newStatus}`);
+                    });
+                    
+                    // Refresh current view silently
+                    const currentView = localStorage.getItem('lastView') || 'home';
+                    if (currentView === 'dashboard') {
+                        await loadDashboard();
+                    } else if (currentView === 'reservations') {
+                        await loadReservations();
+                    } else if (currentView === 'home') {
+                        await updateHomeScreenStats();
+                    }
+                }
+                
+            } catch (error) {
+                console.error('Error auto-updating statuses:', error);
+                // Silent fail - don't show error to user
+            }
+        }
+
+        /**
+         * Schedule auto-status updates
+         */
+        function scheduleAutoStatusUpdates() {
+            // Run immediately on load (after 2 seconds to let app initialize)
+            setTimeout(() => autoUpdateReservationStatuses(), 2000);
+            
+            // Run every hour (3600000 ms = 1 hour)
+            setInterval(() => autoUpdateReservationStatuses(), 3600000);
+            
+            console.log('✅ Auto status update scheduler initialized');
+        }
+
         // Dashboard
         async function loadDashboard() {
             try {
@@ -8552,7 +8656,7 @@
                 const reservation = {
                     property_id: propertyId,
                     property_name: property.name,
-                    booking_type: document.getElementById('bookingType').value, // ← ADD THIS LINE
+                    booking_type: document.getElementById('bookingType').value,
                     booking_date: new Date().toISOString().split('T')[0],
                     check_in: checkIn,
                     check_out: checkOut,
@@ -8566,7 +8670,7 @@
                     guest_email: document.getElementById('guestEmail').value || null,
                     guest_city: document.getElementById('guestCity').value || null,
                     status: document.getElementById('bookingStatus').value,
-                    booking_source: document.getElementById('bookingSource').value,
+                    booking_source: bookingSource,
                     number_of_rooms: parseInt(document.getElementById('numberOfRooms').value) || 1,
                     adults: adults,
                     kids: kids,
@@ -8576,7 +8680,6 @@
                     meals_chef: mealsChef,
                     bonfire_other: bonfireOther,
                     ota_service_fee: parseFloat(document.getElementById('otaServiceFee').value) || 0,
-                    // DO NOT include meals_revenue here - it's calculated on-the-fly
                     taxes: taxes,
                     total_amount_pre_tax: totalAmountPreTax,
                     total_amount_inc_tax: totalAmountIncTax,
@@ -8589,12 +8692,9 @@
                     payment_status: 'pending'
                 };
                 
-                // Generate booking_id for new reservations
+                // Handle booking_id for both new and edited reservations
                 if (!editId) {
-                    const bookingSource = document.getElementById('bookingSource').value;
-                    const reservationCode = document.getElementById('reservationCode').value.trim();
-                    const otaSources = ['AIRBNB', 'AGODA/BOOKING.COM', 'MMT/GOIBIBO'];
-                    
+                    // NEW RESERVATION: Generate booking_id
                     if (otaSources.includes(bookingSource) && reservationCode) {
                         // Use OTA reservation code as booking ID
                         reservation.booking_id = reservationCode;
@@ -8609,6 +8709,13 @@
                         }
                         reservation.booking_id = `HST${year}${rand}`;
                     }
+                } else {
+                    // EDITING EXISTING RESERVATION: Update booking_id if source changed to OTA
+                    if (otaSources.includes(bookingSource) && reservationCode) {
+                        // If changed to OTA and has OTA code, update booking_id
+                        reservation.booking_id = reservationCode;
+                    }
+                    // Note: If source is not OTA, booking_id remains unchanged (keeps existing ID)
                 }
                 
                 if (navigator.onLine) {
@@ -11967,6 +12074,8 @@
                         setTimeout(autoSync, 2000);
                         // Initialize auto-sync for properties with iCal URLs
                         setTimeout(initializeAutoSync, 3000);
+                        // Initialize auto status update scheduler
+                        setTimeout(scheduleAutoStatusUpdates, 3000);
                     }
                 } catch (error) {
                     console.error('Session restore error:', error);
@@ -13119,7 +13228,7 @@
         }
     }
         // ==========================================
-        // GUEST MANAGEMENT FUNCTIONS - OPTION B
+        // GUEST MANAGEMENT FUNCTIONS
         // ==========================================
 
         let allGuests = [];
