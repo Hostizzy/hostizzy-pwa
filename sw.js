@@ -1,23 +1,21 @@
-const CACHE_VERSION = 'v3.0.0';
+const CACHE_VERSION = 'v3.0.1';
 const CACHE_NAME = `resiq-${CACHE_VERSION}`;
 
-// Files to cache immediately
-const PRECACHE_URLS = [
+// Files to cache
+const urlsToCache = [
   '/',
   '/index.html',
-  '/manifest.json',
-  '/icons/icon-192x192.png',
-  '/icons/icon-512x512.png'
+  '/manifest.json'
 ];
 
-// Install event - cache essential files
+// Install event - cache files
 self.addEventListener('install', (event) => {
   console.log('[SW] Installing service worker...');
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('[SW] Caching app shell');
-        return cache.addAll(PRECACHE_URLS);
+        return cache.addAll(urlsToCache);
       })
       .then(() => self.skipWaiting())
   );
@@ -42,14 +40,14 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - Network first, fallback to cache
+// Fetch event - network first, fallback to cache
 self.addEventListener('fetch', (event) => {
   const { request } = event;
   
   // Skip non-GET requests
   if (request.method !== 'GET') return;
   
-  // Skip Supabase API calls (always fetch fresh)
+  // Skip Supabase API calls
   if (request.url.includes('supabase.co')) {
     return;
   }
@@ -57,78 +55,18 @@ self.addEventListener('fetch', (event) => {
   event.respondWith(
     fetch(request)
       .then((response) => {
-        // Clone response before caching
-        const responseClone = response.clone();
-        
-        // Cache successful responses
+        // Clone and cache successful responses
         if (response.status === 200) {
+          const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
             cache.put(request, responseClone);
           });
         }
-        
         return response;
       })
       .catch(() => {
         // Network failed, try cache
-        return caches.match(request)
-          .then((cachedResponse) => {
-            if (cachedResponse) {
-              console.log('[SW] Serving from cache:', request.url);
-              return cachedResponse;
-            }
-            
-            // Return offline page for navigation requests
-            if (request.mode === 'navigate') {
-              return caches.match('/offline.html');
-            }
-          });
-      })
-  );
-});
-
-// Push notification event
-self.addEventListener('push', (event) => {
-  console.log('[SW] Push notification received');
-  
-  const data = event.data ? event.data.json() : {};
-  const title = data.title || 'ResIQ Notification';
-  const options = {
-    body: data.body || 'You have a new notification',
-    icon: '/icons/icon-192x192.png',
-    badge: '/icons/badge-72x72.png',
-    tag: data.tag || 'default',
-    data: data.data || {},
-    actions: data.actions || [],
-    requireInteraction: data.requireInteraction || false
-  };
-  
-  event.waitUntil(
-    self.registration.showNotification(title, options)
-  );
-});
-
-// Notification click event
-self.addEventListener('notificationclick', (event) => {
-  console.log('[SW] Notification clicked');
-  event.notification.close();
-  
-  const urlToOpen = event.notification.data?.url || '/';
-  
-  event.waitUntil(
-    clients.matchAll({ type: 'window', includeUncontrolled: true })
-      .then((clientList) => {
-        // Check if app is already open
-        for (const client of clientList) {
-          if (client.url === urlToOpen && 'focus' in client) {
-            return client.focus();
-          }
-        }
-        
-        // Open new window
-        if (clients.openWindow) {
-          return clients.openWindow(urlToOpen);
-        }
+        return caches.match(request);
       })
   );
 });
