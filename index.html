@@ -15151,5 +15151,162 @@
         </div>
     </div>
 
+    <!-- PWA Install Banner -->
+    <div id="pwaInstallBanner" style="display: none; position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); color: white; padding: 16px 24px; border-radius: 16px; box-shadow: 0 10px 40px rgba(99, 102, 241, 0.4); z-index: 9999; max-width: 90%; width: 400px; animation: slideUp 0.4s ease-out;">
+        <div style="display: flex; align-items: center; gap: 16px;">
+            <div style="font-size: 32px;">📱</div>
+            <div style="flex: 1;">
+                <div style="font-weight: 600; margin-bottom: 4px;">Install ResIQ</div>
+                <div style="font-size: 13px; opacity: 0.9;">Get the app experience with offline access</div>
+            </div>
+            <button onclick="installPWA()" style="background: white; color: #6366f1; border: none; padding: 10px 20px; border-radius: 8px; font-weight: 600; cursor: pointer; font-size: 14px; white-space: nowrap;">
+                Install
+            </button>
+            <button onclick="dismissInstallBanner()" style="background: rgba(255,255,255,0.2); color: white; border: none; padding: 8px; border-radius: 8px; cursor: pointer; font-size: 18px; line-height: 1; width: 32px; height: 32px;">
+                ×
+            </button>
+        </div>
+    </div>
+
+    <style>
+        @keyframes slideUp {
+            from {
+                transform: translateX(-50%) translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(-50%) translateY(0);
+                opacity: 1;
+            }
+        }
+    </style>
+
+    <script>
+        // ==========================================
+        // PWA SERVICE WORKER & INSTALL PROMPT
+        // ==========================================
+        
+        let deferredPrompt = null;
+        let isInstalled = false;
+
+        // Check if already installed
+        function checkIfInstalled() {
+            // Check display mode
+            if (window.matchMedia('(display-mode: standalone)').matches) {
+                isInstalled = true;
+                return true;
+            }
+            
+            // Check if running as PWA on iOS
+            if (window.navigator.standalone === true) {
+                isInstalled = true;
+                return true;
+            }
+            
+            return false;
+        }
+
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/sw.js')
+                    .then(registration => {
+                        console.log('✅ Service Worker registered:', registration.scope);
+                        
+                        // Check for updates every 60 seconds
+                        setInterval(() => {
+                            registration.update();
+                        }, 60000);
+                    })
+                    .catch(error => {
+                        console.error('❌ Service Worker registration failed:', error);
+                    });
+            });
+        }
+
+        // Capture the install prompt event
+        window.addEventListener('beforeinstallprompt', (e) => {
+            console.log('💾 PWA install prompt available');
+            
+            // Prevent the default mini-infobar
+            e.preventDefault();
+            
+            // Store the event for later use
+            deferredPrompt = e;
+            
+            // Check if user previously dismissed
+            const dismissed = localStorage.getItem('pwa_install_dismissed');
+            const dismissedTime = localStorage.getItem('pwa_install_dismissed_time');
+            
+            // Show banner if not dismissed or if 7 days have passed
+            if (!dismissed || (Date.now() - parseInt(dismissedTime)) > 7 * 24 * 60 * 60 * 1000) {
+                showInstallBanner();
+            }
+        });
+
+        // Show install banner
+        function showInstallBanner() {
+            const banner = document.getElementById('pwaInstallBanner');
+            if (banner && !isInstalled) {
+                banner.style.display = 'block';
+            }
+        }
+
+        // Install PWA
+        async function installPWA() {
+            if (!deferredPrompt) {
+                console.log('❌ No install prompt available');
+                return;
+            }
+
+            // Show the install prompt
+            deferredPrompt.prompt();
+
+            // Wait for user response
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User response: ${outcome}`);
+
+            if (outcome === 'accepted') {
+                console.log('✅ PWA installed');
+                isInstalled = true;
+            }
+
+            // Clear the prompt
+            deferredPrompt = null;
+            
+            // Hide banner
+            document.getElementById('pwaInstallBanner').style.display = 'none';
+        }
+
+        // Dismiss install banner
+        function dismissInstallBanner() {
+            document.getElementById('pwaInstallBanner').style.display = 'none';
+            localStorage.setItem('pwa_install_dismissed', 'true');
+            localStorage.setItem('pwa_install_dismissed_time', Date.now().toString());
+            console.log('ℹ️ Install banner dismissed');
+        }
+
+        // Detect when PWA is installed
+        window.addEventListener('appinstalled', () => {
+            console.log('✅ PWA was installed');
+            isInstalled = true;
+            document.getElementById('pwaInstallBanner').style.display = 'none';
+            localStorage.removeItem('pwa_install_dismissed');
+        });
+
+        // Check installation status on load
+        window.addEventListener('load', () => {
+            checkIfInstalled();
+            console.log('PWA Installation Status:', isInstalled ? 'Installed' : 'Not Installed');
+        });
+
+        // OPTIONAL: Add install button to UI (e.g., in settings)
+        // Call this function from your settings or profile page
+        function addInstallButtonToUI() {
+            // You can add a permanent install button in your header or settings
+            // that calls installPWA() when clicked
+        }
+    </script>
+
 </body>
 </html>
