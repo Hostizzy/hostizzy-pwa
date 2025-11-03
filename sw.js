@@ -1,69 +1,134 @@
-const CACHE_NAME = 'hostizzy-v3';
-const urlsToCache = [
+const CACHE_VERSION = 'v3.0.0';
+const CACHE_NAME = `resiq-${CACHE_VERSION}`;
+
+// Files to cache immediately
+const PRECACHE_URLS = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/manifest.json',
+  '/icons/icon-192x192.png',
+  '/icons/icon-512x512.png'
 ];
 
-// Install Service Worker
-self.addEventListener('install', event => {
-  console.log('Service Worker installing...');
+// Install event - cache essential files
+self.addEventListener('install', (event) => {
+  console.log('[SW] Installing service worker...');
   event.waitUntil(
     caches.open(CACHE_NAME)
-      .then(cache => {
-        console.log('Cache opened');
-        return cache.addAll(urlsToCache);
+      .then((cache) => {
+        console.log('[SW] Caching app shell');
+        return cache.addAll(PRECACHE_URLS);
       })
+      .then(() => self.skipWaiting())
   );
-  self.skipWaiting();
 });
 
-// Fetch with Network-First Strategy
-self.addEventListener('fetch', event => {
-  if (event.request.method !== 'GET') {
+// Activate event - clean old caches
+self.addEventListener('activate', (event) => {
+  console.log('[SW] Activating service worker...');
+  event.waitUntil(
+    caches.keys()
+      .then((cacheNames) => {
+        return Promise.all(
+          cacheNames
+            .filter((name) => name !== CACHE_NAME)
+            .map((name) => {
+              console.log('[SW] Deleting old cache:', name);
+              return caches.delete(name);
+            })
+        );
+      })
+      .then(() => self.clients.claim())
+  );
+});
+
+// Fetch event - Network first, fallback to cache
+self.addEventListener('fetch', (event) => {
+  const { request } = event;
+  
+  // Skip non-GET requests
+  if (request.method !== 'GET') return;
+  
+  // Skip Supabase API calls (always fetch fresh)
+  if (request.url.includes('supabase.co')) {
     return;
   }
   
   event.respondWith(
-    fetch(event.request)
-      .then(response => {
-        const responseToCache = response.clone();
-        caches.open(CACHE_NAME).then(cache => {
-          cache.put(event.request, responseToCache);
-        });
+    fetch(request)
+      .then((response) => {
+        // Clone response before caching
+        const responseClone = response.clone();
+        
+        // Cache successful responses
+        if (response.status === 200) {
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(request, responseClone);
+          });
+        }
+        
         return response;
       })
       .catch(() => {
-        return caches.match(event.request)
-          .then(response => {
-            if (response) {
-              return response;
+        // Network failed, try cache
+        return caches.match(request)
+          .then((cachedResponse) => {
+            if (cachedResponse) {
+              console.log('[SW] Serving from cache:', request.url);
+              return cachedResponse;
             }
-            if (event.request.mode === 'navigate') {
-              return caches.match('/index.html');
+            
+            // Return offline page for navigation requests
+            if (request.mode === 'navigate') {
+              return caches.match('/offline.html');
             }
           });
       })
   );
 });
 
-// Activate Service Worker
-self.addEventListener('activate', event => {
-  console.log('Service Worker activating...');
-  const cacheWhitelist = [CACHE_NAME];
+// Push notification event
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push notification received');
+  
+  const data = event.data ? event.data.json() : {};
+  const title = data.title || 'ResIQ Notification';
+  const options = {
+    body: data.body || 'You have a new notification',
+    icon: '/icons/icon-192x192.png',
+    badge: '/icons/badge-72x72.png',
+    tag: data.tag || 'default',
+    data: data.data || {},
+    actions: data.actions || [],
+    requireInteraction: data.requireInteraction || false
+  };
+  
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheWhitelist.indexOf(cacheName) === -1) {
-            console.log('Deleting old cache:', cacheName);
-            return caches.delete(cacheName);
-          }
-        })
-      );
-    })
+    self.registration.showNotification(title, options)
   );
-  return self.clients.claim();
 });
 
-console.log('Service Worker loaded');
+// Notification click event
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked');
+  event.notification.close();
+  
+  const urlToOpen = event.notification.data?.url || '/';
+  
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if app is already open
+        for (const client of clientList) {
+          if (client.url === urlToOpen && 'focus' in client) {
+            return client.focus();
+          }
+        }
+        
+        // Open new window
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});
