@@ -2565,6 +2565,223 @@
             }
         }
 
+        /* ==========================================
+        MOBILE & TABLET OPTIMIZATIONS
+        ========================================== */
+        
+        /* Guest Table Mobile Optimization */
+        @media (max-width: 768px) {
+            /* Hide table headers on mobile */
+            #guestTableView table thead {
+                display: none;
+            }
+            
+            /* Convert table rows to cards */
+            #guestTableView table,
+            #guestTableView table tbody {
+                display: block;
+                width: 100%;
+            }
+            
+            #guestTableView table tbody tr {
+                display: block;
+                margin-bottom: 16px;
+                background: white;
+                border-radius: 12px;
+                box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+                padding: 16px;
+                border: 1px solid var(--border);
+            }
+            
+            #guestTableView table tbody td {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                padding: 10px 0;
+                border: none;
+                text-align: right;
+            }
+            
+            #guestTableView table tbody td:first-child {
+                padding-top: 0;
+            }
+            
+            #guestTableView table tbody td:last-child {
+                padding-bottom: 0;
+                justify-content: center;
+            }
+            
+            #guestTableView table tbody td::before {
+                content: attr(data-label);
+                font-weight: 600;
+                color: var(--text-secondary);
+                font-size: 12px;
+                text-transform: uppercase;
+                text-align: left;
+                flex: 1;
+            }
+            
+            /* Filter scroll on mobile */
+            .filters {
+                overflow-x: auto;
+                -webkit-overflow-scrolling: touch;
+                padding-bottom: 8px;
+                gap: 8px;
+            }
+            
+            .filters::-webkit-scrollbar {
+                height: 4px;
+            }
+            
+            .filters::-webkit-scrollbar-thumb {
+                background: var(--border);
+                border-radius: 4px;
+            }
+            
+            .filter-item {
+                min-width: 140px;
+                flex-shrink: 0;
+            }
+            
+            /* Modal full-screen on mobile */
+            .modal-content {
+                width: 100vw;
+                height: 100vh;
+                max-height: 100vh;
+                margin: 0;
+                border-radius: 0;
+                max-width: 100%;
+            }
+            
+            .modal-body {
+                max-height: calc(100vh - 140px);
+                overflow-y: auto;
+            }
+            
+            /* Stats cards 2-column on small mobile */
+            .stats-grid,
+            .enhanced-metrics {
+                grid-template-columns: repeat(2, 1fr) !important;
+                gap: 12px;
+            }
+            
+            .metric-card,
+            .stat-card {
+                padding: 14px;
+            }
+            
+            .metric-value,
+            .stat-value {
+                font-size: 22px;
+            }
+            
+            .metric-label,
+            .stat-label {
+                font-size: 11px;
+            }
+            
+            /* Pagination mobile */
+            #guestPaginationButtons button {
+                min-width: 36px;
+                height: 36px;
+                padding: 6px 8px;
+                font-size: 12px;
+            }
+            
+            #guestPaginationButtons span {
+                font-size: 11px;
+            }
+            
+            /* Touch targets minimum 44px */
+            .btn-sm {
+                min-height: 44px;
+                padding: 10px 16px;
+                font-size: 14px;
+            }
+            
+            button,
+            a.btn {
+                min-height: 44px;
+            }
+            
+            /* Larger checkboxes */
+            input[type="checkbox"],
+            input[type="radio"] {
+                min-width: 20px;
+                min-height: 20px;
+            }
+            
+            /* Card grid mobile */
+            .icon-card-grid {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+            
+            /* Guest card view on mobile */
+            #guestCardView #guestListContainer > div {
+                grid-template-columns: 1fr !important;
+            }
+        }
+        
+        /* Tablet Optimization (768px - 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            /* 2-column layouts */
+            .stats-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            .enhanced-metrics {
+                grid-template-columns: repeat(3, 1fr);
+            }
+            
+            /* Guest table: hide less important columns */
+            #guestTableView table th:nth-child(3),
+            #guestTableView table td:nth-child(3) {
+                display: none;
+            }
+            
+            /* Modal slightly smaller */
+            .modal-content {
+                max-width: 85%;
+            }
+            
+            /* Keep desktop navigation */
+            .navbar {
+                display: flex;
+            }
+            
+            .mobile-nav {
+                display: none;
+            }
+            
+            /* 2-column guest cards */
+            #guestCardView #guestListContainer > div {
+                grid-template-columns: repeat(2, 1fr) !important;
+            }
+        }
+        
+        /* Very small mobile (<480px) */
+        @media (max-width: 480px) {
+            .enhanced-metrics {
+                grid-template-columns: 1fr !important;
+            }
+            
+            .metric-card {
+                padding: 16px;
+            }
+            
+            h1 {
+                font-size: 20px;
+            }
+            
+            h2 {
+                font-size: 18px;
+            }
+            
+            h3 {
+                font-size: 16px;
+            }
+        }
+
     </style>
 
     <!-- Splash Screen -->
@@ -2796,6 +3013,10 @@
                 <a class="mobile-nav-item" onclick="showView('payments')">
                     <div class="mobile-nav-icon">💰</div>
                     <div>Payments</div>
+                </a>
+                <a class="mobile-nav-item" onclick="showView('availability')">
+                    <div class="mobile-nav-icon">🗓️</div>
+                    <div>Calendar</div>
                 </a>
                 <a class="mobile-nav-item" onclick="showView('performance')">
                     <div class="mobile-nav-icon">📊</div>
@@ -6019,6 +6240,57 @@
             console.log('✅ Auto status update scheduler initialized');
         }
 
+        /**
+         * Save filter state to localStorage
+         */
+        function saveFilterState(viewName, filters) {
+            try {
+                const filterState = JSON.parse(localStorage.getItem('filterState') || '{}');
+                filterState[viewName] = {
+                    ...filters,
+                    timestamp: Date.now()
+                };
+                localStorage.setItem('filterState', JSON.stringify(filterState));
+                console.log(`✅ Saved ${viewName} filters:`, filters);
+            } catch (error) {
+                console.error('Error saving filter state:', error);
+            }
+        }
+
+        /**
+         * Load filter state from localStorage
+         */
+        function loadFilterState(viewName) {
+            try {
+                const filterState = JSON.parse(localStorage.getItem('filterState') || '{}');
+                const viewFilters = filterState[viewName];
+                
+                // Return filters if they exist and are less than 24 hours old
+                if (viewFilters && (Date.now() - viewFilters.timestamp) < 86400000) {
+                    console.log(`✅ Loaded ${viewName} filters:`, viewFilters);
+                    return viewFilters;
+                }
+                return null;
+            } catch (error) {
+                console.error('Error loading filter state:', error);
+                return null;
+            }
+        }
+
+        /**
+         * Clear filter state for a view
+         */
+        function clearFilterState(viewName) {
+            try {
+                const filterState = JSON.parse(localStorage.getItem('filterState') || '{}');
+                delete filterState[viewName];
+                localStorage.setItem('filterState', JSON.stringify(filterState));
+                console.log(`✅ Cleared ${viewName} filters`);
+            } catch (error) {
+                console.error('Error clearing filter state:', error);
+            }
+        }
+
         // Dashboard
         async function loadDashboard() {
             try {
@@ -6135,12 +6407,39 @@
                 
                 // Load Top 15 Properties Stats
                 updateTopPropertiesStats();
-            } catch (error) {
-                console.error('Dashboard error:', error);
-                showToast('Dashboard Error', error.message, '❌');
-            }
+
                 // Add this at the very end:
                 calculateMonthlyMetrics();
+                
+                // Restore saved filter state
+                setTimeout(() => {
+                    const savedFilters = loadFilterState('dashboard');
+                    if (savedFilters) {
+                        console.log('🔄 Restoring dashboard filters:', savedFilters);
+                        
+                        // Restore date range if exists
+                        if (savedFilters.startDate && savedFilters.endDate) {
+                            const startDateInput = document.getElementById('startDate');
+                            const endDateInput = document.getElementById('endDate');
+                            
+                            if (startDateInput) startDateInput.value = savedFilters.startDate;
+                            if (endDateInput) endDateInput.value = savedFilters.endDate;
+                            
+                            // Auto-apply the saved date range
+                            setTimeout(() => applyDateRange(), 200);
+                        }
+                        
+                        // Restore quick filter if exists
+                        if (savedFilters.quickFilter && savedFilters.quickFilter !== 'all') {
+                            setTimeout(() => applyQuickFilter(savedFilters.quickFilter), 300);
+                        }
+                    }
+                }, 500);
+                
+            } catch (error) {
+                console.error('Dashboard error:', error);
+                showToast('Error', 'Failed to load dashboard', '❌');
+            }
         }
 
         // Quick Filter State
@@ -6346,7 +6645,7 @@
             updateTopPropertiesStats(filteredReservations);
         }
 
-                /**
+        /**
          * Update filter info display
          */
         function updateFilterInfo(text) {
@@ -6449,6 +6748,40 @@
             
             // Update dashboard with filtered data
             await updateDashboardWithFilteredData(filteredReservations);
+
+            // Save filter state
+            saveFilterState('dashboard', {
+                quickFilter: currentQuickFilter,
+                startDate: document.getElementById('startDate')?.value || '',
+                endDate: document.getElementById('endDate')?.value || ''
+            });
+        }
+
+        /**
+         * Clear all dashboard filters and reload
+         */
+        async function clearDashboardFilters() {
+            // Clear filter state
+            clearFilterState('dashboard');
+            
+            // Reset UI
+            document.getElementById('quickDateRange').value = '';
+            document.querySelectorAll('.filter-chip').forEach(chip => {
+                chip.classList.remove('active');
+                if (chip.dataset.filter === 'all') {
+                    chip.classList.add('active');
+                }
+            });
+            currentQuickFilter = 'all';
+            
+            // Clear filter info
+            const filterInfo = document.getElementById('filterInfo');
+            if (filterInfo) filterInfo.style.display = 'none';
+            
+            // Reload dashboard with all data
+            await loadDashboard();
+            
+            showToast('Filters Cleared', 'Showing all data', '✅');
         }
 
         /**
@@ -8076,6 +8409,39 @@
                     months.map(m => `<option value="${m}">${m}</option>`).join('');
                 
                 displayReservations(allReservations);
+                
+                // Restore saved filters
+                setTimeout(() => {
+                    const savedFilters = loadFilterState('reservations');
+                    if (savedFilters) {
+                        console.log('🔄 Restoring reservation filters:', savedFilters);
+                        
+                        // Restore each filter
+                        if (savedFilters.search) {
+                            const searchInput = document.getElementById('searchReservations');
+                            if (searchInput) searchInput.value = savedFilters.search;
+                        }
+                        if (savedFilters.status) {
+                            const statusFilter = document.getElementById('statusFilter');
+                            if (statusFilter) statusFilter.value = savedFilters.status;
+                        }
+                        if (savedFilters.property) {
+                            const propertyFilter = document.getElementById('propertyFilter');
+                            if (propertyFilter) propertyFilter.value = savedFilters.property;
+                        }
+                        if (savedFilters.bookingSource) {
+                            const sourceFilter = document.getElementById('bookingSourceFilter');
+                            if (sourceFilter) sourceFilter.value = savedFilters.bookingSource;
+                        }
+                        if (savedFilters.month) {
+                            const monthFilter = document.getElementById('monthFilter');
+                            if (monthFilter) monthFilter.value = savedFilters.month;
+                        }
+                        
+                        // Apply the filters
+                        setTimeout(() => filterReservations(), 200);
+                    }
+                }, 500);
             } catch (error) {
                 console.error('Reservations error:', error);
                 showToast('Error', 'Failed to load reservations', '❌');
@@ -8158,6 +8524,14 @@
             });
             
             displayReservations(filteredReservationsForExport);
+            // Save filter state
+            saveFilterState('reservations', {
+                search: document.getElementById('searchReservations').value,
+                status: document.getElementById('statusFilter').value,
+                property: document.getElementById('propertyFilter').value,
+                bookingSource: document.getElementById('bookingSourceFilter').value,
+                month: document.getElementById('monthFilter').value
+            });
         }
 
         function clearFilters() {
@@ -8168,6 +8542,9 @@
             document.getElementById('monthFilter').value = '';
             filteredReservationsForExport = [];
             displayReservations(allReservations);
+
+            // Clear saved filter state
+            clearFilterState('reservations');
             showToast('Filters Cleared', 'Showing all reservations', 'ℹ️');
         }
 
@@ -12223,43 +12600,52 @@
     </div>
 
     <script>
-    // Register SW
+    // Register Service Worker
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js', { scope: '/' })
-            .then(reg => console.log('SW registered', reg.scope))
-            .catch(err => console.error('SW registration failed', err));
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js')
+        .then((registration) => {
+            console.log('✅ Service Worker registered:', registration.scope);
+            
+            // Check for updates every hour
+            setInterval(() => {
+            registration.update();
+            }, 3600000);
+        })
+        .catch((error) => {
+            console.error('❌ Service Worker registration failed:', error);
         });
+    });
     }
 
-    // Handle PWA install prompt
+    // PWA Install Prompt
     let deferredPrompt;
-    const installBtn = document.getElementById('installBtn');
-    const installBar = document.getElementById('installBar');
 
     window.addEventListener('beforeinstallprompt', (e) => {
-        // Stop Chrome from auto-showing the mini-infobar
-        e.preventDefault();
-        deferredPrompt = e;
-        if (installBar) installBar.style.display = 'flex';
-    });
-
+    console.log('💡 PWA install prompt ready');
+    e.preventDefault();
+    deferredPrompt = e;
+    
+    // Show custom install button
+    const installBtn = document.getElementById('pwaInstallBtn');
     if (installBtn) {
+        installBtn.style.display = 'block';
         installBtn.addEventListener('click', async () => {
-        if (!deferredPrompt) return;
-        deferredPrompt.prompt();
-        const { outcome } = await deferredPrompt.userChoice;
-        console.log(`PWA install: ${outcome}`);
-        deferredPrompt = null;
-        if (installBar) installBar.style.display = 'none';
+        if (deferredPrompt) {
+            deferredPrompt.prompt();
+            const { outcome } = await deferredPrompt.userChoice;
+            console.log(`User ${outcome} the install prompt`);
+            deferredPrompt = null;
+            installBtn.style.display = 'none';
+        }
         });
     }
+    });
 
-    // Optional: hide prompt UI if already installed
     window.addEventListener('appinstalled', () => {
-        deferredPrompt = null;
-        if (installBar) installBar.style.display = 'none';
-        console.log('PWA installed');
+    console.log('🎉 PWA installed successfully');
+    deferredPrompt = null;
+    showToast('Success', 'App installed successfully!', '🎉');
     });
     // Quick Actions System
     let selectedActionIndex = 0;
@@ -13316,7 +13702,58 @@
                 // Initial display
                 filteredGuests = [...allGuests];
                 currentGuestPage = 1;
-                filterGuests();
+                
+                // Restore saved filters
+                setTimeout(() => {
+                    const savedFilters = loadFilterState('guests');
+                    if (savedFilters) {
+                        console.log('🔄 Restoring guest filters:', savedFilters);
+                        
+                        // Restore search
+                        if (savedFilters.search) {
+                            const searchInput = document.getElementById('searchGuests');
+                            if (searchInput) searchInput.value = savedFilters.search;
+                        }
+                        
+                        // Restore type filter
+                        if (savedFilters.typeFilter) {
+                            const typeFilter = document.getElementById('guestTypeFilter');
+                            if (typeFilter) typeFilter.value = savedFilters.typeFilter;
+                        }
+                        
+                        // Restore sort
+                        if (savedFilters.sortBy) {
+                            currentSortColumn = savedFilters.sortBy;
+                        }
+                        
+                        // Restore per page
+                        if (savedFilters.perPage) {
+                            const perPageSelect = document.getElementById('guestsPerPage');
+                            if (perPageSelect) perPageSelect.value = savedFilters.perPage;
+                            guestsPerPage = savedFilters.perPage === 'all' ? displayedGuests.length : parseInt(savedFilters.perPage);
+                        }
+                        
+                        // Restore view (table/cards)
+                        if (savedFilters.currentView) {
+                            currentGuestView = savedFilters.currentView;
+                            switchGuestView(savedFilters.currentView);
+                        }
+                        
+                        // Restore page number
+                        if (savedFilters.currentPage) {
+                            currentGuestPage = savedFilters.currentPage;
+                        }
+                        
+                        // Apply search if exists
+                        if (savedFilters.search) {
+                            searchGuests();
+                        } else {
+                            filterGuests();
+                        }
+                    } else {
+                        filterGuests();
+                    }
+                }, 300);
                 
             } catch (error) {
                 console.error('Error loading guests:', error);
@@ -13393,6 +13830,19 @@
             } else {
                 renderGuestCards();
             }
+            // Save filter state
+            const searchValue = document.getElementById('searchGuests')?.value || '';
+            const sortBy = document.getElementById('guestSortBy')?.value || 'name';
+            const perPage = document.getElementById('guestsPerPage')?.value || '50';
+            
+            saveFilterState('guests', {
+                search: searchValue,
+                typeFilter: typeFilter,
+                sortBy: sortBy,
+                perPage: perPage,
+                currentView: currentGuestView,
+                currentPage: currentGuestPage
+            });
         }
 
         /**
@@ -13532,7 +13982,7 @@
                 
                 html += `
                     <tr style="cursor: pointer;" onclick="showGuestDetail('${guest.key.replace(/'/g, "\\'")}')">
-                        <td>
+                        <td data-label="Guest Name">
                             <div style="display: flex; align-items: center; gap: 8px;">
                                 <div style="width: 36px; height: 36px; background: var(--gradient-primary); border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 16px; color: white; flex-shrink: 0;">
                                     ${(guest.name || '?')[0].toUpperCase()}
@@ -13543,17 +13993,17 @@
                                 </div>
                             </div>
                         </td>
-                        <td>
+                        <td data-label="Contact">
                             <div style="font-size: 13px;">
                                 ${guest.phone ? `<div>📱 ${guest.phone}</div>` : ''}
                                 ${guest.email ? `<div style="color: var(--text-secondary);">📧 ${guest.email}</div>` : ''}
                                 ${!guest.phone && !guest.email ? '<span style="color: var(--text-secondary);">No contact</span>' : ''}
                             </div>
                         </td>
-                        <td>${lastVisitText}</td>
-                        <td><strong>${guest.totalBookings}</strong></td>
-                        <td><strong style="color: var(--success);">${formatCurrency(guest.totalSpent)}</strong></td>
-                        <td>
+                        <td data-label="Last Visit">${lastVisitText}</td>
+                        <td data-label="Stays"><strong>${guest.totalBookings}</strong></td>
+                        <td data-label="Total Spent"><strong style="color: var(--success);">${formatCurrency(guest.totalSpent)}</strong></td>
+                        <td data-label="Actions">
                             <button class="btn btn-sm btn-primary" onclick="event.stopPropagation(); showGuestDetail('${guest.key.replace(/'/g, "\\'")}')">
                                 👁️ View
                             </button>
@@ -13975,8 +14425,17 @@
         function clearGuestFilters() {
             document.getElementById('searchGuests').value = '';
             document.getElementById('guestTypeFilter').value = '';
+            document.getElementById('guestSortBy').value = 'name';
+            document.getElementById('guestsPerPage').value = '50';
+            guestsPerPage = 50;
             currentGuestPage = 1;
+            currentSortColumn = 'name';
+            currentSortDirection = 'asc';
             filteredGuests = [...allGuests];
+            
+            // Clear saved filter state
+            clearFilterState('guests');
+            
             filterGuests();
         }
 
