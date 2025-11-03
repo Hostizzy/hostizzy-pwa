@@ -5964,6 +5964,32 @@
             }
         }
 
+               // ==========================================
+        // SPLASH SCREEN & HOME SCREEN
+        // ==========================================
+
+        /**
+         * Initialize splash screen and show home screen
+         */
+        function initializeSplashScreen() {
+            // Show splash for 2.5 seconds (2 sec display + 0.5 sec fade)
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                splash.style.opacity = '0';
+                
+                setTimeout(() => {
+                    splash.style.display = 'none';
+                    // Restore last view or default to home
+                    const lastView = localStorage.getItem('lastView') || 'home';
+                    showView(lastView);
+                    // Update home stats if on home view
+                    if (lastView === 'home') {
+                        updateHomeScreenStats();
+                    }
+                }, 500);
+            }, 2500);
+        }
+
         function hidePerformanceForStaff() {
             // Hide from desktop navigation
             document.querySelectorAll('.nav-link').forEach(link => {
@@ -12762,31 +12788,6 @@
                 }, 2000);
             }
 
-        // ==========================================
-        // SPLASH SCREEN & HOME SCREEN
-        // ==========================================
-
-        /**
-         * Initialize splash screen and show home screen
-         */
-        function initializeSplashScreen() {
-            // Show splash for 2.5 seconds (2 sec display + 0.5 sec fade)
-            setTimeout(() => {
-                const splash = document.getElementById('splashScreen');
-                splash.style.opacity = '0';
-                
-                setTimeout(() => {
-                    splash.style.display = 'none';
-                    // Restore last view or default to home
-                    const lastView = localStorage.getItem('lastView') || 'home';
-                    showView(lastView);
-                    // Update home stats if on home view
-                    if (lastView === 'home') {
-                        updateHomeScreenStats();
-                    }
-                }, 500);
-            }, 2500);
-        }
 
         // Push Notifications
         async function requestNotificationPermission() {
@@ -12885,81 +12886,43 @@
     </div>
 
     <script>
-    // Register Service Worker
+    // Register SW
     if ('serviceWorker' in navigator) {
-    window.addEventListener('load', () => {
-        navigator.serviceWorker.register('/sw.js')
-        .then((registration) => {
-            console.log('✅ Service Worker registered:', registration.scope);
-            
-            // Check for updates every hour
-            setInterval(() => {
-            registration.update();
-            }, 3600000);
-        })
-        .catch((error) => {
-            console.error('❌ Service Worker registration failed:', error);
+        window.addEventListener('load', () => {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' })
+            .then(reg => console.log('SW registered', reg.scope))
+            .catch(err => console.error('SW registration failed', err));
         });
-    });
     }
 
-   // PWA Install Prompt
+    // Handle PWA install prompt
+    let deferredPrompt;
+    const installBtn = document.getElementById('installBtn');
+    const installBar = document.getElementById('installBar');
+
     window.addEventListener('beforeinstallprompt', (e) => {
-        console.log('💡 PWA install prompt ready');
-        // Prevent the mini-infobar from appearing
+        // Stop Chrome from auto-showing the mini-infobar
         e.preventDefault();
         deferredPrompt = e;
-        
-        // Show custom install bar
-        const installBar = document.getElementById('installBar');
-        if (installBar) {
-            installBar.style.display = 'flex';
-        }
+        if (installBar) installBar.style.display = 'flex';
     });
 
-    // Handle install button click
-    const installBtn = document.getElementById('installBtn');
     if (installBtn) {
         installBtn.addEventListener('click', async () => {
-            if (!deferredPrompt) {
-                console.log('No deferred prompt available');
-                return;
-            }
-            
-            // Show the install prompt
-            deferredPrompt.prompt();
-            
-            // Wait for the user's response
-            const { outcome } = await deferredPrompt.userChoice;
-            console.log(`PWA install: ${outcome}`);
-            
-            // Clear the deferred prompt
-            deferredPrompt = null;
-            
-            // Hide the install bar
-            const installBar = document.getElementById('installBar');
-            if (installBar) {
-                installBar.style.display = 'none';
-            }
-            
-            if (outcome === 'accepted') {
-                showToast('Success', 'App installed successfully!', '🎉');
-            }
+        if (!deferredPrompt) return;
+        deferredPrompt.prompt();
+        const { outcome } = await deferredPrompt.userChoice;
+        console.log(`PWA install: ${outcome}`);
+        deferredPrompt = null;
+        if (installBar) installBar.style.display = 'none';
         });
     }
 
-    // Handle successful installation
+    // Optional: hide prompt UI if already installed
     window.addEventListener('appinstalled', () => {
-        console.log('🎉 PWA installed successfully');
         deferredPrompt = null;
-        
-        // Hide install bar
-        const installBar = document.getElementById('installBar');
-        if (installBar) {
-            installBar.style.display = 'none';
-        }
-        
-        showToast('Success', 'ResIQ installed! Open from your home screen.', '🎉');
+        if (installBar) installBar.style.display = 'none';
+        console.log('PWA installed');
     });
 
     // Quick Actions System
