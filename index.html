@@ -6547,11 +6547,6 @@
         async function showView(viewName) {
             document.querySelectorAll('.container').forEach(el => el.classList.add('hidden'));
             document.getElementById(`${viewName}View`).classList.remove('hidden');
-
-            // ADD THIS:
-            if (viewName === 'guestDocuments') {
-            loadGuestDocuments();
-            }
             
             document.querySelectorAll('.nav-link, .mobile-nav-item').forEach(link => {
                 link.classList.remove('active');
@@ -6569,7 +6564,6 @@
             if (viewName === 'home') {
                 await loadInitialData();        // ensure data loaded first
                 await updateHomeScreenStats();  // then update stats
-                await loadGuestDocuments(); // This updates homeStatDocuments
             }
             if (viewName === 'dashboard') loadDashboard();
             if (viewName === 'reservations') loadReservations();
@@ -6579,6 +6573,8 @@
             if (viewName === 'properties') loadProperties();
             if (viewName === 'performance') initializePerformanceView();
             if (viewName === 'team') loadTeam();
+            // ADD THIS:
+            if (viewName === 'guestDocuments') loadGuestDocuments();
         }
         function renderBookingTypeBreakdown(reservations, targetId) {
         const bookingTypes = {};
