@@ -13683,16 +13683,6 @@
         e.preventDefault();
         deferredPrompt = e;
         
-        // Show custom install bar
-        const installBar = document.getElementById('installBar');
-        console.log('Install bar element:', installBar);
-        
-        if (installBar) {
-            installBar.style.display = 'flex';
-            console.log('✅ Install bar shown');
-        } else {
-            console.error('❌ Install bar element not found!');
-        }
     });
     
     // Log PWA installation criteria
