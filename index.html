@@ -6148,6 +6148,8 @@
         // Guest Portal Functions
         function showGuestPortalLogin() {
             document.getElementById('loginScreen').classList.add('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
+            document.getElementById('guestPortalDashboard').classList.add('hidden');
             document.getElementById('guestPortalLogin').classList.remove('hidden');
 
             // Check URL parameters for booking ID
@@ -6161,6 +6163,7 @@
         function showAdminLogin() {
             document.getElementById('guestPortalLogin').classList.add('hidden');
             document.getElementById('guestPortalDashboard').classList.add('hidden');
+            document.getElementById('mainApp').classList.add('hidden');
             document.getElementById('loginScreen').classList.remove('hidden');
         }
 
@@ -6182,23 +6185,38 @@
                     user_role: 'guest'
                 }).catch(() => {}); // Ignore if function doesn't exist
 
-                // Query reservation
+                // Query reservation - get all with matching booking_id first
                 const { data: reservations, error } = await supabase
                     .from('reservations')
                     .select('*')
-                    .eq('booking_id', bookingId)
-                    .or(`guest_phone.eq.${phone},guest_phone.like.%${phone.slice(-10)}`);
+                    .eq('booking_id', bookingId);
 
                 hideLoadingOverlay();
 
                 if (error) throw error;
 
                 if (!reservations || reservations.length === 0) {
-                    showToast('Error', 'Booking not found. Please check your details.', '❌');
+                    showToast('Error', 'Booking not found. Please check your booking ID.', '❌');
                     return;
                 }
 
-                const reservation = reservations[0];
+                // Match phone number (flexible matching - last 10 digits)
+                const cleanPhone = phone.replace(/\D/g, ''); // Remove non-digits
+                const phoneLastDigits = cleanPhone.slice(-10); // Get last 10 digits
+
+                const matchingReservation = reservations.find(r => {
+                    if (!r.guest_phone) return false;
+                    const reservationPhone = r.guest_phone.replace(/\D/g, '');
+                    const reservationLastDigits = reservationPhone.slice(-10);
+                    return reservationLastDigits === phoneLastDigits;
+                });
+
+                if (!matchingReservation) {
+                    showToast('Error', 'Phone number does not match this booking.', '❌');
+                    return;
+                }
+
+                const reservation = matchingReservation;
 
                 // Create guest session
                 guestSession = {
@@ -7673,7 +7691,7 @@
                     
                     // Set user context for RLS
                     await supabase.rpc('set_user_context', { user_email: email });
-                    
+
                     document.getElementById('loginScreen').classList.add('hidden');
                     document.getElementById('guestPortalLogin').classList.add('hidden');
                     document.getElementById('guestPortalDashboard').classList.add('hidden');
@@ -14452,7 +14470,7 @@
                     
                     // Set user context for RLS
                     await supabase.rpc('set_user_context', { user_email: currentUser.email });
-                    
+
                     document.getElementById('loginScreen').classList.add('hidden');
                     document.getElementById('guestPortalLogin').classList.add('hidden');
                     document.getElementById('guestPortalDashboard').classList.add('hidden');
