@@ -390,6 +390,31 @@
             cursor: not-allowed;
         }
 
+        /* Filter Chips */
+        .filter-chip {
+            padding: 8px 16px;
+            border: 2px solid var(--border);
+            border-radius: 20px;
+            background: white;
+            color: var(--text-primary);
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .filter-chip:hover {
+            border-color: var(--primary);
+            background: var(--primary-light);
+            color: white;
+        }
+
+        .filter-chip.active {
+            background: var(--primary);
+            color: white;
+            border-color: var(--primary);
+        }
+
         /* Navigation */
         .navbar {
             background: white;
@@ -3189,6 +3214,9 @@
                 <a class="mobile-sidebar-link" onclick="showViewMobile('reservations')">
                     <span style="margin-right: 12px;">📅</span> Reservations
                 </a>
+                <a class="mobile-sidebar-link" onclick="showViewMobile('guestDocuments')">
+                    <span style="margin-right: 12px;">📋</span> Guest IDs
+                </a>
                 <a class="mobile-sidebar-link" onclick="showViewMobile('payments')">
                     <span style="margin-right: 12px;">💰</span> Payments
                 </a>
@@ -3230,8 +3258,9 @@
                     <a class="nav-link nav-primary active" onclick="showView('dashboard')">Dashboard</a>
                     <a class="nav-link nav-primary" onclick="showView('reservations')">Reservations</a>
                     <a class="nav-link nav-primary" onclick="showView('guests')">Guests</a>
+                    <a class="nav-link nav-primary" onclick="showView('guestDocuments')">Guest IDs</a>
                     <a class="nav-link nav-primary" onclick="showView('payments')">Payments</a>
-                    
+
                     <!-- Secondary Navigation (hidden on tablet, shown in More dropdown) -->
                     <a class="nav-link nav-secondary" onclick="showView('availability')">Availability</a>
                     <a class="nav-link nav-secondary" onclick="showView('properties')">Properties</a>
@@ -3409,6 +3438,16 @@
                     <div class="icon-card-title">Performance</div>
                     <div class="icon-card-stat" id="homeStatRevenue">--</div>
                     <div class="icon-card-label">This Month</div>
+                </div>
+
+                <!-- Guest Documents Card -->
+                <div class="icon-card" onclick="showView('guestDocuments')" style="animation: cardPop 0.5s ease-out 0.8s both;">
+                    <div class="icon-card-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
+                        📋
+                    </div>
+                    <div class="icon-card-title">Guest IDs</div>
+                    <div class="icon-card-stat" id="homeStatDocuments">--</div>
+                    <div class="icon-card-label">Pending Review</div>
                 </div>
             </div>
 
@@ -4383,6 +4422,80 @@
                 </table>
             </div>
         </div>
+
+        <!-- Guest Documents View -->
+        <div id="guestDocumentsView" class="container hidden">
+            <div class="card-header">
+                <h2>📋 Guest ID Documents</h2>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn btn-secondary" onclick="copyGuestPortalLink()" title="Copy guest portal link">
+                        🔗 Copy Guest Portal Link
+                    </button>
+                    <button class="btn btn-secondary" onclick="refreshGuestDocuments()">
+                        🔄 Refresh
+                    </button>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="card">
+                <div style="display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;">
+                    <button class="filter-chip active" data-status="all" onclick="filterGuestDocuments('all')">
+                        All Documents
+                    </button>
+                    <button class="filter-chip" data-status="pending" onclick="filterGuestDocuments('pending')">
+                        ⏳ Pending Review
+                    </button>
+                    <button class="filter-chip" data-status="verified" onclick="filterGuestDocuments('verified')">
+                        ✅ Verified
+                    </button>
+                    <button class="filter-chip" data-status="rejected" onclick="filterGuestDocuments('rejected')">
+                        ❌ Rejected
+                    </button>
+                    <button class="filter-chip" data-status="incomplete" onclick="filterGuestDocuments('incomplete')">
+                        ⚠️ Incomplete
+                    </button>
+                </div>
+
+                <!-- Search Bar -->
+                <div style="margin-bottom: 20px;">
+                    <input
+                        type="text"
+                        id="guestDocSearch"
+                        placeholder="🔍 Search by booking ID, guest name, or phone..."
+                        style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px;"
+                        oninput="searchGuestDocuments(this.value)"
+                    >
+                </div>
+
+                <!-- Stats Summary -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 12px; margin-bottom: 20px;">
+                    <div style="background: var(--warning-light); color: white; padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700;" id="docStatPending">0</div>
+                        <div style="font-size: 12px; opacity: 0.9;">Pending Review</div>
+                    </div>
+                    <div style="background: var(--success); color: white; padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700;" id="docStatVerified">0</div>
+                        <div style="font-size: 12px; opacity: 0.9;">Verified</div>
+                    </div>
+                    <div style="background: var(--danger); color: white; padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700;" id="docStatRejected">0</div>
+                        <div style="font-size: 12px; opacity: 0.9;">Rejected</div>
+                    </div>
+                    <div style="background: var(--secondary); color: white; padding: 16px; border-radius: 8px; text-align: center;">
+                        <div style="font-size: 24px; font-weight: 700;" id="docStatIncomplete">0</div>
+                        <div style="font-size: 12px; opacity: 0.9;">Incomplete</div>
+                    </div>
+                </div>
+
+                <!-- Documents List -->
+                <div id="guestDocumentsList">
+                    <div style="text-align: center; padding: 40px; color: var(--text-secondary);">
+                        Loading documents...
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 
     <!-- Reservation Modal -->
@@ -4925,6 +5038,126 @@
             <button class="btn btn-primary" style="width: 100%;" onclick="applyBulkEdit()">
                 Apply Changes
             </button>
+        </div>
+    </div>
+
+    <!-- Guest Document Review Modal -->
+    <div id="guestDocumentModal" class="modal">
+        <div class="modal-content" style="max-width: 900px;">
+            <div class="modal-header">
+                <h3 class="modal-title">Review Guest Document</h3>
+                <button class="close-btn" onclick="closeGuestDocumentModal()">&times;</button>
+            </div>
+
+            <div id="guestDocumentModalContent">
+                <!-- Guest & Reservation Info -->
+                <div style="background: var(--background); padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 16px;">
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Guest Name</div>
+                            <div style="font-weight: 600;" id="modalGuestName">-</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Booking ID</div>
+                            <div style="font-weight: 600;" id="modalBookingId">-</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Document Type</div>
+                            <div style="font-weight: 600; text-transform: capitalize;" id="modalDocType">-</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Document Number</div>
+                            <div style="font-weight: 600;" id="modalDocNumber">-</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Submitted</div>
+                            <div style="font-weight: 600;" id="modalSubmittedAt">-</div>
+                        </div>
+                        <div>
+                            <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 4px;">Status</div>
+                            <div style="font-weight: 600;" id="modalStatus">-</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Document Images -->
+                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 16px; margin-bottom: 20px;">
+                    <!-- Front Image -->
+                    <div id="modalFrontImageContainer">
+                        <div style="font-weight: 600; margin-bottom: 8px;">Front Side</div>
+                        <img id="modalFrontImage" style="width: 100%; border-radius: 8px; cursor: pointer; border: 2px solid var(--border);" onclick="openImageFullscreen(this.src)" alt="Front">
+                    </div>
+
+                    <!-- Back Image -->
+                    <div id="modalBackImageContainer" style="display: none;">
+                        <div style="font-weight: 600; margin-bottom: 8px;">Back Side</div>
+                        <img id="modalBackImage" style="width: 100%; border-radius: 8px; cursor: pointer; border: 2px solid var(--border);" onclick="openImageFullscreen(this.src)" alt="Back">
+                    </div>
+
+                    <!-- Selfie -->
+                    <div id="modalSelfieContainer" style="display: none;">
+                        <div style="font-weight: 600; margin-bottom: 8px;">Selfie</div>
+                        <img id="modalSelfieImage" style="width: 100%; border-radius: 8px; cursor: pointer; border: 2px solid var(--border);" onclick="openImageFullscreen(this.src)" alt="Selfie">
+                    </div>
+                </div>
+
+                <!-- Rejection Reason (if rejected) -->
+                <div id="rejectionReasonSection" style="display: none; background: #fef2f2; border: 1px solid #fecaca; padding: 16px; border-radius: 8px; margin-bottom: 20px;">
+                    <div style="font-weight: 600; color: #dc2626; margin-bottom: 8px;">Rejection Reason</div>
+                    <div id="rejectionReasonText" style="color: #991b1b;"></div>
+                </div>
+
+                <!-- Staff Notes -->
+                <div class="form-group">
+                    <label>Staff Notes (Optional)</label>
+                    <textarea id="modalStaffNotes" rows="3" placeholder="Add any internal notes about this document..." style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;"></textarea>
+                </div>
+
+                <!-- Actions -->
+                <div id="modalActions" style="display: flex; gap: 12px; margin-top: 20px;">
+                    <button class="btn btn-success" style="flex: 1;" onclick="approveDocument()">
+                        ✅ Approve Document
+                    </button>
+                    <button class="btn btn-danger" style="flex: 1;" onclick="showRejectForm()">
+                        ❌ Reject Document
+                    </button>
+                </div>
+
+                <!-- Reject Form (hidden by default) -->
+                <div id="rejectFormSection" style="display: none; margin-top: 20px;">
+                    <div class="form-group">
+                        <label>Rejection Reason *</label>
+                        <select id="modalRejectionReason" style="width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px;">
+                            <option value="">Select reason...</option>
+                            <option value="blurry">Image is too blurry</option>
+                            <option value="incomplete">Incomplete document</option>
+                            <option value="expired">Document expired</option>
+                            <option value="mismatch">Name mismatch</option>
+                            <option value="invalid">Invalid document</option>
+                            <option value="other">Other (specify in notes)</option>
+                        </select>
+                    </div>
+                    <div style="display: flex; gap: 12px;">
+                        <button class="btn btn-secondary" style="flex: 1;" onclick="hideRejectForm()">Cancel</button>
+                        <button class="btn btn-danger" style="flex: 1;" onclick="rejectDocument()">Confirm Rejection</button>
+                    </div>
+                </div>
+
+                <!-- Already Verified Message -->
+                <div id="verifiedMessage" style="display: none; text-align: center; padding: 20px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px;">
+                    <div style="font-size: 48px; margin-bottom: 12px;">✅</div>
+                    <div style="font-weight: 600; color: #16a34a; margin-bottom: 4px;">Document Verified</div>
+                    <div style="color: #15803d; font-size: 14px;">Verified by <span id="verifiedBy">-</span> on <span id="verifiedAt">-</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Fullscreen Image Modal -->
+    <div id="fullscreenImageModal" class="modal" onclick="closeFullscreenImage()">
+        <div style="position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center;">
+            <button class="close-btn" style="position: absolute; top: 20px; right: 20px; background: white; z-index: 10;" onclick="closeFullscreenImage()">&times;</button>
+            <img id="fullscreenImage" style="max-width: 90%; max-height: 90%; object-fit: contain; border-radius: 8px;" alt="Fullscreen view">
         </div>
     </div>
 
