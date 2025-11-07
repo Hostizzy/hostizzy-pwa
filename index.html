@@ -6706,6 +6706,10 @@
             currentGuestReservation = null;
             allGuestDocuments = [];
 
+            // Clear form fields
+            document.getElementById('guestBookingId').value = '';
+            document.getElementById('guestPhone').value = '';
+
             document.getElementById('guestPortalDashboard').classList.add('hidden');
             document.getElementById('guestPortalLogin').classList.remove('hidden');
 
@@ -7671,6 +7675,8 @@
                     await supabase.rpc('set_user_context', { user_email: email });
                     
                     document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('guestPortalLogin').classList.add('hidden');
+                    document.getElementById('guestPortalDashboard').classList.add('hidden');
                     document.getElementById('mainApp').classList.remove('hidden');
                     // Update email in both navbar and dropdown
                     updateUserEmailDisplay(currentUser.email);
@@ -14448,6 +14454,8 @@
                     await supabase.rpc('set_user_context', { user_email: currentUser.email });
                     
                     document.getElementById('loginScreen').classList.add('hidden');
+                    document.getElementById('guestPortalLogin').classList.add('hidden');
+                    document.getElementById('guestPortalDashboard').classList.add('hidden');
                     document.getElementById('mainApp').classList.remove('hidden');
                     // Update email in both navbar and dropdown
                     updateUserEmailDisplay(currentUser.email);
