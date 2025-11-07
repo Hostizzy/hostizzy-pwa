@@ -1,0 +1,77 @@
+{
+  "name": "Hostizzy Guest Portal",
+  "short_name": "Hostizzy Guest",
+  "description": "Submit your identification documents securely for your Hostizzy reservation",
+  "start_url": "/guest-portal.html",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#1a73e8",
+  "orientation": "portrait",
+  "scope": "/",
+  "lang": "en-IN",
+  "dir": "ltr",
+  "categories": ["travel", "hospitality", "productivity"],
+  "icons": [
+    {
+      "src": "assets/logo-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "assets/logo-192-maskable.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/logo-512-maskable.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
+    },
+    {
+      "src": "assets/logo.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "assets/screenshot-mobile.png",
+      "sizes": "390x844",
+      "type": "image/png",
+      "form_factor": "narrow",
+      "label": "Guest ID Submission Interface"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Submit ID",
+      "short_name": "Submit",
+      "description": "Submit guest identification documents",
+      "url": "/guest-portal.html",
+      "icons": [
+        {
+          "src": "assets/logo-192.png",
+          "sizes": "192x192"
+        }
+      ]
+    }
+  ],
+  "prefer_related_applications": false,
+  "related_applications": [
+    {
+      "platform": "play",
+      "id": "com.hostizzy.guest",
+      "url": "https://play.google.com/store/apps/details?id=com.hostizzy.guest"
+    }
+  ],
+  "iarc_rating_id": "",
+  "features": [
+    "camera",
+    "photo-upload",
+    "offline-support"
+  ]
+}
