@@ -716,6 +716,43 @@
         .footer-link:hover {
             text-decoration: underline;
         }
+
+        /* ============================================
+           PHOTO UPLOAD COMPONENTS
+           ============================================ */
+        .photo-upload-container {
+            margin-top: 8px;
+        }
+
+        .photo-preview {
+            width: 100%;
+            min-height: 200px;
+            background: var(--gray-50);
+            border: 2px dashed var(--border);
+            border-radius: var(--radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .photo-placeholder {
+            text-align: center;
+            color: var(--text-secondary);
+        }
+
+        .photo-preview.has-photo {
+            border-style: solid;
+            border-color: var(--success);
+            background: white;
+        }
+
+        .photo-preview img {
+            max-width: 100%;
+            max-height: 400px;
+            object-fit: contain;
+        }
     </style>
 </head>
 <body>
@@ -868,6 +905,217 @@
             </div>
 
             <!-- ========================================
+                 SCREEN 3: DOCUMENT SUBMISSION FORM
+                 ======================================== -->
+            <div id="submissionScreen" class="screen">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">📝</div>
+                        <h2 id="submissionTitle">Submit ID Document</h2>
+                    </div>
+
+                    <div class="alert alert-info">
+                        <span class="alert-icon">ℹ️</span>
+                        <div class="alert-content" id="submissionInfo">
+                            Please provide accurate information and clear photos of your ID document.
+                        </div>
+                    </div>
+
+                    <form id="documentForm">
+                        <!-- Guest Name -->
+                        <div class="form-group">
+                            <label class="form-label" for="guestNameInput">Full Name (as per ID)</label>
+                            <input
+                                type="text"
+                                id="guestNameInput"
+                                class="form-input"
+                                placeholder="Enter full name"
+                                required
+                            >
+                            <div class="form-hint">Exactly as shown on your ID document</div>
+                        </div>
+
+                        <!-- Guest Age (for additional guests) -->
+                        <div class="form-group" id="ageGroup" style="display: none;">
+                            <label class="form-label" for="guestAgeInput">Age</label>
+                            <input
+                                type="number"
+                                id="guestAgeInput"
+                                class="form-input"
+                                placeholder="Enter age"
+                                min="1"
+                                max="120"
+                            >
+                            <div class="form-hint">Children under 18 don't need to submit ID</div>
+                        </div>
+
+                        <!-- Document Type -->
+                        <div class="form-group">
+                            <label class="form-label">Document Type</label>
+                            <div class="radio-group">
+                                <label class="radio-option">
+                                    <input type="radio" name="documentType" value="aadhar" required>
+                                    <span>🪪 Aadhar Card</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="documentType" value="passport">
+                                    <span>🛂 Passport</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="documentType" value="driving_license">
+                                    <span>🚗 Driving License</span>
+                                </label>
+                                <label class="radio-option">
+                                    <input type="radio" name="documentType" value="voter_id">
+                                    <span>🗳️ Voter ID</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Document Number -->
+                        <div class="form-group">
+                            <label class="form-label" for="documentNumber">Document Number</label>
+                            <input
+                                type="text"
+                                id="documentNumber"
+                                class="form-input"
+                                placeholder="Enter document number"
+                                required
+                            >
+                            <div class="form-hint">The identification number on your document</div>
+                        </div>
+
+                        <!-- Photo Upload Instructions -->
+                        <div class="alert alert-warning" style="margin-bottom: 16px;">
+                            <span class="alert-icon">📸</span>
+                            <div class="alert-content">
+                                <strong>Photo Requirements:</strong>
+                                Clear, well-lit photos. Ensure all text is readable.
+                            </div>
+                        </div>
+
+                        <!-- Document Front Photo -->
+                        <div class="form-group">
+                            <label class="form-label">Document Front Photo</label>
+                            <div class="photo-upload-container">
+                                <div class="photo-preview" id="frontPhotoPreview">
+                                    <div class="photo-placeholder">
+                                        <div style="font-size: 48px; margin-bottom: 8px;">📷</div>
+                                        <div>No photo selected</div>
+                                    </div>
+                                    <img id="frontPhotoImg" style="display: none; width: 100%; border-radius: 8px;">
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                                    <button type="button" class="btn btn-primary" onclick="capturePhoto('front')" style="flex: 1;">
+                                        📸 Take Photo
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="uploadPhoto('front')" style="flex: 1;">
+                                        📁 Upload File
+                                    </button>
+                                </div>
+                                <input type="file" id="frontFileInput" accept="image/*" style="display: none;" onchange="handleFileSelect('front', event)">
+                            </div>
+                        </div>
+
+                        <!-- Document Back Photo (for Aadhar/DL) -->
+                        <div class="form-group" id="backPhotoGroup" style="display: none;">
+                            <label class="form-label">Document Back Photo</label>
+                            <div class="photo-upload-container">
+                                <div class="photo-preview" id="backPhotoPreview">
+                                    <div class="photo-placeholder">
+                                        <div style="font-size: 48px; margin-bottom: 8px;">📷</div>
+                                        <div>No photo selected</div>
+                                    </div>
+                                    <img id="backPhotoImg" style="display: none; width: 100%; border-radius: 8px;">
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                                    <button type="button" class="btn btn-primary" onclick="capturePhoto('back')" style="flex: 1;">
+                                        📸 Take Photo
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="uploadPhoto('back')" style="flex: 1;">
+                                        📁 Upload File
+                                    </button>
+                                </div>
+                                <input type="file" id="backFileInput" accept="image/*" style="display: none;" onchange="handleFileSelect('back', event)">
+                            </div>
+                        </div>
+
+                        <!-- Selfie Photo (for primary guest only) -->
+                        <div class="form-group" id="selfiePhotoGroup" style="display: none;">
+                            <label class="form-label">Selfie with ID</label>
+                            <div class="alert alert-info" style="margin-bottom: 12px;">
+                                <span class="alert-icon">🤳</span>
+                                <div class="alert-content">
+                                    Please take a selfie holding your ID document next to your face
+                                </div>
+                            </div>
+                            <div class="photo-upload-container">
+                                <div class="photo-preview" id="selfiePhotoPreview">
+                                    <div class="photo-placeholder">
+                                        <div style="font-size: 48px; margin-bottom: 8px;">🤳</div>
+                                        <div>No photo selected</div>
+                                    </div>
+                                    <img id="selfiePhotoImg" style="display: none; width: 100%; border-radius: 8px;">
+                                </div>
+                                <div style="display: flex; gap: 8px; margin-top: 12px;">
+                                    <button type="button" class="btn btn-primary" onclick="capturePhoto('selfie')" style="flex: 1;">
+                                        📸 Take Selfie
+                                    </button>
+                                    <button type="button" class="btn btn-secondary" onclick="uploadPhoto('selfie')" style="flex: 1;">
+                                        📁 Upload File
+                                    </button>
+                                </div>
+                                <input type="file" id="selfieFileInput" accept="image/*" style="display: none;" onchange="handleFileSelect('selfie', event)">
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div style="display: flex; gap: 12px; margin-top: 24px;">
+                            <button type="button" class="btn btn-secondary" onclick="cancelSubmission()" style="flex: 1;">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn btn-success" id="submitDocBtn" style="flex: 1;">
+                                Submit Document
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- ========================================
+                 SCREEN 4: CAMERA CAPTURE
+                 ======================================== -->
+            <div id="cameraScreen" class="screen">
+                <div class="card">
+                    <div class="card-header">
+                        <div class="card-icon">📸</div>
+                        <h2 id="cameraTitle">Take Photo</h2>
+                    </div>
+
+                    <div style="position: relative; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
+                        <video id="cameraVideo" autoplay playsinline style="width: 100%; display: block; max-height: 60vh;"></video>
+                        <canvas id="cameraCanvas" style="display: none;"></canvas>
+                    </div>
+
+                    <div style="display: flex; gap: 12px;">
+                        <button type="button" class="btn btn-secondary" onclick="closeCameraCapture()" style="flex: 1;">
+                            Cancel
+                        </button>
+                        <button type="button" class="btn btn-primary" onclick="takeCameraPhoto()" style="flex: 2;">
+                            📸 Capture
+                        </button>
+                    </div>
+
+                    <div class="alert alert-info" style="margin-top: 16px;">
+                        <span class="alert-icon">💡</span>
+                        <div class="alert-content">
+                            Ensure good lighting and all text is clearly visible
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ========================================
                  SCREEN 5: SUCCESS
                  ======================================== -->
             <div id="successScreen" class="screen">
@@ -930,6 +1178,20 @@
         const AppState = {
             reservation: null,
             guestDocuments: [],
+            currentSubmission: {
+                sequence: null,
+                isPrimary: false,
+                existingDoc: null,
+                photos: {
+                    front: null,
+                    back: null,
+                    selfie: null
+                }
+            },
+            cameraState: {
+                stream: null,
+                photoType: null
+            }
         };
 
         // ============================================
@@ -1176,12 +1438,436 @@
             `;
 
             div.addEventListener('click', () => {
-                showToast('Document submission form coming soon!', 'info');
-                // TODO: Implement openGuestForm(sequence, isPrimary, document);
+                openGuestForm(sequence, isPrimary, document);
             });
 
             return div;
         }
+
+        // ============================================
+        // DOCUMENT SUBMISSION FORM
+        // ============================================
+
+        function openGuestForm(sequence, isPrimary, existingDoc = null) {
+            // Reset submission state
+            AppState.currentSubmission = {
+                sequence: sequence,
+                isPrimary: isPrimary,
+                existingDoc: existingDoc,
+                photos: {
+                    front: null,
+                    back: null,
+                    selfie: null
+                }
+            };
+
+            // Reset form
+            document.getElementById('documentForm').reset();
+            resetPhotoPreview('front');
+            resetPhotoPreview('back');
+            resetPhotoPreview('selfie');
+
+            // Set title
+            document.getElementById('submissionTitle').textContent =
+                isPrimary ? 'Your ID Document' : `Guest ${sequence} - ID Document`;
+
+            // Pre-fill if editing
+            if (existingDoc) {
+                document.getElementById('guestNameInput').value = existingDoc.guest_name || '';
+                if (existingDoc.guest_age) {
+                    document.getElementById('guestAgeInput').value = existingDoc.guest_age;
+                }
+                if (existingDoc.document_type) {
+                    document.querySelector(`input[name="documentType"][value="${existingDoc.document_type}"]`).checked = true;
+                    updateDocumentTypeFields(existingDoc.document_type);
+                }
+                if (existingDoc.document_number) {
+                    document.getElementById('documentNumber').value = existingDoc.document_number;
+                }
+            } else {
+                // Pre-fill primary guest name
+                if (isPrimary) {
+                    document.getElementById('guestNameInput').value = AppState.reservation.guest_name;
+                }
+            }
+
+            // Show/hide age field (only for additional guests)
+            document.getElementById('ageGroup').style.display = isPrimary ? 'none' : 'block';
+
+            // Show/hide selfie field (only for primary guest)
+            document.getElementById('selfiePhotoGroup').style.display = isPrimary ? 'block' : 'none';
+
+            showScreen('submissionScreen');
+        }
+
+        function cancelSubmission() {
+            showOverviewScreen();
+        }
+
+        // Document type change handler
+        document.addEventListener('DOMContentLoaded', () => {
+            document.querySelectorAll('input[name="documentType"]').forEach(radio => {
+                radio.addEventListener('change', (e) => {
+                    updateDocumentTypeFields(e.target.value);
+                });
+            });
+        });
+
+        function updateDocumentTypeFields(docType) {
+            const backPhotoGroup = document.getElementById('backPhotoGroup');
+
+            // Aadhar and Driving License need back photo
+            if (docType === 'aadhar' || docType === 'driving_license') {
+                backPhotoGroup.style.display = 'block';
+            } else {
+                backPhotoGroup.style.display = 'none';
+                resetPhotoPreview('back');
+                AppState.currentSubmission.photos.back = null;
+            }
+        }
+
+        function resetPhotoPreview(photoType) {
+            const preview = document.getElementById(`${photoType}PhotoPreview`);
+            const img = document.getElementById(`${photoType}PhotoImg`);
+            const placeholder = preview.querySelector('.photo-placeholder');
+
+            img.style.display = 'none';
+            img.src = '';
+            if (placeholder) placeholder.style.display = 'block';
+            preview.classList.remove('has-photo');
+        }
+
+        // ============================================
+        // PHOTO CAPTURE - CAMERA API
+        // ============================================
+
+        async function capturePhoto(photoType) {
+            AppState.cameraState.photoType = photoType;
+
+            try {
+                // Request camera access
+                const stream = await navigator.mediaDevices.getUserMedia({
+                    video: {
+                        facingMode: photoType === 'selfie' ? 'user' : 'environment',
+                        width: { ideal: 1920 },
+                        height: { ideal: 1080 }
+                    }
+                });
+
+                AppState.cameraState.stream = stream;
+
+                // Show camera screen
+                const video = document.getElementById('cameraVideo');
+                video.srcObject = stream;
+
+                const title = photoType === 'front' ? 'Document Front Photo' :
+                             photoType === 'back' ? 'Document Back Photo' :
+                             'Selfie with ID';
+                document.getElementById('cameraTitle').textContent = title;
+
+                showScreen('cameraScreen');
+            } catch (error) {
+                console.error('Camera access error:', error);
+                showToast('Camera access denied. Please use file upload instead.', 'error');
+            }
+        }
+
+        async function takeCameraPhoto() {
+            const video = document.getElementById('cameraVideo');
+            const canvas = document.getElementById('cameraCanvas');
+            const photoType = AppState.cameraState.photoType;
+
+            // Set canvas size to video size
+            canvas.width = video.videoWidth;
+            canvas.height = video.videoHeight;
+
+            // Draw video frame to canvas
+            const ctx = canvas.getContext('2d');
+            ctx.drawImage(video, 0, 0);
+
+            // Convert to blob
+            canvas.toBlob(async (blob) => {
+                await processPhoto(photoType, blob);
+                closeCameraCapture();
+            }, 'image/jpeg', 0.9);
+        }
+
+        function closeCameraCapture() {
+            // Stop camera stream
+            if (AppState.cameraState.stream) {
+                AppState.cameraState.stream.getTracks().forEach(track => track.stop());
+                AppState.cameraState.stream = null;
+            }
+
+            // Clear video
+            const video = document.getElementById('cameraVideo');
+            video.srcObject = null;
+
+            showScreen('submissionScreen');
+        }
+
+        // ============================================
+        // PHOTO UPLOAD - FILE INPUT
+        // ============================================
+
+        function uploadPhoto(photoType) {
+            document.getElementById(`${photoType}FileInput`).click();
+        }
+
+        async function handleFileSelect(photoType, event) {
+            const file = event.target.files[0];
+            if (!file) return;
+
+            // Validate file type
+            if (!file.type.startsWith('image/')) {
+                showToast('Please select an image file', 'error');
+                return;
+            }
+
+            // Validate file size (max 10MB)
+            if (file.size > 10 * 1024 * 1024) {
+                showToast('Image too large. Maximum size is 10MB', 'error');
+                return;
+            }
+
+            await processPhoto(photoType, file);
+        }
+
+        // ============================================
+        // IMAGE COMPRESSION
+        // ============================================
+
+        async function processPhoto(photoType, blob) {
+            try {
+                showLoading('Processing image...');
+
+                // Compress image
+                const compressedBlob = await compressImage(blob);
+
+                // Store in state
+                AppState.currentSubmission.photos[photoType] = compressedBlob;
+
+                // Update preview
+                updatePhotoPreview(photoType, compressedBlob);
+
+                hideLoading();
+                showToast('Photo added successfully', 'success');
+            } catch (error) {
+                hideLoading();
+                console.error('Photo processing error:', error);
+                showToast('Error processing photo. Please try again.', 'error');
+            }
+        }
+
+        async function compressImage(blob) {
+            return new Promise((resolve, reject) => {
+                const img = new Image();
+                const url = URL.createObjectURL(blob);
+
+                img.onload = () => {
+                    URL.revokeObjectURL(url);
+
+                    const canvas = document.createElement('canvas');
+                    let width = img.width;
+                    let height = img.height;
+
+                    // Max dimensions
+                    const MAX_WIDTH = 1920;
+                    const MAX_HEIGHT = 1920;
+
+                    // Calculate new dimensions
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height = (height * MAX_WIDTH) / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width = (width * MAX_HEIGHT) / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    canvas.toBlob((compressedBlob) => {
+                        if (compressedBlob) {
+                            console.log(`Compressed: ${(blob.size / 1024).toFixed(2)}KB → ${(compressedBlob.size / 1024).toFixed(2)}KB`);
+                            resolve(compressedBlob);
+                        } else {
+                            reject(new Error('Compression failed'));
+                        }
+                    }, 'image/jpeg', 0.85);
+                };
+
+                img.onerror = () => {
+                    URL.revokeObjectURL(url);
+                    reject(new Error('Image load failed'));
+                };
+
+                img.src = url;
+            });
+        }
+
+        function updatePhotoPreview(photoType, blob) {
+            const preview = document.getElementById(`${photoType}PhotoPreview`);
+            const img = document.getElementById(`${photoType}PhotoImg`);
+            const placeholder = preview.querySelector('.photo-placeholder');
+
+            const url = URL.createObjectURL(blob);
+            img.src = url;
+            img.style.display = 'block';
+            if (placeholder) placeholder.style.display = 'none';
+            preview.classList.add('has-photo');
+        }
+
+        // ============================================
+        // SUPABASE STORAGE UPLOAD
+        // ============================================
+
+        async function uploadToStorage(blob, path) {
+            try {
+                // Convert blob to File with proper name
+                const file = new File([blob], path, { type: 'image/jpeg' });
+
+                const { data, error } = await supabase.storage
+                    .from('guest-id-documents')
+                    .upload(path, file, {
+                        cacheControl: '3600',
+                        upsert: true
+                    });
+
+                if (error) throw error;
+
+                // Get public URL
+                const { data: urlData } = supabase.storage
+                    .from('guest-id-documents')
+                    .getPublicUrl(path);
+
+                return urlData.publicUrl;
+            } catch (error) {
+                console.error('Upload error:', error);
+                throw error;
+            }
+        }
+
+        // ============================================
+        // FORM SUBMISSION
+        // ============================================
+
+        document.getElementById('documentForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const form = e.target;
+            const guestName = document.getElementById('guestNameInput').value.trim();
+            const guestAge = document.getElementById('guestAgeInput').value;
+            const documentType = document.querySelector('input[name="documentType"]:checked')?.value;
+            const documentNumber = document.getElementById('documentNumber').value.trim();
+
+            // Validation
+            if (!guestName || !documentType || !documentNumber) {
+                showToast('Please fill in all required fields', 'error');
+                return;
+            }
+
+            // Check for additional guest age
+            if (!AppState.currentSubmission.isPrimary && guestAge && parseInt(guestAge) < 18) {
+                showToast('Children under 18 do not need to submit ID documents', 'info');
+                return;
+            }
+
+            // Validate photos
+            const photos = AppState.currentSubmission.photos;
+            if (!photos.front) {
+                showToast('Please upload document front photo', 'error');
+                return;
+            }
+
+            if ((documentType === 'aadhar' || documentType === 'driving_license') && !photos.back) {
+                showToast('Please upload document back photo', 'error');
+                return;
+            }
+
+            if (AppState.currentSubmission.isPrimary && !photos.selfie) {
+                showToast('Please upload a selfie with your ID', 'error');
+                return;
+            }
+
+            // Start submission
+            showLoading('Uploading documents...');
+
+            try {
+                const bookingId = AppState.reservation.booking_id;
+                const sequence = AppState.currentSubmission.sequence;
+                const timestamp = Date.now();
+
+                // Upload photos to storage
+                const frontPath = `${bookingId}/${sequence}_front_${timestamp}.jpg`;
+                const frontUrl = await uploadToStorage(photos.front, frontPath);
+
+                let backUrl = null;
+                if (photos.back) {
+                    const backPath = `${bookingId}/${sequence}_back_${timestamp}.jpg`;
+                    backUrl = await uploadToStorage(photos.back, backPath);
+                }
+
+                let selfieUrl = null;
+                if (photos.selfie) {
+                    const selfiePath = `${bookingId}/${sequence}_selfie_${timestamp}.jpg`;
+                    selfieUrl = await uploadToStorage(photos.selfie, selfiePath);
+                }
+
+                // Insert/update document record
+                const documentData = {
+                    booking_id: bookingId,
+                    guest_type: AppState.currentSubmission.isPrimary ? 'primary' : 'additional',
+                    guest_sequence: sequence,
+                    guest_name: guestName,
+                    guest_age: guestAge ? parseInt(guestAge) : null,
+                    document_type: documentType,
+                    document_number: documentNumber,
+                    document_front_url: frontUrl,
+                    document_back_url: backUrl,
+                    selfie_url: selfieUrl,
+                    status: 'pending',
+                    submitted_at: new Date().toISOString()
+                };
+
+                let result;
+                if (AppState.currentSubmission.existingDoc) {
+                    // Update existing
+                    result = await supabase
+                        .from('guest_documents')
+                        .update(documentData)
+                        .eq('id', AppState.currentSubmission.existingDoc.id);
+                } else {
+                    // Insert new
+                    result = await supabase
+                        .from('guest_documents')
+                        .insert([documentData]);
+                }
+
+                if (result.error) throw result.error;
+
+                // Reload documents
+                await loadGuestDocuments();
+
+                hideLoading();
+                showToast('Document submitted successfully!', 'success');
+
+                // Show success screen
+                showScreen('successScreen');
+
+            } catch (error) {
+                hideLoading();
+                console.error('Submission error:', error);
+                showToast('Failed to submit document. Please try again.', 'error');
+            }
+        });
 
         // ============================================
         // NAVIGATION
@@ -1200,7 +1886,18 @@
         });
 
         document.getElementById('addGuestBtn').addEventListener('click', () => {
-            showToast('Add guest form coming soon!', 'info');
+            const r = AppState.reservation;
+            const totalAdults = r.adults;
+            const currentGuests = AppState.guestDocuments.filter(d => d.guest_type === 'additional').length + 1; // +1 for primary
+
+            if (currentGuests >= totalAdults) {
+                showToast(`All ${totalAdults} guests already have submissions`, 'info');
+                return;
+            }
+
+            // Get next sequence number
+            const nextSequence = currentGuests + 1;
+            openGuestForm(nextSequence, false, null);
         });
 
         // ============================================
