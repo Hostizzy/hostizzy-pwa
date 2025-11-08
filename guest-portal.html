@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="theme-color" content="#6366f1">
+    <meta name="theme-color" content="#1a73e8">
     <meta name="description" content="Submit your identification documents securely for your Hostizzy reservation">
 
     <!-- PWA Meta Tags -->
@@ -26,61 +26,29 @@
 
     <style>
         /* ============================================
-           IMPROVED DESIGN SYSTEM
+           CSS VARIABLES & THEME
            ============================================ */
         :root {
-            /* Primary Colors - Modern Purple/Indigo */
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --primary-lighter: #eef2ff;
-
-            /* Status Colors */
-            --success: #10b981;
-            --success-light: #d1fae5;
-            --warning: #f59e0b;
-            --warning-light: #fef3c7;
-            --error: #ef4444;
-            --error-light: #fee2e2;
-            --info: #3b82f6;
-            --info-light: #dbeafe;
-
-            /* Neutrals */
-            --gray-50: #f9fafb;
-            --gray-100: #f3f4f6;
-            --gray-200: #e5e7eb;
-            --gray-300: #d1d5db;
-            --gray-400: #9ca3af;
-            --gray-500: #6b7280;
-            --gray-600: #4b5563;
-            --gray-700: #374151;
-            --gray-800: #1f2937;
-            --gray-900: #111827;
-
-            /* Semantic */
-            --text-primary: var(--gray-900);
-            --text-secondary: var(--gray-600);
-            --text-tertiary: var(--gray-400);
-            --border: var(--gray-200);
-            --bg: #ffffff;
-            --bg-secondary: var(--gray-50);
-
-            /* Effects */
-            --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-            --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
-            --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-            --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-            --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
-            --radius-sm: 6px;
-            --radius: 8px;
-            --radius-md: 12px;
-            --radius-lg: 16px;
-            --radius-xl: 24px;
-
-            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            --primary-color: #1a73e8;
+            --primary-dark: #1557b0;
+            --primary-light: #e8f0fe;
+            --success-color: #34a853;
+            --warning-color: #fbbc04;
+            --error-color: #ea4335;
+            --text-primary: #202124;
+            --text-secondary: #5f6368;
+            --border-color: #dadce0;
+            --bg-color: #ffffff;
+            --bg-secondary: #f8f9fa;
+            --shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.24);
+            --shadow-hover: 0 3px 6px rgba(0,0,0,0.16), 0 3px 6px rgba(0,0,0,0.23);
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
         }
 
+        /* ============================================
+           GLOBAL STYLES
+           ============================================ */
         * {
             margin: 0;
             padding: 0;
@@ -88,135 +56,109 @@
         }
 
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', Roboto, sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background: var(--bg-secondary);
             color: var(--text-primary);
             line-height: 1.6;
-            min-height: 100vh;
+            overflow-x: hidden;
             -webkit-font-smoothing: antialiased;
             -moz-osx-font-smoothing: grayscale;
         }
 
         /* ============================================
-           LAYOUT
+           LAYOUT COMPONENTS
            ============================================ */
         .app-container {
-            max-width: 480px;
+            max-width: 600px;
             margin: 0 auto;
             min-height: 100vh;
-            background: var(--bg);
-            position: relative;
+            background: var(--bg-color);
+            box-shadow: var(--shadow);
         }
 
-        /* Improved Header */
+        /* Header */
         .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: var(--primary-color);
             color: white;
-            padding: 28px 24px;
+            padding: 20px;
             text-align: center;
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .header-logo {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 12px;
-            background: white;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            box-shadow: var(--shadow);
         }
 
         .header h1 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 4px;
-            letter-spacing: -0.5px;
+            font-size: 24px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
 
         .header .subtitle {
-            font-size: 13px;
-            opacity: 0.95;
-            font-weight: 500;
+            font-size: 14px;
+            opacity: 0.9;
+            margin-top: 5px;
         }
 
         /* Content Area */
         .content {
-            padding: 24px;
+            padding: 20px;
         }
 
         .screen {
             display: none;
-            animation: fadeInUp 0.4s ease-out;
         }
 
         .screen.active {
             display: block;
+            animation: fadeIn 0.3s ease;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
         /* ============================================
-           IMPROVED CARDS
+           CARDS & CONTAINERS
            ============================================ */
         .card {
-            background: var(--bg);
-            border-radius: var(--radius-lg);
-            padding: 24px;
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 20px;
             margin-bottom: 20px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border);
+            box-shadow: var(--shadow);
             transition: var(--transition);
         }
 
         .card:hover {
-            box-shadow: var(--shadow-lg);
+            box-shadow: var(--shadow-hover);
         }
 
         .card-header {
             display: flex;
             align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--gray-100);
-        }
-
-        .card-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--primary-lighter);
-            border-radius: var(--radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
+            gap: 10px;
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--bg-secondary);
         }
 
         .card-header h2 {
             font-size: 18px;
-            font-weight: 700;
-            color: var(--text-primary);
+            font-weight: 600;
             flex: 1;
         }
 
+        .card-icon {
+            font-size: 24px;
+        }
+
         /* ============================================
-           IMPROVED FORMS
+           FORM ELEMENTS
            ============================================ */
         .form-group {
             margin-bottom: 20px;
@@ -224,7 +166,7 @@
 
         .form-label {
             display: block;
-            font-weight: 600;
+            font-weight: 500;
             margin-bottom: 8px;
             color: var(--text-primary);
             font-size: 14px;
@@ -232,39 +174,83 @@
 
         .form-input {
             width: 100%;
-            padding: 14px 16px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 15px;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
             transition: var(--transition);
             font-family: inherit;
-            background: var(--bg);
         }
 
         .form-input:focus {
             outline: none;
-            border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-lighter);
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light);
         }
 
         .form-input::placeholder {
-            color: var(--gray-400);
-        }
-
-        .form-hint {
-            margin-top: 6px;
-            font-size: 13px;
             color: var(--text-secondary);
         }
 
+        .form-select {
+            width: 100%;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 16px;
+            background: white;
+            transition: var(--transition);
+            cursor: pointer;
+        }
+
+        .form-select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+            box-shadow: 0 0 0 3px var(--primary-light);
+        }
+
+        /* Radio Buttons */
+        .radio-group {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .radio-option {
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .radio-option:hover {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
+        .radio-option input[type="radio"] {
+            margin-right: 10px;
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .radio-option.selected {
+            border-color: var(--primary-color);
+            background: var(--primary-light);
+        }
+
         /* ============================================
-           IMPROVED BUTTONS
+           BUTTONS
            ============================================ */
         .btn {
             padding: 14px 24px;
             border: none;
-            border-radius: var(--radius);
-            font-size: 15px;
+            border-radius: 8px;
+            font-size: 16px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
@@ -274,26 +260,6 @@
             gap: 8px;
             text-decoration: none;
             font-family: inherit;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:active::before {
-            width: 300px;
-            height: 300px;
         }
 
         .btn:disabled {
@@ -302,47 +268,188 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
+            background: var(--primary-color);
             color: white;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
         }
 
         .btn-primary:hover:not(:disabled) {
+            background: var(--primary-dark);
             transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
+            box-shadow: var(--shadow-hover);
         }
 
         .btn-secondary {
-            background: var(--gray-100);
+            background: var(--bg-secondary);
             color: var(--text-primary);
-            border: 1px solid var(--border);
         }
 
         .btn-secondary:hover:not(:disabled) {
-            background: var(--gray-200);
+            background: var(--border-color);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
+            background: var(--success-color);
             color: white;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+        }
+
+        .btn-success:hover:not(:disabled) {
+            background: #2d8e47;
         }
 
         .btn-block {
             width: 100%;
         }
 
+        .btn-icon {
+            padding: 10px;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+        }
+
         /* ============================================
-           IMPROVED ALERTS
+           PHOTO CAPTURE
+           ============================================ */
+        .photo-capture {
+            margin: 15px 0;
+        }
+
+        .photo-preview {
+            width: 100%;
+            max-height: 300px;
+            object-fit: contain;
+            border-radius: 8px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        .photo-preview.visible {
+            display: block;
+        }
+
+        .camera-container {
+            position: relative;
+            width: 100%;
+            background: #000;
+            border-radius: 8px;
+            overflow: hidden;
+            display: none;
+        }
+
+        .camera-container.active {
+            display: block;
+        }
+
+        .camera-video {
+            width: 100%;
+            display: block;
+        }
+
+        .camera-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 20px;
+        }
+
+        .camera-hint {
+            background: rgba(0,0,0,0.6);
+            color: white;
+            padding: 10px;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 14px;
+        }
+
+        .camera-controls {
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+        }
+
+        .capture-btn {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background: white;
+            border: 4px solid var(--primary-color);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .capture-btn:hover {
+            transform: scale(1.1);
+        }
+
+        /* ============================================
+           PROGRESS & STATUS
+           ============================================ */
+        .progress-bar {
+            width: 100%;
+            height: 8px;
+            background: var(--bg-secondary);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 20px 0;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .progress-text {
+            text-align: center;
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 5px;
+        }
+
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .status-pending {
+            background: var(--warning-color);
+            color: white;
+        }
+
+        .status-verified {
+            background: var(--success-color);
+            color: white;
+        }
+
+        .status-rejected {
+            background: var(--error-color);
+            color: white;
+        }
+
+        .status-incomplete {
+            background: var(--text-secondary);
+            color: white;
+        }
+
+        /* ============================================
+           ALERTS & MESSAGES
            ============================================ */
         .alert {
-            padding: 16px;
-            border-radius: var(--radius-md);
+            padding: 15px;
+            border-radius: 8px;
             margin-bottom: 20px;
             display: flex;
             align-items: flex-start;
-            gap: 12px;
-            border-left: 4px solid;
+            gap: 10px;
         }
 
         .alert-icon {
@@ -350,177 +457,28 @@
             flex-shrink: 0;
         }
 
-        .alert-content {
-            flex: 1;
-        }
-
-        .alert-content strong {
-            display: block;
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
-
         .alert-info {
-            background: var(--info-light);
-            border-color: var(--info);
-            color: #1e40af;
+            background: var(--primary-light);
+            color: var(--primary-dark);
+            border-left: 4px solid var(--primary-color);
         }
 
         .alert-success {
-            background: var(--success-light);
-            border-color: var(--success);
-            color: #065f46;
+            background: #e6f4ea;
+            color: #137333;
+            border-left: 4px solid var(--success-color);
         }
 
         .alert-warning {
-            background: var(--warning-light);
-            border-color: var(--warning);
-            color: #92400e;
+            background: #fef7e0;
+            color: #7f5f01;
+            border-left: 4px solid var(--warning-color);
         }
 
         .alert-error {
-            background: var(--error-light);
-            border-color: var(--error);
-            color: #991b1b;
-        }
-
-        /* ============================================
-           TOAST NOTIFICATIONS
-           ============================================ */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-width: 400px;
-        }
-
-        .toast {
-            background: white;
-            padding: 16px 20px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-xl);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideInRight 0.3s ease-out;
-            border-left: 4px solid var(--primary);
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .toast-success {
-            border-left-color: var(--success);
-        }
-
-        .toast-error {
-            border-left-color: var(--error);
-        }
-
-        /* ============================================
-           LOADING
-           ============================================ */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-        }
-
-        .loading-content {
-            background: white;
-            padding: 32px;
-            border-radius: var(--radius-xl);
-            text-align: center;
-            box-shadow: var(--shadow-xl);
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid var(--gray-200);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        /* ============================================
-           RESERVATION INFO CARD
-           ============================================ */
-        .reservation-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 24px;
-            border-radius: var(--radius-lg);
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .reservation-property {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: -0.5px;
-        }
-
-        .reservation-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-
-        .reservation-item {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 12px;
-            border-radius: var(--radius);
-            backdrop-filter: blur(10px);
-        }
-
-        .reservation-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
-
-        .reservation-value {
-            font-size: 16px;
-            font-weight: 700;
+            background: #fce8e6;
+            color: #c5221f;
+            border-left: 4px solid var(--error-color);
         }
 
         /* ============================================
@@ -529,26 +487,22 @@
         .guest-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 15px;
         }
 
         .guest-item {
-            background: var(--gray-50);
-            padding: 16px;
-            border-radius: var(--radius-md);
+            background: var(--bg-secondary);
+            padding: 15px;
+            border-radius: 8px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             cursor: pointer;
             transition: var(--transition);
-            border: 2px solid transparent;
         }
 
         .guest-item:hover {
-            background: white;
-            border-color: var(--primary);
-            transform: translateX(4px);
-            box-shadow: var(--shadow-md);
+            background: var(--border-color);
         }
 
         .guest-info {
@@ -558,127 +512,96 @@
         .guest-name {
             font-weight: 600;
             margin-bottom: 4px;
-            font-size: 15px;
         }
 
         .guest-meta {
-            font-size: 13px;
-            color: var(--text-secondary);
-        }
-
-        .status-badge {
-            padding: 6px 12px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .status-pending {
-            background: var(--warning-light);
-            color: #92400e;
-        }
-
-        .status-verified {
-            background: var(--success-light);
-            color: #065f46;
-        }
-
-        .status-rejected {
-            background: var(--error-light);
-            color: #991b1b;
-        }
-
-        /* ============================================
-           PROGRESS BAR
-           ============================================ */
-        .progress-container {
-            margin: 24px 0;
-        }
-
-        .progress-bar {
-            height: 8px;
-            background: var(--gray-200);
-            border-radius: 4px;
-            overflow: hidden;
-            margin-bottom: 8px;
-        }
-
-        .progress-fill {
-            height: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
-            transition: width 0.5s ease;
-            border-radius: 4px;
-        }
-
-        .progress-text {
-            text-align: center;
             font-size: 14px;
             color: var(--text-secondary);
-            font-weight: 500;
+        }
+
+        .guest-status {
+            margin-left: 10px;
         }
 
         /* ============================================
-           RESPONSIVE
+           RESERVATION INFO
            ============================================ */
-        @media (max-width: 480px) {
-            .content {
-                padding: 16px;
-            }
-
-            .card {
-                padding: 20px;
-            }
-
-            .reservation-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .toast-container {
-                left: 16px;
-                right: 16px;
-                max-width: none;
-            }
+        .reservation-info {
+            background: linear-gradient(135deg, var(--primary-color), var(--primary-dark));
+            color: white;
+            padding: 20px;
+            border-radius: var(--border-radius);
+            margin-bottom: 20px;
         }
 
-        /* ============================================
-           RADIO OPTIONS
-           ============================================ */
-        .radio-group {
+        .reservation-property {
+            font-size: 22px;
+            font-weight: 700;
+            margin-bottom: 10px;
+        }
+
+        .reservation-details {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-top: 15px;
+        }
+
+        .reservation-detail {
             display: flex;
             flex-direction: column;
-            gap: 12px;
         }
 
-        .radio-option {
-            display: flex;
+        .reservation-detail-label {
+            font-size: 12px;
+            opacity: 0.8;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .reservation-detail-value {
+            font-size: 16px;
+            font-weight: 600;
+            margin-top: 4px;
+        }
+
+        /* ============================================
+           LOADING & SPINNER
+           ============================================ */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.7);
+            display: none;
             align-items: center;
-            padding: 14px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: var(--transition);
-            background: var(--bg);
+            justify-content: center;
+            z-index: 1000;
         }
 
-        .radio-option:hover {
-            border-color: var(--primary);
-            background: var(--primary-lighter);
+        .loading-overlay.active {
+            display: flex;
         }
 
-        .radio-option input[type="radio"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 12px;
-            cursor: pointer;
-            accent-color: var(--primary);
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255,255,255,0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
         }
 
-        .radio-option.selected {
-            border-color: var(--primary);
-            background: var(--primary-lighter);
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            color: white;
+            margin-top: 15px;
+            font-size: 16px;
         }
 
         /* ============================================
@@ -686,35 +609,83 @@
            ============================================ */
         .footer {
             text-align: center;
-            padding: 32px 20px;
+            padding: 30px 20px;
             color: var(--text-secondary);
-            font-size: 13px;
-            background: var(--gray-50);
-            border-top: 1px solid var(--border);
+            font-size: 14px;
+            border-top: 1px solid var(--border-color);
             margin-top: 40px;
         }
 
-        .footer-brand {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
         .footer-links {
-            margin-top: 12px;
-            display: flex;
-            justify-content: center;
-            gap: 16px;
+            margin-top: 10px;
         }
 
         .footer-link {
-            color: var(--primary);
+            color: var(--primary-color);
             text-decoration: none;
-            font-weight: 500;
+            margin: 0 10px;
         }
 
-        .footer-link:hover {
-            text-decoration: underline;
+        /* ============================================
+           RESPONSIVE DESIGN
+           ============================================ */
+        @media (max-width: 480px) {
+            .header h1 {
+                font-size: 20px;
+            }
+
+            .content {
+                padding: 15px;
+            }
+
+            .card {
+                padding: 15px;
+            }
+
+            .reservation-details {
+                grid-template-columns: 1fr;
+                gap: 10px;
+            }
+        }
+
+        /* ============================================
+           UTILITY CLASSES
+           ============================================ */
+        .text-center {
+            text-align: center;
+        }
+
+        .text-muted {
+            color: var(--text-secondary);
+        }
+
+        .mb-0 { margin-bottom: 0; }
+        .mb-10 { margin-bottom: 10px; }
+        .mb-20 { margin-bottom: 20px; }
+        .mt-20 { margin-top: 20px; }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .flex {
+            display: flex;
+        }
+
+        .flex-between {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .flex-center {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .gap-10 {
+            gap: 10px;
         }
 
         /* ============================================
@@ -756,14 +727,13 @@
     </style>
 </head>
 <body>
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
-
     <div class="app-container">
         <!-- Header -->
         <header class="header">
-            <div class="header-logo">🏠</div>
-            <h1>Hostizzy Guest Portal</h1>
+            <h1>
+                <span>🏠</span>
+                <span>Hostizzy Guest Portal</span>
+            </h1>
             <div class="subtitle">Secure ID Document Submission</div>
         </header>
 
@@ -775,16 +745,13 @@
             <div id="authScreen" class="screen active">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-icon">🔐</div>
+                        <span class="card-icon">🔐</span>
                         <h2>Verify Your Reservation</h2>
                     </div>
 
-                    <div class="alert alert-info">
-                        <span class="alert-icon">ℹ️</span>
-                        <div class="alert-content">
-                            Enter your booking details to access the portal and submit your ID documents.
-                        </div>
-                    </div>
+                    <p class="text-muted mb-20">
+                        Enter your booking details to access the guest portal and submit your identification documents.
+                    </p>
 
                     <form id="authForm">
                         <div class="form-group">
@@ -797,7 +764,7 @@
                                 required
                                 autocomplete="off"
                             >
-                            <div class="form-hint">Found in your booking confirmation email/SMS</div>
+                            <small class="text-muted">Found in your booking confirmation email/SMS</small>
                         </div>
 
                         <div class="form-group">
@@ -811,7 +778,7 @@
                                 required
                                 autocomplete="tel"
                             >
-                            <div class="form-hint">Same number used during booking</div>
+                            <small class="text-muted">Same number used during booking</small>
                         </div>
 
                         <button type="submit" class="btn btn-primary btn-block">
@@ -821,10 +788,10 @@
                     </form>
                 </div>
 
-                <div class="alert alert-warning">
-                    <span class="alert-icon">⚠️</span>
-                    <div class="alert-content">
-                        <strong>Need help?</strong>
+                <div class="alert alert-info">
+                    <span class="alert-icon">ℹ️</span>
+                    <div>
+                        <strong>Need help?</strong><br>
                         Contact the property directly if you can't find your booking ID.
                     </div>
                 </div>
@@ -835,24 +802,24 @@
                  ======================================== -->
             <div id="overviewScreen" class="screen">
                 <!-- Reservation Info Card -->
-                <div class="reservation-card">
+                <div class="reservation-info">
                     <div class="reservation-property" id="propertyName">Loading...</div>
-                    <div class="reservation-grid">
-                        <div class="reservation-item">
-                            <div class="reservation-label">Check-in</div>
-                            <div class="reservation-value" id="checkInDate">-</div>
+                    <div class="reservation-details">
+                        <div class="reservation-detail">
+                            <div class="reservation-detail-label">Check-in</div>
+                            <div class="reservation-detail-value" id="checkInDate">-</div>
                         </div>
-                        <div class="reservation-item">
-                            <div class="reservation-label">Check-out</div>
-                            <div class="reservation-value" id="checkOutDate">-</div>
+                        <div class="reservation-detail">
+                            <div class="reservation-detail-label">Check-out</div>
+                            <div class="reservation-detail-value" id="checkOutDate">-</div>
                         </div>
-                        <div class="reservation-item">
-                            <div class="reservation-label">Nights</div>
-                            <div class="reservation-value" id="nightsCount">-</div>
+                        <div class="reservation-detail">
+                            <div class="reservation-detail-label">Nights</div>
+                            <div class="reservation-detail-value" id="nightsCount">-</div>
                         </div>
-                        <div class="reservation-item">
-                            <div class="reservation-label">Guests</div>
-                            <div class="reservation-value" id="guestCount">-</div>
+                        <div class="reservation-detail">
+                            <div class="reservation-detail-label">Guests</div>
+                            <div class="reservation-detail-value" id="guestCount">-</div>
                         </div>
                     </div>
                 </div>
@@ -860,101 +827,87 @@
                 <!-- ID Submission Card -->
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-icon">📋</div>
+                        <span class="card-icon">📋</span>
                         <h2>ID Document Submission</h2>
                     </div>
 
-                    <div class="alert alert-info">
-                        <span class="alert-icon">ℹ️</span>
-                        <div class="alert-content">
-                            Please submit identification documents for all adult guests (18+). This is required for check-in.
-                        </div>
-                    </div>
+                    <p class="text-muted mb-20">
+                        Please submit identification documents for all adult guests (18+). This is required for check-in.
+                    </p>
 
                     <!-- Progress Bar -->
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="submissionProgress" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-text" id="submissionProgressText">0 of 0 completed</div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="submissionProgress" style="width: 0%"></div>
                     </div>
+                    <div class="progress-text" id="submissionProgressText">0 of 0 completed</div>
 
                     <!-- Guest List -->
                     <div class="guest-list" id="guestList">
                         <!-- Populated dynamically -->
                     </div>
 
-                    <button id="addGuestBtn" class="btn btn-secondary btn-block" style="margin-top: 16px;">
+                    <button id="addGuestBtn" class="btn btn-secondary btn-block mt-20">
                         <span>➕</span>
                         <span>Add Additional Guest</span>
                     </button>
                 </div>
 
                 <div class="alert alert-warning">
-                    <span class="alert-icon">🔒</span>
-                    <div class="alert-content">
-                        <strong>Data Privacy:</strong>
-                        Your documents are encrypted and automatically deleted 60 days after submission.
+                    <span class="alert-icon">⚠️</span>
+                    <div>
+                        <strong>Data Privacy:</strong><br>
+                        Your documents will be securely stored and automatically deleted 60 days after submission.
                     </div>
                 </div>
 
                 <button id="logoutBtn" class="btn btn-secondary btn-block">
-                    <span>🚪</span>
                     <span>Logout</span>
                 </button>
             </div>
 
             <!-- ========================================
-                 SCREEN 3: DOCUMENT SUBMISSION FORM
+                 SCREEN 3: GUEST FORM
                  ======================================== -->
-            <div id="submissionScreen" class="screen">
+            <div id="guestFormScreen" class="screen">
                 <div class="card">
                     <div class="card-header">
-                        <div class="card-icon">📝</div>
-                        <h2 id="submissionTitle">Submit ID Document</h2>
+                        <span class="card-icon">👤</span>
+                        <h2 id="guestFormTitle">Guest Information</h2>
                     </div>
 
-                    <div class="alert alert-info">
-                        <span class="alert-icon">ℹ️</span>
-                        <div class="alert-content" id="submissionInfo">
-                            Please provide accurate information and clear photos of your ID document.
-                        </div>
-                    </div>
-
-                    <form id="documentForm">
-                        <!-- Guest Name -->
+                    <form id="guestForm">
+                        <!-- Guest Basic Info -->
                         <div class="form-group">
-                            <label class="form-label" for="guestNameInput">Full Name (as per ID)</label>
+                            <label class="form-label" for="guestName">Full Name (as per ID)</label>
                             <input
                                 type="text"
-                                id="guestNameInput"
+                                id="guestName"
                                 class="form-input"
                                 placeholder="Enter full name"
                                 required
                             >
-                            <div class="form-hint">Exactly as shown on your ID document</div>
                         </div>
 
-                        <!-- Guest Age (for additional guests) -->
-                        <div class="form-group" id="ageGroup" style="display: none;">
-                            <label class="form-label" for="guestAgeInput">Age</label>
+                        <div class="form-group">
+                            <label class="form-label" for="guestAge">Age</label>
                             <input
                                 type="number"
-                                id="guestAgeInput"
+                                id="guestAge"
                                 class="form-input"
                                 placeholder="Enter age"
                                 min="1"
                                 max="120"
+                                required
                             >
-                            <div class="form-hint">Children under 18 don't need to submit ID</div>
+                            <small class="text-muted">ID required for guests 18 years and above</small>
                         </div>
 
-                        <!-- Document Type -->
-                        <div class="form-group">
-                            <label class="form-label">Document Type</label>
+                        <!-- Document Type Selection -->
+                        <div class="form-group" id="documentTypeGroup">
+                            <label class="form-label">Select ID Document Type</label>
                             <div class="radio-group">
                                 <label class="radio-option">
-                                    <input type="radio" name="documentType" value="aadhar" required>
+                                    <input type="radio" name="documentType" value="aadhar">
                                     <span>🪪 Aadhar Card</span>
                                 </label>
                                 <label class="radio-option">
@@ -963,7 +916,7 @@
                                 </label>
                                 <label class="radio-option">
                                     <input type="radio" name="documentType" value="driving_license">
-                                    <span>🚗 Driving License</span>
+                                    <span>🚗 Driver's License</span>
                                 </label>
                                 <label class="radio-option">
                                     <input type="radio" name="documentType" value="voter_id">
@@ -973,109 +926,63 @@
                         </div>
 
                         <!-- Document Number -->
-                        <div class="form-group">
+                        <div class="form-group" id="documentNumberGroup" class="hidden">
                             <label class="form-label" for="documentNumber">Document Number</label>
                             <input
                                 type="text"
                                 id="documentNumber"
                                 class="form-input"
                                 placeholder="Enter document number"
-                                required
                             >
-                            <div class="form-hint">The identification number on your document</div>
                         </div>
 
-                        <!-- Photo Upload Instructions -->
-                        <div class="alert alert-warning" style="margin-bottom: 16px;">
-                            <span class="alert-icon">📸</span>
-                            <div class="alert-content">
-                                <strong>Photo Requirements:</strong>
-                                Clear, well-lit photos. Ensure all text is readable.
+                        <!-- Photo Uploads -->
+                        <div id="photoUploadSection" class="hidden">
+                            <!-- Front Photo -->
+                            <div class="photo-capture">
+                                <label class="form-label">Document Front Side</label>
+                                <button type="button" class="btn btn-secondary btn-block" id="captureFrontBtn">
+                                    <span>📷</span>
+                                    <span>Take Photo / Upload</span>
+                                </button>
+                                <input type="file" id="frontPhotoInput" accept="image/*" class="hidden">
+                                <img id="frontPhotoPreview" class="photo-preview" alt="Front preview">
+                            </div>
+
+                            <!-- Back Photo -->
+                            <div class="photo-capture" id="backPhotoSection">
+                                <label class="form-label">Document Back Side</label>
+                                <button type="button" class="btn btn-secondary btn-block" id="captureBackBtn">
+                                    <span>📷</span>
+                                    <span>Take Photo / Upload</span>
+                                </button>
+                                <input type="file" id="backPhotoInput" accept="image/*" class="hidden">
+                                <img id="backPhotoPreview" class="photo-preview" alt="Back preview">
+                            </div>
+
+                            <!-- Selfie (Primary Guest Only) -->
+                            <div class="photo-capture" id="selfieSection" class="hidden">
+                                <label class="form-label">Live Selfie (Required)</label>
+                                <div class="alert alert-info mb-10">
+                                    <span class="alert-icon">ℹ️</span>
+                                    <div>Please take a clear selfie for identity verification</div>
+                                </div>
+                                <button type="button" class="btn btn-secondary btn-block" id="captureSelfieBtn">
+                                    <span>🤳</span>
+                                    <span>Take Selfie</span>
+                                </button>
+                                <input type="file" id="selfiePhotoInput" accept="image/*" class="hidden">
+                                <img id="selfiePhotoPreview" class="photo-preview" alt="Selfie preview">
                             </div>
                         </div>
 
-                        <!-- Document Front Photo -->
-                        <div class="form-group">
-                            <label class="form-label">Document Front Photo</label>
-                            <div class="photo-upload-container">
-                                <div class="photo-preview" id="frontPhotoPreview">
-                                    <div class="photo-placeholder">
-                                        <div style="font-size: 48px; margin-bottom: 8px;">📷</div>
-                                        <div>No photo selected</div>
-                                    </div>
-                                    <img id="frontPhotoImg" style="display: none; width: 100%; border-radius: 8px;">
-                                </div>
-                                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                                    <button type="button" class="btn btn-primary" onclick="capturePhoto('front')" style="flex: 1;">
-                                        📸 Take Photo
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" onclick="uploadPhoto('front')" style="flex: 1;">
-                                        📁 Upload File
-                                    </button>
-                                </div>
-                                <input type="file" id="frontFileInput" accept="image/*" style="display: none;" onchange="handleFileSelect('front', event)">
-                            </div>
-                        </div>
-
-                        <!-- Document Back Photo (for Aadhar/DL) -->
-                        <div class="form-group" id="backPhotoGroup" style="display: none;">
-                            <label class="form-label">Document Back Photo</label>
-                            <div class="photo-upload-container">
-                                <div class="photo-preview" id="backPhotoPreview">
-                                    <div class="photo-placeholder">
-                                        <div style="font-size: 48px; margin-bottom: 8px;">📷</div>
-                                        <div>No photo selected</div>
-                                    </div>
-                                    <img id="backPhotoImg" style="display: none; width: 100%; border-radius: 8px;">
-                                </div>
-                                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                                    <button type="button" class="btn btn-primary" onclick="capturePhoto('back')" style="flex: 1;">
-                                        📸 Take Photo
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" onclick="uploadPhoto('back')" style="flex: 1;">
-                                        📁 Upload File
-                                    </button>
-                                </div>
-                                <input type="file" id="backFileInput" accept="image/*" style="display: none;" onchange="handleFileSelect('back', event)">
-                            </div>
-                        </div>
-
-                        <!-- Selfie Photo (for primary guest only) -->
-                        <div class="form-group" id="selfiePhotoGroup" style="display: none;">
-                            <label class="form-label">Selfie with ID</label>
-                            <div class="alert alert-info" style="margin-bottom: 12px;">
-                                <span class="alert-icon">🤳</span>
-                                <div class="alert-content">
-                                    Please take a selfie holding your ID document next to your face
-                                </div>
-                            </div>
-                            <div class="photo-upload-container">
-                                <div class="photo-preview" id="selfiePhotoPreview">
-                                    <div class="photo-placeholder">
-                                        <div style="font-size: 48px; margin-bottom: 8px;">🤳</div>
-                                        <div>No photo selected</div>
-                                    </div>
-                                    <img id="selfiePhotoImg" style="display: none; width: 100%; border-radius: 8px;">
-                                </div>
-                                <div style="display: flex; gap: 8px; margin-top: 12px;">
-                                    <button type="button" class="btn btn-primary" onclick="capturePhoto('selfie')" style="flex: 1;">
-                                        📸 Take Selfie
-                                    </button>
-                                    <button type="button" class="btn btn-secondary" onclick="uploadPhoto('selfie')" style="flex: 1;">
-                                        📁 Upload File
-                                    </button>
-                                </div>
-                                <input type="file" id="selfieFileInput" accept="image/*" style="display: none;" onchange="handleFileSelect('selfie', event)">
-                            </div>
-                        </div>
-
-                        <!-- Action Buttons -->
-                        <div style="display: flex; gap: 12px; margin-top: 24px;">
-                            <button type="button" class="btn btn-secondary" onclick="cancelSubmission()" style="flex: 1;">
+                        <!-- Submit Buttons -->
+                        <div class="flex gap-10 mt-20">
+                            <button type="button" class="btn btn-secondary" id="cancelGuestFormBtn" style="flex: 1;">
                                 Cancel
                             </button>
-                            <button type="submit" class="btn btn-success" id="submitDocBtn" style="flex: 1;">
-                                Submit Document
+                            <button type="submit" class="btn btn-primary" style="flex: 2;">
+                                <span>Save & Submit</span>
                             </button>
                         </div>
                     </form>
@@ -1083,33 +990,26 @@
             </div>
 
             <!-- ========================================
-                 SCREEN 4: CAMERA CAPTURE
+                 SCREEN 4: CAMERA MODAL
                  ======================================== -->
-            <div id="cameraScreen" class="screen">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">📸</div>
-                        <h2 id="cameraTitle">Take Photo</h2>
-                    </div>
+            <div id="cameraModal" class="screen">
+                <div class="camera-container active">
+                    <video id="cameraVideo" class="camera-video" autoplay playsinline></video>
+                    <canvas id="cameraCanvas" class="hidden"></canvas>
 
-                    <div style="position: relative; background: #000; border-radius: 12px; overflow: hidden; margin-bottom: 16px;">
-                        <video id="cameraVideo" autoplay playsinline style="width: 100%; display: block; max-height: 60vh;"></video>
-                        <canvas id="cameraCanvas" style="display: none;"></canvas>
-                    </div>
+                    <div class="camera-overlay">
+                        <div class="camera-hint" id="cameraHint">
+                            Position your document within the frame
+                        </div>
 
-                    <div style="display: flex; gap: 12px;">
-                        <button type="button" class="btn btn-secondary" onclick="closeCameraCapture()" style="flex: 1;">
-                            Cancel
-                        </button>
-                        <button type="button" class="btn btn-primary" onclick="takeCameraPhoto()" style="flex: 2;">
-                            📸 Capture
-                        </button>
-                    </div>
-
-                    <div class="alert alert-info" style="margin-top: 16px;">
-                        <span class="alert-icon">💡</span>
-                        <div class="alert-content">
-                            Ensure good lighting and all text is clearly visible
+                        <div class="camera-controls">
+                            <button class="btn btn-secondary btn-icon" id="closeCameraBtn">
+                                ✕
+                            </button>
+                            <button class="capture-btn" id="takePictureBtn"></button>
+                            <button class="btn btn-secondary btn-icon" id="switchCameraBtn">
+                                🔄
+                            </button>
                         </div>
                     </div>
                 </div>
@@ -1119,20 +1019,19 @@
                  SCREEN 5: SUCCESS
                  ======================================== -->
             <div id="successScreen" class="screen">
-                <div class="card" style="text-align: center;">
-                    <div style="font-size: 80px; margin-bottom: 20px;">✅</div>
-                    <h2 style="margin-bottom: 12px; font-size: 24px; font-weight: 700;">Submission Successful!</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 24px;">
-                        Thank you for submitting your identification documents. Our team will review them shortly.
+                <div class="card text-center">
+                    <div style="font-size: 64px; margin-bottom: 20px;">✅</div>
+                    <h2 class="mb-10">Submission Successful!</h2>
+                    <p class="text-muted mb-20">
+                        Thank you for submitting your identification documents.
+                        Our team will review them shortly.
                     </p>
-
                     <div class="alert alert-success">
                         <span class="alert-icon">✓</span>
-                        <div class="alert-content">
-                            You will receive a confirmation once your documents are verified.
+                        <div>
+                            You will receive a confirmation email once your documents are verified.
                         </div>
                     </div>
-
                     <button class="btn btn-primary btn-block" id="backToOverviewBtn">
                         <span>Back to Overview</span>
                     </button>
@@ -1142,7 +1041,6 @@
 
         <!-- Footer -->
         <footer class="footer">
-            <div class="footer-brand">Hostizzy ResIQ</div>
             <div>© 2025 Hostizzy. All rights reserved.</div>
             <div class="footer-links">
                 <a href="#" class="footer-link">Privacy Policy</a>
@@ -1154,7 +1052,7 @@
 
     <!-- Loading Overlay -->
     <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-content">
+        <div style="text-align: center;">
             <div class="spinner"></div>
             <div class="loading-text" id="loadingText">Loading...</div>
         </div>
@@ -1168,7 +1066,7 @@
         // SUPABASE CONFIGURATION
         // ============================================
         const SUPABASE_URL = 'https://dxthxsguqrxpurorpokq.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dGh4c2d1cXJ4cHVyb3Jwb2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzQ1NDk2ODYsImV4cCI6MjA1MDEyNTY4Nn0.Z6cU_hOg3rZCp8VIxSqHC9L7RCkD5oYPHgxrFCc__UM';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dGh4c2d1cXJ4cHVyb3Jwb2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMjc4MTMsImV4cCI6MjA3NTYwMzgxM30.JhGzqUolA-A_fGha-0DhHVl7p1vRq4CZcp5ttdVxjQg';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
@@ -1177,21 +1075,11 @@
         // ============================================
         const AppState = {
             reservation: null,
+            currentGuest: null,
             guestDocuments: [],
-            currentSubmission: {
-                sequence: null,
-                isPrimary: false,
-                existingDoc: null,
-                photos: {
-                    front: null,
-                    back: null,
-                    selfie: null
-                }
-            },
-            cameraState: {
-                stream: null,
-                photoType: null
-            }
+            currentPhotoTarget: null,
+            cameraStream: null,
+            facingMode: 'environment' // 'user' for selfie, 'environment' for documents
         };
 
         // ============================================
@@ -1212,24 +1100,9 @@
             document.getElementById('loadingOverlay').classList.remove('active');
         }
 
-        function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
-            const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-
-            const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
-            toast.innerHTML = `
-                <span style="font-size: 20px;">${icon}</span>
-                <span style="flex: 1;">${message}</span>
-            `;
-
-            container.appendChild(toast);
-
-            setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(400px)';
-                setTimeout(() => toast.remove(), 300);
-            }, 4000);
+        function showAlert(message, type = 'info') {
+            // Create alert element (you can enhance this)
+            alert(message);
         }
 
         function formatDate(dateString) {
@@ -1237,6 +1110,50 @@
                 day: 'numeric',
                 month: 'short',
                 year: 'numeric'
+            });
+        }
+
+        // ============================================
+        // IMAGE COMPRESSION
+        // ============================================
+
+        async function compressImage(file, maxWidth = 1200, quality = 0.85) {
+            return new Promise((resolve, reject) => {
+                const reader = new FileReader();
+                reader.readAsDataURL(file);
+                reader.onload = (event) => {
+                    const img = new Image();
+                    img.src = event.target.result;
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        let width = img.width;
+                        let height = img.height;
+
+                        if (width > maxWidth) {
+                            height = (height * maxWidth) / width;
+                            width = maxWidth;
+                        }
+
+                        canvas.width = width;
+                        canvas.height = height;
+
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+
+                        canvas.toBlob(
+                            (blob) => {
+                                resolve(new File([blob], file.name, {
+                                    type: 'image/jpeg',
+                                    lastModified: Date.now()
+                                }));
+                            },
+                            'image/jpeg',
+                            quality
+                        );
+                    };
+                    img.onerror = reject;
+                };
+                reader.onerror = reject;
             });
         }
 
@@ -1250,18 +1167,7 @@
             const bookingId = document.getElementById('bookingId').value.trim().toUpperCase();
             const phone = document.getElementById('guestPhone').value.trim();
 
-            // Validate inputs
-            if (!bookingId || !phone) {
-                showToast('Please fill in all fields', 'error');
-                return;
-            }
-
-            if (!/^[0-9]{10}$/.test(phone)) {
-                showToast('Please enter a valid 10-digit phone number', 'error');
-                return;
-            }
-
-            showLoading('Verifying your reservation...');
+            showLoading('Verifying reservation...');
 
             try {
                 // Fetch reservation from Supabase
@@ -1271,40 +1177,26 @@
                     .eq('booking_id', bookingId)
                     .single();
 
-                if (error) {
-                    console.error('Supabase error:', error);
+                if (error || !reservation) {
                     hideLoading();
-
-                    if (error.code === '406') {
-                        showToast('Booking not found. Please check your Booking ID.', 'error');
-                    } else if (error.message.includes('JWT')) {
-                        showToast('Authentication error. Please contact support.', 'error');
-                    } else {
-                        showToast('Booking not found. Please check your Booking ID.', 'error');
-                    }
-                    return;
-                }
-
-                if (!reservation) {
-                    hideLoading();
-                    showToast('Booking not found. Please check your Booking ID.', 'error');
+                    showAlert('Booking not found. Please check your Booking ID.', 'error');
                     return;
                 }
 
                 // Verify phone number (last 10 digits match)
-                const dbPhone = (reservation.guest_phone || '').replace(/\D/g, '').slice(-10);
+                const dbPhone = reservation.guest_phone.replace(/\D/g, '').slice(-10);
                 const inputPhone = phone.replace(/\D/g, '').slice(-10);
 
                 if (dbPhone !== inputPhone) {
                     hideLoading();
-                    showToast('Phone number does not match our records.', 'error');
+                    showAlert('Phone number does not match our records.', 'error');
                     return;
                 }
 
                 // Check if reservation is cancelled
                 if (reservation.status === 'cancelled') {
                     hideLoading();
-                    showToast('This reservation has been cancelled.', 'error');
+                    showAlert('This reservation has been cancelled.', 'error');
                     return;
                 }
 
@@ -1323,12 +1215,11 @@
                 // Show overview
                 showOverviewScreen();
                 hideLoading();
-                showToast('Welcome! Booking verified successfully.', 'success');
 
             } catch (error) {
                 hideLoading();
                 console.error('Authentication error:', error);
-                showToast('An error occurred. Please try again.', 'error');
+                showAlert('An error occurred. Please try again.', 'error');
             }
         });
 
@@ -1337,23 +1228,14 @@
         // ============================================
 
         async function loadGuestDocuments() {
-            try {
-                const { data, error } = await supabase
-                    .from('guest_documents')
-                    .select('*')
-                    .eq('booking_id', AppState.reservation.booking_id)
-                    .order('guest_sequence', { ascending: true });
+            const { data, error } = await supabase
+                .from('guest_documents')
+                .select('*')
+                .eq('booking_id', AppState.reservation.booking_id)
+                .order('guest_sequence', { ascending: true });
 
-                if (error) {
-                    console.error('Error loading documents:', error);
-                    // Don't fail if no documents exist yet
-                    AppState.guestDocuments = [];
-                } else {
-                    AppState.guestDocuments = data || [];
-                }
-            } catch (error) {
-                console.error('Error loading documents:', error);
-                AppState.guestDocuments = [];
+            if (!error && data) {
+                AppState.guestDocuments = data;
             }
         }
 
@@ -1369,7 +1251,7 @@
             document.getElementById('checkInDate').textContent = formatDate(r.check_in);
             document.getElementById('checkOutDate').textContent = formatDate(r.check_out);
             document.getElementById('nightsCount').textContent = `${r.nights} Nights`;
-            document.getElementById('guestCount').textContent = `${r.adults} Adults${r.kids > 0 ? ', ' + r.kids + ' Kids' : ''}`;
+            document.getElementById('guestCount').textContent = `${r.adults} Adults, ${r.kids} Kids`;
 
             // Render guest list
             renderGuestList();
@@ -1398,30 +1280,33 @@
             // Update progress
             const completed = docs.filter(d => d.status === 'verified').length;
             const total = totalAdults;
-            const percent = total > 0 ? (completed / total) * 100 : 0;
+            const percent = (completed / total) * 100;
 
             document.getElementById('submissionProgress').style.width = `${percent}%`;
             document.getElementById('submissionProgressText').textContent =
                 `${completed} of ${total} verified`;
         }
 
-        function createGuestItem(sequence, isPrimary, document) {
+        function createGuestItem(sequence, isPrimary, guestDoc) {
             const div = document.createElement('div');
             div.className = 'guest-item';
 
             let statusBadge = '';
             let statusText = 'Not Submitted';
 
-            if (document) {
-                if (document.status === 'verified') {
+            if (guestDoc) {
+                if (guestDoc.status === 'verified') {
                     statusBadge = '<span class="status-badge status-verified">✓ Verified</span>';
                     statusText = 'Verified';
-                } else if (document.status === 'pending') {
+                } else if (guestDoc.status === 'pending') {
                     statusBadge = '<span class="status-badge status-pending">⏳ Pending</span>';
                     statusText = 'Pending Review';
-                } else if (document.status === 'rejected') {
+                } else if (guestDoc.status === 'rejected') {
                     statusBadge = '<span class="status-badge status-rejected">✕ Rejected</span>';
                     statusText = 'Needs Resubmission';
+                } else if (guestDoc.status === 'incomplete') {
+                    statusBadge = '<span class="status-badge status-incomplete">⚠ Incomplete</span>';
+                    statusText = 'Incomplete';
                 }
             }
 
@@ -1429,449 +1314,290 @@
                 <div class="guest-info">
                     <div class="guest-name">
                         ${isPrimary ? '👤 ' : ''}
-                        ${document ? document.guest_name : (isPrimary ? AppState.reservation.guest_name : `Guest ${sequence}`)}
+                        ${guestDoc ? guestDoc.guest_name : (isPrimary ? AppState.reservation.guest_name : `Guest ${sequence}`)}
                         ${isPrimary ? ' (Primary)' : ''}
                     </div>
                     <div class="guest-meta">${statusText}</div>
                 </div>
-                ${statusBadge}
+                <div class="guest-status">
+                    ${statusBadge}
+                </div>
             `;
 
             div.addEventListener('click', () => {
-                openGuestForm(sequence, isPrimary, document);
+                openGuestForm(sequence, isPrimary, guestDoc);
             });
 
             return div;
         }
 
         // ============================================
-        // DOCUMENT SUBMISSION FORM
+        // GUEST FORM
         // ============================================
 
         function openGuestForm(sequence, isPrimary, existingDoc = null) {
-            // Reset submission state
-            AppState.currentSubmission = {
-                sequence: sequence,
-                isPrimary: isPrimary,
-                existingDoc: existingDoc,
-                photos: {
-                    front: null,
-                    back: null,
-                    selfie: null
-                }
+            AppState.currentGuest = {
+                sequence,
+                isPrimary,
+                existingDoc
             };
 
-            // Reset form
-            document.getElementById('documentForm').reset();
-            resetPhotoPreview('front');
-            resetPhotoPreview('back');
-            resetPhotoPreview('selfie');
-
-            // Set title
-            document.getElementById('submissionTitle').textContent =
-                isPrimary ? 'Your ID Document' : `Guest ${sequence} - ID Document`;
+            const title = isPrimary ? 'Primary Guest Information' : `Guest ${sequence} Information`;
+            document.getElementById('guestFormTitle').textContent = title;
 
             // Pre-fill if editing
             if (existingDoc) {
-                document.getElementById('guestNameInput').value = existingDoc.guest_name || '';
-                if (existingDoc.guest_age) {
-                    document.getElementById('guestAgeInput').value = existingDoc.guest_age;
-                }
-                if (existingDoc.document_type) {
-                    document.querySelector(`input[name="documentType"][value="${existingDoc.document_type}"]`).checked = true;
-                    updateDocumentTypeFields(existingDoc.document_type);
-                }
-                if (existingDoc.document_number) {
-                    document.getElementById('documentNumber').value = existingDoc.document_number;
+                document.getElementById('guestName').value = existingDoc.guest_name || '';
+                document.getElementById('guestAge').value = existingDoc.guest_age || '';
+                document.getElementById('documentNumber').value = existingDoc.document_number || '';
+
+                // Select document type
+                const docTypeRadio = document.querySelector(`input[name="documentType"][value="${existingDoc.document_type}"]`);
+                if (docTypeRadio) {
+                    docTypeRadio.checked = true;
+                    docTypeRadio.parentElement.classList.add('selected');
                 }
             } else {
                 // Pre-fill primary guest name
                 if (isPrimary) {
-                    document.getElementById('guestNameInput').value = AppState.reservation.guest_name;
+                    document.getElementById('guestName').value = AppState.reservation.guest_name;
                 }
             }
 
-            // Show/hide age field (only for additional guests)
-            document.getElementById('ageGroup').style.display = isPrimary ? 'none' : 'block';
+            // Show/hide selfie section
+            document.getElementById('selfieSection').classList.toggle('hidden', !isPrimary);
 
-            // Show/hide selfie field (only for primary guest)
-            document.getElementById('selfiePhotoGroup').style.display = isPrimary ? 'block' : 'none';
-
-            showScreen('submissionScreen');
+            showScreen('guestFormScreen');
         }
 
-        function cancelSubmission() {
-            showOverviewScreen();
-        }
+        // Document type selection
+        document.querySelectorAll('input[name="documentType"]').forEach(radio => {
+            radio.addEventListener('change', (e) => {
+                // Update UI
+                document.querySelectorAll('.radio-option').forEach(opt =>
+                    opt.classList.remove('selected'));
+                e.target.parentElement.classList.add('selected');
 
-        // Document type change handler
-        document.addEventListener('DOMContentLoaded', () => {
-            document.querySelectorAll('input[name="documentType"]').forEach(radio => {
-                radio.addEventListener('change', (e) => {
-                    updateDocumentTypeFields(e.target.value);
-                });
+                // Show document number and photo sections
+                document.getElementById('documentNumberGroup').classList.remove('hidden');
+                document.getElementById('photoUploadSection').classList.remove('hidden');
+
+                // Show/hide back photo based on document type
+                const docType = e.target.value;
+                const needsBack = ['aadhar', 'driving_license', 'voter_id'].includes(docType);
+                document.getElementById('backPhotoSection').classList.toggle('hidden', !needsBack);
             });
         });
 
-        function updateDocumentTypeFields(docType) {
-            const backPhotoGroup = document.getElementById('backPhotoGroup');
+        // Age input handler
+        document.getElementById('guestAge').addEventListener('input', (e) => {
+            const age = parseInt(e.target.value);
+            const isMinor = age < 18;
 
-            // Aadhar and Driving License need back photo
-            if (docType === 'aadhar' || docType === 'driving_license') {
-                backPhotoGroup.style.display = 'block';
-            } else {
-                backPhotoGroup.style.display = 'none';
-                resetPhotoPreview('back');
-                AppState.currentSubmission.photos.back = null;
-            }
-        }
-
-        function resetPhotoPreview(photoType) {
-            const preview = document.getElementById(`${photoType}PhotoPreview`);
-            const img = document.getElementById(`${photoType}PhotoImg`);
-            const placeholder = preview.querySelector('.photo-placeholder');
-
-            img.style.display = 'none';
-            img.src = '';
-            if (placeholder) placeholder.style.display = 'block';
-            preview.classList.remove('has-photo');
-        }
+            // Hide ID fields for minors
+            document.getElementById('documentTypeGroup').classList.toggle('hidden', isMinor);
+            document.getElementById('documentNumberGroup').classList.toggle('hidden', isMinor);
+            document.getElementById('photoUploadSection').classList.toggle('hidden', isMinor);
+        });
 
         // ============================================
-        // PHOTO CAPTURE - CAMERA API
+        // PHOTO CAPTURE
         // ============================================
 
-        async function capturePhoto(photoType) {
-            AppState.cameraState.photoType = photoType;
+        document.getElementById('captureFrontBtn').addEventListener('click', () => {
+            AppState.currentPhotoTarget = 'front';
+            AppState.facingMode = 'environment';
+            document.getElementById('frontPhotoInput').click();
+        });
 
-            try {
-                // Request camera access
-                const stream = await navigator.mediaDevices.getUserMedia({
-                    video: {
-                        facingMode: photoType === 'selfie' ? 'user' : 'environment',
-                        width: { ideal: 1920 },
-                        height: { ideal: 1080 }
+        document.getElementById('captureBackBtn').addEventListener('click', () => {
+            AppState.currentPhotoTarget = 'back';
+            AppState.facingMode = 'environment';
+            document.getElementById('backPhotoInput').click();
+        });
+
+        document.getElementById('captureSelfieBtn').addEventListener('click', () => {
+            AppState.currentPhotoTarget = 'selfie';
+            AppState.facingMode = 'user';
+            document.getElementById('selfiePhotoInput').click();
+        });
+
+        // File input handlers
+        ['front', 'back', 'selfie'].forEach(type => {
+            document.getElementById(`${type}PhotoInput`).addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    showLoading('Processing image...');
+                    try {
+                        const compressed = await compressImage(file);
+                        const preview = document.getElementById(`${type}PhotoPreview`);
+                        preview.src = URL.createObjectURL(compressed);
+                        preview.classList.add('visible');
+
+                        // Store in memory
+                        AppState[`${type}Photo`] = compressed;
+                        hideLoading();
+                    } catch (error) {
+                        hideLoading();
+                        console.error('Image processing error:', error);
+                        showAlert('Failed to process image', 'error');
                     }
-                });
-
-                AppState.cameraState.stream = stream;
-
-                // Show camera screen
-                const video = document.getElementById('cameraVideo');
-                video.srcObject = stream;
-
-                const title = photoType === 'front' ? 'Document Front Photo' :
-                             photoType === 'back' ? 'Document Back Photo' :
-                             'Selfie with ID';
-                document.getElementById('cameraTitle').textContent = title;
-
-                showScreen('cameraScreen');
-            } catch (error) {
-                console.error('Camera access error:', error);
-                showToast('Camera access denied. Please use file upload instead.', 'error');
-            }
-        }
-
-        async function takeCameraPhoto() {
-            const video = document.getElementById('cameraVideo');
-            const canvas = document.getElementById('cameraCanvas');
-            const photoType = AppState.cameraState.photoType;
-
-            // Set canvas size to video size
-            canvas.width = video.videoWidth;
-            canvas.height = video.videoHeight;
-
-            // Draw video frame to canvas
-            const ctx = canvas.getContext('2d');
-            ctx.drawImage(video, 0, 0);
-
-            // Convert to blob
-            canvas.toBlob(async (blob) => {
-                await processPhoto(photoType, blob);
-                closeCameraCapture();
-            }, 'image/jpeg', 0.9);
-        }
-
-        function closeCameraCapture() {
-            // Stop camera stream
-            if (AppState.cameraState.stream) {
-                AppState.cameraState.stream.getTracks().forEach(track => track.stop());
-                AppState.cameraState.stream = null;
-            }
-
-            // Clear video
-            const video = document.getElementById('cameraVideo');
-            video.srcObject = null;
-
-            showScreen('submissionScreen');
-        }
-
-        // ============================================
-        // PHOTO UPLOAD - FILE INPUT
-        // ============================================
-
-        function uploadPhoto(photoType) {
-            document.getElementById(`${photoType}FileInput`).click();
-        }
-
-        async function handleFileSelect(photoType, event) {
-            const file = event.target.files[0];
-            if (!file) return;
-
-            // Validate file type
-            if (!file.type.startsWith('image/')) {
-                showToast('Please select an image file', 'error');
-                return;
-            }
-
-            // Validate file size (max 10MB)
-            if (file.size > 10 * 1024 * 1024) {
-                showToast('Image too large. Maximum size is 10MB', 'error');
-                return;
-            }
-
-            await processPhoto(photoType, file);
-        }
-
-        // ============================================
-        // IMAGE COMPRESSION
-        // ============================================
-
-        async function processPhoto(photoType, blob) {
-            try {
-                showLoading('Processing image...');
-
-                // Compress image
-                const compressedBlob = await compressImage(blob);
-
-                // Store in state
-                AppState.currentSubmission.photos[photoType] = compressedBlob;
-
-                // Update preview
-                updatePhotoPreview(photoType, compressedBlob);
-
-                hideLoading();
-                showToast('Photo added successfully', 'success');
-            } catch (error) {
-                hideLoading();
-                console.error('Photo processing error:', error);
-                showToast('Error processing photo. Please try again.', 'error');
-            }
-        }
-
-        async function compressImage(blob) {
-            return new Promise((resolve, reject) => {
-                const img = new Image();
-                const url = URL.createObjectURL(blob);
-
-                img.onload = () => {
-                    URL.revokeObjectURL(url);
-
-                    const canvas = document.createElement('canvas');
-                    let width = img.width;
-                    let height = img.height;
-
-                    // Max dimensions
-                    const MAX_WIDTH = 1920;
-                    const MAX_HEIGHT = 1920;
-
-                    // Calculate new dimensions
-                    if (width > height) {
-                        if (width > MAX_WIDTH) {
-                            height = (height * MAX_WIDTH) / width;
-                            width = MAX_WIDTH;
-                        }
-                    } else {
-                        if (height > MAX_HEIGHT) {
-                            width = (width * MAX_HEIGHT) / height;
-                            height = MAX_HEIGHT;
-                        }
-                    }
-
-                    canvas.width = width;
-                    canvas.height = height;
-
-                    const ctx = canvas.getContext('2d');
-                    ctx.drawImage(img, 0, 0, width, height);
-
-                    canvas.toBlob((compressedBlob) => {
-                        if (compressedBlob) {
-                            console.log(`Compressed: ${(blob.size / 1024).toFixed(2)}KB → ${(compressedBlob.size / 1024).toFixed(2)}KB`);
-                            resolve(compressedBlob);
-                        } else {
-                            reject(new Error('Compression failed'));
-                        }
-                    }, 'image/jpeg', 0.85);
-                };
-
-                img.onerror = () => {
-                    URL.revokeObjectURL(url);
-                    reject(new Error('Image load failed'));
-                };
-
-                img.src = url;
+                }
             });
-        }
-
-        function updatePhotoPreview(photoType, blob) {
-            const preview = document.getElementById(`${photoType}PhotoPreview`);
-            const img = document.getElementById(`${photoType}PhotoImg`);
-            const placeholder = preview.querySelector('.photo-placeholder');
-
-            const url = URL.createObjectURL(blob);
-            img.src = url;
-            img.style.display = 'block';
-            if (placeholder) placeholder.style.display = 'none';
-            preview.classList.add('has-photo');
-        }
-
-        // ============================================
-        // SUPABASE STORAGE UPLOAD
-        // ============================================
-
-        async function uploadToStorage(blob, path) {
-            try {
-                // Convert blob to File with proper name
-                const file = new File([blob], path, { type: 'image/jpeg' });
-
-                const { data, error } = await supabase.storage
-                    .from('guest-id-documents')
-                    .upload(path, file, {
-                        cacheControl: '3600',
-                        upsert: true
-                    });
-
-                if (error) throw error;
-
-                // Get public URL
-                const { data: urlData } = supabase.storage
-                    .from('guest-id-documents')
-                    .getPublicUrl(path);
-
-                return urlData.publicUrl;
-            } catch (error) {
-                console.error('Upload error:', error);
-                throw error;
-            }
-        }
+        });
 
         // ============================================
         // FORM SUBMISSION
         // ============================================
 
-        document.getElementById('documentForm').addEventListener('submit', async (e) => {
+        document.getElementById('guestForm').addEventListener('submit', async (e) => {
             e.preventDefault();
 
-            const form = e.target;
-            const guestName = document.getElementById('guestNameInput').value.trim();
-            const guestAge = document.getElementById('guestAgeInput').value;
-            const documentType = document.querySelector('input[name="documentType"]:checked')?.value;
-            const documentNumber = document.getElementById('documentNumber').value.trim();
+            const name = document.getElementById('guestName').value.trim();
+            const age = parseInt(document.getElementById('guestAge').value);
+            const isMinor = age < 18;
 
             // Validation
-            if (!guestName || !documentType || !documentNumber) {
-                showToast('Please fill in all required fields', 'error');
+            if (!name) {
+                showAlert('Please enter guest name', 'error');
                 return;
             }
 
-            // Check for additional guest age
-            if (!AppState.currentSubmission.isPrimary && guestAge && parseInt(guestAge) < 18) {
-                showToast('Children under 18 do not need to submit ID documents', 'info');
-                return;
+            if (!isMinor) {
+                const docType = document.querySelector('input[name="documentType"]:checked');
+                if (!docType) {
+                    showAlert('Please select a document type', 'error');
+                    return;
+                }
+
+                if (!AppState.frontPhoto) {
+                    showAlert('Please upload front side of document', 'error');
+                    return;
+                }
+
+                const needsBack = ['aadhar', 'driving_license', 'voter_id'].includes(docType.value);
+                if (needsBack && !AppState.backPhoto) {
+                    showAlert('Please upload back side of document', 'error');
+                    return;
+                }
+
+                if (AppState.currentGuest.isPrimary && !AppState.selfiePhoto) {
+                    showAlert('Please take a selfie', 'error');
+                    return;
+                }
             }
 
-            // Validate photos
-            const photos = AppState.currentSubmission.photos;
-            if (!photos.front) {
-                showToast('Please upload document front photo', 'error');
-                return;
-            }
-
-            if ((documentType === 'aadhar' || documentType === 'driving_license') && !photos.back) {
-                showToast('Please upload document back photo', 'error');
-                return;
-            }
-
-            if (AppState.currentSubmission.isPrimary && !photos.selfie) {
-                showToast('Please upload a selfie with your ID', 'error');
-                return;
-            }
-
-            // Start submission
-            showLoading('Uploading documents...');
+            showLoading('Submitting documents...');
 
             try {
                 const bookingId = AppState.reservation.booking_id;
-                const sequence = AppState.currentSubmission.sequence;
-                const timestamp = Date.now();
+                const sequence = AppState.currentGuest.sequence;
+                const docNumber = document.getElementById('documentNumber').value.trim();
+                const docType = !isMinor ? document.querySelector('input[name="documentType"]:checked').value : null;
 
-                // Upload photos to storage
-                const frontPath = `${bookingId}/${sequence}_front_${timestamp}.jpg`;
-                const frontUrl = await uploadToStorage(photos.front, frontPath);
+                let frontUrl = null, backUrl = null, selfieUrl = null;
 
-                let backUrl = null;
-                if (photos.back) {
-                    const backPath = `${bookingId}/${sequence}_back_${timestamp}.jpg`;
-                    backUrl = await uploadToStorage(photos.back, backPath);
+                // Upload photos to Supabase Storage (only for adults)
+                if (!isMinor) {
+                    const folder = `${bookingId}/${AppState.currentGuest.isPrimary ? 'primary' : 'guest' + sequence}_${name.replace(/\s+/g, '_').toLowerCase()}`;
+                    const timestamp = Date.now();
+
+                    // Upload front
+                    if (AppState.frontPhoto) {
+                        const frontPath = `${folder}/${timestamp}_${docType}_front.jpg`;
+                        const { error: frontError } = await supabase.storage
+                            .from('guest-id-documents')
+                            .upload(frontPath, AppState.frontPhoto, { upsert: true });
+
+                        if (!frontError) {
+                            frontUrl = frontPath;
+                        }
+                    }
+
+                    // Upload back
+                    if (AppState.backPhoto) {
+                        const backPath = `${folder}/${timestamp}_${docType}_back.jpg`;
+                        const { error: backError } = await supabase.storage
+                            .from('guest-id-documents')
+                            .upload(backPath, AppState.backPhoto, { upsert: true });
+
+                        if (!backError) {
+                            backUrl = backPath;
+                        }
+                    }
+
+                    // Upload selfie
+                    if (AppState.selfiePhoto) {
+                        const selfiePath = `${folder}/${timestamp}_selfie.jpg`;
+                        const { error: selfieError } = await supabase.storage
+                            .from('guest-id-documents')
+                            .upload(selfiePath, AppState.selfiePhoto, { upsert: true });
+
+                        if (!selfieError) {
+                            selfieUrl = selfiePath;
+                        }
+                    }
                 }
 
-                let selfieUrl = null;
-                if (photos.selfie) {
-                    const selfiePath = `${bookingId}/${sequence}_selfie_${timestamp}.jpg`;
-                    selfieUrl = await uploadToStorage(photos.selfie, selfiePath);
-                }
-
-                // Insert/update document record
+                // Insert/Update database
                 const documentData = {
                     booking_id: bookingId,
-                    guest_type: AppState.currentSubmission.isPrimary ? 'primary' : 'additional',
+                    guest_type: AppState.currentGuest.isPrimary ? 'primary' : 'additional',
                     guest_sequence: sequence,
-                    guest_name: guestName,
-                    guest_age: guestAge ? parseInt(guestAge) : null,
-                    document_type: documentType,
-                    document_number: documentNumber,
+                    guest_name: name,
+                    guest_age: age,
+                    document_type: docType,
+                    document_number: docNumber,
                     document_front_url: frontUrl,
                     document_back_url: backUrl,
                     selfie_url: selfieUrl,
-                    status: 'pending',
-                    submitted_at: new Date().toISOString()
+                    status: isMinor ? 'verified' : 'pending', // Auto-verify minors
+                    ip_address: null, // Can be captured via API
+                    user_agent: navigator.userAgent
                 };
 
-                let result;
-                if (AppState.currentSubmission.existingDoc) {
+                if (AppState.currentGuest.existingDoc) {
                     // Update existing
-                    result = await supabase
+                    const { error } = await supabase
                         .from('guest_documents')
                         .update(documentData)
-                        .eq('id', AppState.currentSubmission.existingDoc.id);
+                        .eq('id', AppState.currentGuest.existingDoc.id);
+
+                    if (error) throw error;
                 } else {
                     // Insert new
-                    result = await supabase
+                    const { error } = await supabase
                         .from('guest_documents')
-                        .insert([documentData]);
+                        .insert(documentData);
+
+                    if (error) throw error;
                 }
 
-                if (result.error) throw result.error;
+                // Clear photo state
+                AppState.frontPhoto = null;
+                AppState.backPhoto = null;
+                AppState.selfiePhoto = null;
 
                 // Reload documents
                 await loadGuestDocuments();
 
                 hideLoading();
-                showToast('Document submitted successfully!', 'success');
-
-                // Show success screen
                 showScreen('successScreen');
 
             } catch (error) {
                 hideLoading();
                 console.error('Submission error:', error);
-                showToast('Failed to submit document. Please try again.', 'error');
+                showAlert('Failed to submit documents. Please try again.', 'error');
             }
         });
 
         // ============================================
         // NAVIGATION
         // ============================================
+
+        document.getElementById('cancelGuestFormBtn').addEventListener('click', () => {
+            showOverviewScreen();
+        });
 
         document.getElementById('backToOverviewBtn').addEventListener('click', () => {
             showOverviewScreen();
@@ -1882,21 +1608,10 @@
             AppState.reservation = null;
             AppState.guestDocuments = [];
             showScreen('authScreen');
-            showToast('Logged out successfully', 'success');
         });
 
         document.getElementById('addGuestBtn').addEventListener('click', () => {
-            const r = AppState.reservation;
-            const totalAdults = r.adults;
-            const currentGuests = AppState.guestDocuments.filter(d => d.guest_type === 'additional').length + 1; // +1 for primary
-
-            if (currentGuests >= totalAdults) {
-                showToast(`All ${totalAdults} guests already have submissions`, 'info');
-                return;
-            }
-
-            // Get next sequence number
-            const nextSequence = currentGuests + 1;
+            const nextSequence = AppState.guestDocuments.length + 1;
             openGuestForm(nextSequence, false, null);
         });
 
@@ -1916,14 +1631,15 @@
         });
 
         // ============================================
-        // PWA SERVICE WORKER
+        // PWA INSTALL PROMPT
         // ============================================
 
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/guest-sw.js')
-                .then(reg => console.log('✅ Service Worker registered'))
-                .catch(err => console.error('❌ SW registration failed:', err));
-        }
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            // Show install button if needed
+        });
 
         console.log('🏠 Hostizzy Guest Portal - Ready');
     </script>

@@ -3215,7 +3215,7 @@
                     <span style="margin-right: 12px;">📅</span> Reservations
                 </a>
                 <a class="mobile-sidebar-link" onclick="showViewMobile('guestDocuments')">
-                    <span style="margin-right: 12px;">📋</span> Guest IDs
+                    <span style="margin-right: 12px;">📋</span> Documents
                 </a>
                 <a class="mobile-sidebar-link" onclick="showViewMobile('payments')">
                     <span style="margin-right: 12px;">💰</span> Payments
@@ -3258,7 +3258,7 @@
                     <a class="nav-link nav-primary active" onclick="showView('dashboard')">Dashboard</a>
                     <a class="nav-link nav-primary" onclick="showView('reservations')">Reservations</a>
                     <a class="nav-link nav-primary" onclick="showView('guests')">Guests</a>
-                    <a class="nav-link nav-primary" onclick="showView('guestDocuments')">Guest IDs</a>
+                    <a class="nav-link nav-primary" onclick="showView('guestDocuments')">Documents</a>
                     <a class="nav-link nav-primary" onclick="showView('payments')">Payments</a>
 
                     <!-- Secondary Navigation (hidden on tablet, shown in More dropdown) -->
@@ -3445,7 +3445,7 @@
                     <div class="icon-card-icon" style="background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);">
                         📋
                     </div>
-                    <div class="icon-card-title">Guest IDs</div>
+                    <div class="icon-card-title">Documents</div>
                     <div class="icon-card-stat" id="homeStatDocuments">--</div>
                     <div class="icon-card-label">Pending Review</div>
                 </div>
@@ -13121,8 +13121,7 @@
         });
 
         // ============================================
-        // HOSTIZZY - GUEST DOCUMENTS JAVASCRIPT FUNCTIONS
-        // Add these functions to your index.html <script> section
+        // GUEST DOCUMENTS JAVASCRIPT FUNCTIONS
         // ============================================
         
         // Global state for guest documents
@@ -13154,9 +13153,14 @@
                     `)
                     .order('submitted_at', { ascending: false });
         
-                if (error) throw error;
+                if (error) {
+                    console.error('Error loading guest documents:', error);
+                    // Don't throw - show empty state if no table exists yet
+                    currentGuestDocuments = [];
+                } else {
+                    currentGuestDocuments = documents || [];
+                }
         
-                currentGuestDocuments = documents || [];
                 renderGuestDocuments();
                 updateDocumentStats();
                 updateHomeStatDocuments();
@@ -13165,7 +13169,20 @@
             } catch (error) {
                 hideLoading();
                 console.error('Error loading guest documents:', error);
-                showToast('Failed to load guest documents', 'error');
+                // Show user-friendly message
+                const container = document.getElementById('guestDocumentsList');
+                if (container) {
+                    container.innerHTML = `
+                        <div style="text-align: center; padding: 60px 20px; color: var(--text-secondary);">
+                            <div style="font-size: 64px; margin-bottom: 16px; opacity: 0.3;">⚠️</div>
+                            <div style="font-size: 18px; font-weight: 600; margin-bottom: 8px;">Unable to load documents</div>
+                            <div style="font-size: 14px;">Please ensure the database schema has been set up.</div>
+                            <div style="font-size: 14px; margin-top: 8px;">
+                                <a href="#" onclick="loadGuestDocuments(); return false;" style="color: var(--primary);">Retry</a>
+                            </div>
+                        </div>
+                    `;
+                }
             }
         }
         
@@ -13174,6 +13191,7 @@
         // ============================================
         function renderGuestDocuments() {
             const container = document.getElementById('guestDocumentsList');
+            if (!container) return;
         
             // Filter documents
             let filtered = currentGuestDocuments;
@@ -13186,8 +13204,8 @@
             if (searchTerm) {
                 filtered = filtered.filter(doc => {
                     return (
-                        doc.booking_id.toLowerCase().includes(searchTerm) ||
-                        doc.guest_name.toLowerCase().includes(searchTerm) ||
+                        (doc.booking_id || '').toLowerCase().includes(searchTerm) ||
+                        (doc.guest_name || '').toLowerCase().includes(searchTerm) ||
                         (doc.reservations?.guest_phone || '').includes(searchTerm)
                     );
                 });
@@ -13233,7 +13251,7 @@
                                     ${reservation?.property_name || 'Unknown Property'}
                                 </div>
                                 <div style="color: var(--text-secondary); font-size: 13px; margin-top: 4px;">
-                                    📅 ${reservation ? formatDate(reservation.check_in) : '-'} - ${reservation ? formatDate(reservation.check_out) : '-'}
+                                    📅 ${reservation ? formatDateHelper(reservation.check_in) : '-'} - ${reservation ? formatDateHelper(reservation.check_out) : '-'}
                                 </div>
                             </div>
                             <div style="display: flex; gap: 8px; align-items: center; flex-wrap: wrap;">
@@ -13291,7 +13309,7 @@
                     </div>
         
                     <div style="font-size: 12px; color: var(--text-tertiary);">
-                        Submitted: ${formatDateTime(doc.submitted_at)}
+                        Submitted: ${formatDateTimeHelper(doc.submitted_at)}
                     </div>
         
                     ${doc.verified_at ? `
@@ -13340,10 +13358,15 @@
             const rejected = currentGuestDocuments.filter(d => d.status === 'rejected').length;
             const incomplete = currentGuestDocuments.filter(d => d.status === 'incomplete').length;
         
-            document.getElementById('docStatPending').textContent = pending;
-            document.getElementById('docStatVerified').textContent = verified;
-            document.getElementById('docStatRejected').textContent = rejected;
-            document.getElementById('docStatIncomplete').textContent = incomplete;
+            const pendingEl = document.getElementById('docStatPending');
+            const verifiedEl = document.getElementById('docStatVerified');
+            const rejectedEl = document.getElementById('docStatRejected');
+            const incompleteEl = document.getElementById('docStatIncomplete');
+        
+            if (pendingEl) pendingEl.textContent = pending;
+            if (verifiedEl) verifiedEl.textContent = verified;
+            if (rejectedEl) rejectedEl.textContent = rejected;
+            if (incompleteEl) incompleteEl.textContent = incomplete;
         }
         
         // ============================================
@@ -13362,7 +13385,7 @@
         // ============================================
         async function refreshGuestDocuments() {
             await loadGuestDocuments();
-            showToast('Documents refreshed', 'success');
+            showToast('Documents refreshed successfully!', 'success');
         }
         
         // ============================================
@@ -13387,7 +13410,7 @@
                 document.getElementById('modalBookingId').textContent = doc.booking_id;
                 document.getElementById('modalDocType').textContent = (doc.document_type || 'Unknown').replace(/_/g, ' ');
                 document.getElementById('modalDocNumber').textContent = doc.document_number || 'N/A';
-                document.getElementById('modalSubmittedAt').textContent = formatDateTime(doc.submitted_at);
+                document.getElementById('modalSubmittedAt').textContent = formatDateTimeHelper(doc.submitted_at);
                 document.getElementById('modalStatus').textContent = doc.status.toUpperCase();
                 document.getElementById('modalStaffNotes').value = doc.staff_notes || '';
         
@@ -13400,7 +13423,7 @@
                     document.getElementById('rejectFormSection').style.display = 'none';
                     document.getElementById('verifiedMessage').style.display = 'block';
                     document.getElementById('verifiedBy').textContent = doc.verified_by || 'Staff';
-                    document.getElementById('verifiedAt').textContent = formatDateTime(doc.verified_at);
+                    document.getElementById('verifiedAt').textContent = formatDateTimeHelper(doc.verified_at);
                 } else {
                     document.getElementById('modalActions').style.display = 'flex';
                     document.getElementById('rejectFormSection').style.display = 'none';
@@ -13511,12 +13534,9 @@
         
                 if (error) throw error;
         
-                showToast('Document approved successfully', 'success');
+                showToast('Document approved successfully!', 'success');
                 closeGuestDocumentModal();
                 await loadGuestDocuments();
-        
-                // TODO: Send email notification to guest
-                // sendDocumentVerificationEmail(currentDocumentForReview.booking_id);
         
             } catch (error) {
                 hideLoading();
@@ -13575,9 +13595,6 @@
                 closeGuestDocumentModal();
                 await loadGuestDocuments();
         
-                // TODO: Send email notification to guest
-                // sendDocumentRejectionEmail(currentDocumentForReview.booking_id, reason);
-        
             } catch (error) {
                 hideLoading();
                 console.error('Error rejecting document:', error);
@@ -13601,11 +13618,10 @@
         // COPY GUEST PORTAL LINK
         // ============================================
         function copyGuestPortalLink() {
-            // Change this URL to your actual guest portal domain
             const portalUrl = window.location.origin + '/guest-portal.html';
         
             navigator.clipboard.writeText(portalUrl).then(() => {
-                showToast('Guest portal link copied to clipboard', 'success');
+                showToast('Guest portal link copied to clipboard!', 'success');
             }).catch(() => {
                 showToast('Failed to copy link', 'error');
             });
@@ -13626,9 +13642,9 @@
         }
         
         // ============================================
-        // HELPER: FORMAT DATE
+        // HELPER FUNCTIONS
         // ============================================
-        function formatDate(dateString) {
+        function formatDateHelper(dateString) {
             if (!dateString) return '-';
             return new Date(dateString).toLocaleDateString('en-IN', {
                 day: 'numeric',
@@ -13637,10 +13653,7 @@
             });
         }
         
-        // ============================================
-        // HELPER: FORMAT DATE TIME
-        // ============================================
-        function formatDateTime(dateString) {
+        function formatDateTimeHelper(dateString) {
             if (!dateString) return '-';
             return new Date(dateString).toLocaleString('en-IN', {
                 day: 'numeric',
@@ -13650,6 +13663,8 @@
                 minute: '2-digit'
             });
         }
+        
+        console.log('✅ Guest Documents functions loaded successfully');
     </script>
 
     <script>
