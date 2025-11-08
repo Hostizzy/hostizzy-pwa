@@ -5796,11 +5796,17 @@
         
         // Toast Notifications
         function showToast(title, message, icon = '🔔') {
-            // Haptic feedback based on icon
-            if (icon === '✅') haptic('success');
-            else if (icon === '❌') haptic('error');
-            else if (icon === '⚠️') haptic('warning');
-            else haptic('light');
+            // Haptic feedback based on icon (if available)
+            try {
+                if (typeof haptic === 'function') {
+                    if (icon === '✅') haptic('success');
+                    else if (icon === '❌') haptic('error');
+                    else if (icon === '⚠️') haptic('warning');
+                    else haptic('light');
+                }
+            } catch (e) {
+                // Haptic not available, continue without it
+            }
             const toast = document.getElementById('notificationToast');
             document.getElementById('toastIcon').textContent = icon;
             document.getElementById('toastTitle').textContent = title;
