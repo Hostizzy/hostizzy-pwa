@@ -25,17 +25,13 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 
     <style>
-        /* ============================================
-           IMPROVED DESIGN SYSTEM
-           ============================================ */
         :root {
-            /* Primary Colors - Modern Purple/Indigo */
             --primary: #6366f1;
             --primary-dark: #4f46e5;
             --primary-light: #818cf8;
             --primary-lighter: #eef2ff;
-
-            /* Status Colors */
+            --secondary: #8b5cf6;
+            
             --success: #10b981;
             --success-light: #d1fae5;
             --warning: #f59e0b;
@@ -44,8 +40,7 @@
             --error-light: #fee2e2;
             --info: #3b82f6;
             --info-light: #dbeafe;
-
-            /* Neutrals */
+            
             --gray-50: #f9fafb;
             --gray-100: #f3f4f6;
             --gray-200: #e5e7eb;
@@ -56,35 +51,39 @@
             --gray-700: #374151;
             --gray-800: #1f2937;
             --gray-900: #111827;
-
-            /* Semantic */
+            
             --text-primary: var(--gray-900);
             --text-secondary: var(--gray-600);
             --text-tertiary: var(--gray-400);
             --border: var(--gray-200);
             --bg: #ffffff;
             --bg-secondary: var(--gray-50);
-
-            /* Effects */
+            
             --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
             --shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px 0 rgba(0, 0, 0, 0.06);
             --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
             --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
             --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
+            
             --radius-sm: 6px;
             --radius: 8px;
             --radius-md: 12px;
             --radius-lg: 16px;
             --radius-xl: 24px;
-
-            --transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+            
+            --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+        }
+
+        html, body {
+            width: 100%;
+            height: 100%;
+            overflow-x: hidden;
         }
 
         body {
@@ -100,70 +99,38 @@
         /* ============================================
            LAYOUT
            ============================================ */
-        .app-container {
-            max-width: 480px;
+        .container {
+            max-width: 600px;
             margin: 0 auto;
+            padding: 20px;
             min-height: 100vh;
-            background: var(--bg);
-            position: relative;
-        }
-
-        /* Improved Header */
-        .header {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            padding: 28px 24px;
-            text-align: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-        }
-
-        .header-logo {
-            width: 48px;
-            height: 48px;
-            margin: 0 auto 12px;
-            background: white;
-            border-radius: 12px;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            flex-direction: column;
         }
 
-        .header h1 {
-            font-size: 22px;
-            font-weight: 700;
-            margin-bottom: 4px;
-            letter-spacing: -0.5px;
+        @media (max-width: 640px) {
+            .container {
+                padding: 16px;
+            }
         }
 
-        .header .subtitle {
-            font-size: 13px;
-            opacity: 0.95;
-            font-weight: 500;
-        }
-
-        /* Content Area */
-        .content {
-            padding: 24px;
-        }
-
+        /* ============================================
+           SCREENS
+           ============================================ */
         .screen {
             display: none;
-            animation: fadeInUp 0.4s ease-out;
+            animation: fadeIn 0.3s ease-out;
         }
 
         .screen.active {
-            display: block;
+            display: flex;
+            flex-direction: column;
         }
 
-        @keyframes fadeInUp {
+        @keyframes fadeIn {
             from {
                 opacity: 0;
-                transform: translateY(20px);
+                transform: translateY(10px);
             }
             to {
                 opacity: 1;
@@ -172,412 +139,157 @@
         }
 
         /* ============================================
-           IMPROVED CARDS
+           HEADER
            ============================================ */
-        .card {
-            background: var(--bg);
-            border-radius: var(--radius-lg);
+        .header {
+            background: white;
             padding: 24px;
-            margin-bottom: 20px;
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border);
-            transition: var(--transition);
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow);
+            margin-bottom: 24px;
+            text-align: center;
         }
 
-        .card:hover {
-            box-shadow: var(--shadow-lg);
-        }
-
-        .card-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 2px solid var(--gray-100);
-        }
-
-        .card-icon {
-            width: 40px;
-            height: 40px;
-            background: var(--primary-lighter);
-            border-radius: var(--radius-md);
+        .header-logo {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 32px;
+            margin: 0 auto 16px;
+            box-shadow: var(--shadow-md);
         }
 
-        .card-header h2 {
-            font-size: 18px;
+        .header h1 {
+            font-size: 28px;
             font-weight: 700;
             color: var(--text-primary);
-            flex: 1;
+            margin-bottom: 8px;
+        }
+
+        .header p {
+            font-size: 14px;
+            color: var(--text-secondary);
         }
 
         /* ============================================
-           IMPROVED FORMS
+           FORMS & INPUTS
            ============================================ */
         .form-group {
             margin-bottom: 20px;
         }
 
-        .form-label {
+        .form-group label {
             display: block;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-primary);
             font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
         }
 
-        .form-input {
+        .form-group input,
+        .form-group select {
             width: 100%;
-            padding: 14px 16px;
+            padding: 12px 16px;
             border: 2px solid var(--border);
-            border-radius: var(--radius);
-            font-size: 15px;
+            border-radius: var(--radius-md);
+            font-size: 14px;
             transition: var(--transition);
             font-family: inherit;
-            background: var(--bg);
         }
 
-        .form-input:focus {
+        .form-group input:focus,
+        .form-group select:focus {
             outline: none;
             border-color: var(--primary);
-            box-shadow: 0 0 0 3px var(--primary-lighter);
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
         }
 
-        .form-input::placeholder {
-            color: var(--gray-400);
-        }
-
-        .form-hint {
-            margin-top: 6px;
-            font-size: 13px;
-            color: var(--text-secondary);
+        .form-group input::placeholder {
+            color: var(--text-tertiary);
         }
 
         /* ============================================
-           IMPROVED BUTTONS
+           BUTTONS
            ============================================ */
         .btn {
             padding: 14px 24px;
             border: none;
-            border-radius: var(--radius);
+            border-radius: var(--radius-md);
             font-size: 15px;
             font-weight: 600;
             cursor: pointer;
             transition: var(--transition);
-            display: inline-flex;
+            display: flex;
             align-items: center;
             justify-content: center;
             gap: 8px;
             text-decoration: none;
-            font-family: inherit;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .btn::before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 0;
-            height: 0;
-            border-radius: 50%;
-            background: rgba(255, 255, 255, 0.3);
-            transform: translate(-50%, -50%);
-            transition: width 0.6s, height 0.6s;
-        }
-
-        .btn:active::before {
-            width: 300px;
-            height: 300px;
-        }
-
-        .btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-        }
-
-        .btn-primary {
-            background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.4);
-        }
-
-        .btn-primary:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 20px rgba(99, 102, 241, 0.6);
-        }
-
-        .btn-secondary {
-            background: var(--gray-100);
-            color: var(--text-primary);
-            border: 1px solid var(--border);
-        }
-
-        .btn-secondary:hover:not(:disabled) {
-            background: var(--gray-200);
-        }
-
-        .btn-success {
-            background: linear-gradient(135deg, var(--success) 0%, #059669 100%);
-            color: white;
-            box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
-        }
-
-        .btn-block {
             width: 100%;
         }
 
-        /* ============================================
-           IMPROVED ALERTS
-           ============================================ */
-        .alert {
-            padding: 16px;
-            border-radius: var(--radius-md);
-            margin-bottom: 20px;
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            border-left: 4px solid;
-        }
-
-        .alert-icon {
-            font-size: 20px;
-            flex-shrink: 0;
-        }
-
-        .alert-content {
-            flex: 1;
-        }
-
-        .alert-content strong {
-            display: block;
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
-
-        .alert-info {
-            background: var(--info-light);
-            border-color: var(--info);
-            color: #1e40af;
-        }
-
-        .alert-success {
-            background: var(--success-light);
-            border-color: var(--success);
-            color: #065f46;
-        }
-
-        .alert-warning {
-            background: var(--warning-light);
-            border-color: var(--warning);
-            color: #92400e;
-        }
-
-        .alert-error {
-            background: var(--error-light);
-            border-color: var(--error);
-            color: #991b1b;
-        }
-
-        /* ============================================
-           TOAST NOTIFICATIONS
-           ============================================ */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            max-width: 400px;
-        }
-
-        .toast {
-            background: white;
-            padding: 16px 20px;
-            border-radius: var(--radius-md);
-            box-shadow: var(--shadow-xl);
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideInRight 0.3s ease-out;
-            border-left: 4px solid var(--primary);
-        }
-
-        @keyframes slideInRight {
-            from {
-                transform: translateX(400px);
-                opacity: 0;
-            }
-            to {
-                transform: translateX(0);
-                opacity: 1;
-            }
-        }
-
-        .toast-success {
-            border-left-color: var(--success);
-        }
-
-        .toast-error {
-            border-left-color: var(--error);
-        }
-
-        /* ============================================
-           LOADING
-           ============================================ */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.7);
-            backdrop-filter: blur(4px);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-        }
-
-        .loading-content {
-            background: white;
-            padding: 32px;
-            border-radius: var(--radius-xl);
-            text-align: center;
-            box-shadow: var(--shadow-xl);
-        }
-
-        .spinner {
-            width: 50px;
-            height: 50px;
-            border: 4px solid var(--gray-200);
-            border-top-color: var(--primary);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            margin: 0 auto 16px;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            color: var(--text-secondary);
-            font-weight: 500;
-        }
-
-        /* ============================================
-           RESERVATION INFO CARD
-           ============================================ */
-        .reservation-card {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        .btn-primary {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
             color: white;
-            padding: 24px;
-            border-radius: var(--radius-lg);
-            margin-bottom: 24px;
-            box-shadow: var(--shadow-lg);
-        }
-
-        .reservation-property {
-            font-size: 24px;
-            font-weight: 700;
-            margin-bottom: 16px;
-            letter-spacing: -0.5px;
-        }
-
-        .reservation-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 16px;
-        }
-
-        .reservation-item {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 12px;
-            border-radius: var(--radius);
-            backdrop-filter: blur(10px);
-        }
-
-        .reservation-label {
-            font-size: 11px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            opacity: 0.9;
-            margin-bottom: 4px;
-            font-weight: 600;
-        }
-
-        .reservation-value {
-            font-size: 16px;
-            font-weight: 700;
-        }
-
-        /* ============================================
-           GUEST LIST
-           ============================================ */
-        .guest-list {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .guest-item {
-            background: var(--gray-50);
-            padding: 16px;
-            border-radius: var(--radius-md);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            cursor: pointer;
-            transition: var(--transition);
-            border: 2px solid transparent;
-        }
-
-        .guest-item:hover {
-            background: white;
-            border-color: var(--primary);
-            transform: translateX(4px);
             box-shadow: var(--shadow-md);
         }
 
-        .guest-info {
-            flex: 1;
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-lg);
         }
 
-        .guest-name {
-            font-weight: 600;
-            margin-bottom: 4px;
-            font-size: 15px;
+        .btn-primary:active {
+            transform: translateY(0);
         }
 
-        .guest-meta {
-            font-size: 13px;
-            color: var(--text-secondary);
+        .btn-secondary {
+            background: var(--bg-secondary);
+            color: var(--primary);
+            border: 2px solid var(--border);
         }
 
+        .btn-secondary:hover {
+            background: var(--gray-100);
+            border-color: var(--primary);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        /* ============================================
+           CARDS
+           ============================================ */
+        .card {
+            background: white;
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            box-shadow: var(--shadow);
+            margin-bottom: 16px;
+            transition: var(--transition);
+        }
+
+        .card:hover {
+            box-shadow: var(--shadow-lg);
+            transform: translateY(-2px);
+        }
+
+        /* ============================================
+           STATUS BADGES
+           ============================================ */
         .status-badge {
+            display: inline-block;
             padding: 6px 12px;
             border-radius: 20px;
             font-size: 12px;
             font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.3px;
-        }
-
-        .status-pending {
-            background: var(--warning-light);
-            color: #92400e;
+            white-space: nowrap;
         }
 
         .status-verified {
@@ -585,424 +297,343 @@
             color: #065f46;
         }
 
+        .status-pending {
+            background: var(--warning-light);
+            color: #92400e;
+        }
+
         .status-rejected {
             background: var(--error-light);
             color: #991b1b;
+        }
+
+        .status-incomplete {
+            background: var(--info-light);
+            color: #0c4a6e;
+        }
+
+        /* ============================================
+           GUEST ITEMS
+           ============================================ */
+        .guest-item {
+            background: white;
+            border: 2px solid var(--border);
+            border-radius: var(--radius-md);
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .guest-item:hover {
+            border-color: var(--primary);
+            background: var(--primary-lighter);
+        }
+
+        .guest-info {
+            flex: 1;
+        }
+
+        .guest-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+
+        .guest-meta {
+            font-size: 13px;
+            color: var(--text-secondary);
+        }
+
+        .guest-status {
+            text-align: right;
         }
 
         /* ============================================
            PROGRESS BAR
            ============================================ */
         .progress-container {
-            margin: 24px 0;
+            background: white;
+            padding: 20px;
+            border-radius: var(--radius-lg);
+            margin-bottom: 24px;
+            box-shadow: var(--shadow);
+        }
+
+        .progress-label {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text-primary);
+            margin-bottom: 8px;
+            display: flex;
+            justify-content: space-between;
         }
 
         .progress-bar {
+            width: 100%;
             height: 8px;
-            background: var(--gray-200);
+            background: var(--border);
             border-radius: 4px;
             overflow: hidden;
-            margin-bottom: 8px;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary) 0%, var(--primary-light) 100%);
-            transition: width 0.5s ease;
+            background: linear-gradient(90deg, var(--primary) 0%, var(--secondary) 100%);
+            transition: width 0.3s ease;
             border-radius: 4px;
         }
 
-        .progress-text {
-            text-align: center;
-            font-size: 14px;
-            color: var(--text-secondary);
-            font-weight: 500;
+        /* ============================================
+           ALERTS & TOASTS
+           ============================================ */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            right: 20px;
+            padding: 16px;
+            background: white;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-lg);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            max-width: 560px;
+            margin: 0 auto;
+            animation: slideUp 0.3s ease-out;
+            z-index: 1000;
+        }
+
+        @keyframes slideUp {
+            from {
+                transform: translateY(100px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid var(--success);
+        }
+
+        .toast.error {
+            border-left: 4px solid var(--error);
+        }
+
+        .toast.info {
+            border-left: 4px solid var(--info);
+        }
+
+        .toast.warning {
+            border-left: 4px solid var(--warning);
+        }
+
+        /* ============================================
+           LOADING
+           ============================================ */
+        .loading {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 999;
+            align-items: center;
+            justify-content: center;
+            backdrop-filter: blur(4px);
+        }
+
+        .loading.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 50px;
+            height: 50px;
+            border: 4px solid rgba(255, 255, 255, 0.3);
+            border-top-color: white;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
         }
 
         /* ============================================
            RESPONSIVE
            ============================================ */
-        @media (max-width: 480px) {
-            .content {
-                padding: 16px;
+        @media (max-width: 640px) {
+            .header {
+                padding: 20px;
+                margin-bottom: 20px;
+            }
+
+            .header h1 {
+                font-size: 24px;
+            }
+
+            .btn {
+                padding: 12px 20px;
+                font-size: 14px;
             }
 
             .card {
-                padding: 20px;
+                padding: 16px;
             }
-
-            .reservation-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-
-            .toast-container {
-                left: 16px;
-                right: 16px;
-                max-width: none;
-            }
-        }
-
-        /* ============================================
-           RADIO OPTIONS
-           ============================================ */
-        .radio-group {
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .radio-option {
-            display: flex;
-            align-items: center;
-            padding: 14px;
-            border: 2px solid var(--border);
-            border-radius: var(--radius);
-            cursor: pointer;
-            transition: var(--transition);
-            background: var(--bg);
-        }
-
-        .radio-option:hover {
-            border-color: var(--primary);
-            background: var(--primary-lighter);
-        }
-
-        .radio-option input[type="radio"] {
-            width: 20px;
-            height: 20px;
-            margin-right: 12px;
-            cursor: pointer;
-            accent-color: var(--primary);
-        }
-
-        .radio-option.selected {
-            border-color: var(--primary);
-            background: var(--primary-lighter);
-        }
-
-        /* ============================================
-           FOOTER
-           ============================================ */
-        .footer {
-            text-align: center;
-            padding: 32px 20px;
-            color: var(--text-secondary);
-            font-size: 13px;
-            background: var(--gray-50);
-            border-top: 1px solid var(--border);
-            margin-top: 40px;
-        }
-
-        .footer-brand {
-            font-weight: 600;
-            color: var(--text-primary);
-            margin-bottom: 8px;
-        }
-
-        .footer-links {
-            margin-top: 12px;
-            display: flex;
-            justify-content: center;
-            gap: 16px;
-        }
-
-        .footer-link {
-            color: var(--primary);
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .footer-link:hover {
-            text-decoration: underline;
         }
     </style>
 </head>
 <body>
-    <!-- Toast Container -->
-    <div id="toastContainer" class="toast-container"></div>
+    <div class="container">
+        <!-- AUTH SCREEN -->
+        <div id="authScreen" class="screen active">
+            <div class="header">
+                <div class="header-logo">🔐</div>
+                <h1>Guest Portal</h1>
+                <p>Verify your reservation to submit documents</p>
+            </div>
 
-    <div class="app-container">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-logo">🏠</div>
-            <h1>Hostizzy Guest Portal</h1>
-            <div class="subtitle">Secure ID Document Submission</div>
-        </header>
-
-        <!-- Main Content -->
-        <main class="content">
-            <!-- ========================================
-                 SCREEN 1: AUTHENTICATION
-                 ======================================== -->
-            <div id="authScreen" class="screen active">
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">🔐</div>
-                        <h2>Verify Your Reservation</h2>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <span class="alert-icon">ℹ️</span>
-                        <div class="alert-content">
-                            Enter your booking details to access the portal and submit your ID documents.
-                        </div>
-                    </div>
-
-                    <form id="authForm">
-                        <div class="form-group">
-                            <label class="form-label" for="bookingId">Booking ID</label>
-                            <input
-                                type="text"
-                                id="bookingId"
-                                class="form-input"
-                                placeholder="e.g., BK-2024-001"
-                                required
-                                autocomplete="off"
-                            >
-                            <div class="form-hint">Found in your booking confirmation email/SMS</div>
-                        </div>
-
-                        <div class="form-group">
-                            <label class="form-label" for="guestPhone">Phone Number</label>
-                            <input
-                                type="tel"
-                                id="guestPhone"
-                                class="form-input"
-                                placeholder="10-digit mobile number"
-                                pattern="[0-9]{10}"
-                                required
-                                autocomplete="tel"
-                            >
-                            <div class="form-hint">Same number used during booking</div>
-                        </div>
-
-                        <button type="submit" class="btn btn-primary btn-block">
-                            <span>Continue</span>
-                            <span>→</span>
-                        </button>
-                    </form>
+            <form id="authForm" style="flex: 1; display: flex; flex-direction: column;">
+                <div class="form-group">
+                    <label for="bookingId">Booking ID *</label>
+                    <input 
+                        type="text" 
+                        id="bookingId" 
+                        placeholder="e.g., HHQN0RNM4O" 
+                        required
+                        autocomplete="off"
+                    >
                 </div>
 
-                <div class="alert alert-warning">
-                    <span class="alert-icon">⚠️</span>
-                    <div class="alert-content">
-                        <strong>Need help?</strong>
-                        Contact the property directly if you can't find your booking ID.
-                    </div>
+                <div class="form-group">
+                    <label for="guestPhone">Phone Number *</label>
+                    <input 
+                        type="tel" 
+                        id="guestPhone" 
+                        placeholder="+91-XXXXXXXXXX" 
+                        required
+                        autocomplete="off"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary" style="margin-top: auto;">
+                    ✓ Verify & Continue
+                </button>
+            </form>
+        </div>
+
+        <!-- OVERVIEW SCREEN -->
+        <div id="overviewScreen" class="screen hidden">
+            <div class="header">
+                <div class="header-logo">📋</div>
+                <h1>Document Submission</h1>
+                <p id="guestGreeting">Welcome back!</p>
+            </div>
+
+            <div class="progress-container">
+                <div class="progress-label">
+                    <span>Verification Progress</span>
+                    <span id="progressText">0%</span>
+                </div>
+                <div class="progress-bar">
+                    <div id="submissionProgress" class="progress-fill" style="width: 0%"></div>
+                </div>
+                <div style="font-size: 12px; color: var(--text-secondary); margin-top: 8px;">
+                    <span id="submissionProgressText">0 of 0 verified</span>
                 </div>
             </div>
 
-            <!-- ========================================
-                 SCREEN 2: RESERVATION OVERVIEW
-                 ======================================== -->
-            <div id="overviewScreen" class="screen">
-                <!-- Reservation Info Card -->
-                <div class="reservation-card">
-                    <div class="reservation-property" id="propertyName">Loading...</div>
-                    <div class="reservation-grid">
-                        <div class="reservation-item">
-                            <div class="reservation-label">Check-in</div>
-                            <div class="reservation-value" id="checkInDate">-</div>
-                        </div>
-                        <div class="reservation-item">
-                            <div class="reservation-label">Check-out</div>
-                            <div class="reservation-value" id="checkOutDate">-</div>
-                        </div>
-                        <div class="reservation-item">
-                            <div class="reservation-label">Nights</div>
-                            <div class="reservation-value" id="nightsCount">-</div>
-                        </div>
-                        <div class="reservation-item">
-                            <div class="reservation-label">Guests</div>
-                            <div class="reservation-value" id="guestCount">-</div>
-                        </div>
-                    </div>
-                </div>
+            <div style="flex: 1;">
+                <h3 style="font-size: 16px; font-weight: 600; margin-bottom: 16px; color: var(--text-primary);">
+                    Guests
+                </h3>
+                <div id="guestList"></div>
+            </div>
 
-                <!-- ID Submission Card -->
-                <div class="card">
-                    <div class="card-header">
-                        <div class="card-icon">📋</div>
-                        <h2>ID Document Submission</h2>
-                    </div>
-
-                    <div class="alert alert-info">
-                        <span class="alert-icon">ℹ️</span>
-                        <div class="alert-content">
-                            Please submit identification documents for all adult guests (18+). This is required for check-in.
-                        </div>
-                    </div>
-
-                    <!-- Progress Bar -->
-                    <div class="progress-container">
-                        <div class="progress-bar">
-                            <div class="progress-fill" id="submissionProgress" style="width: 0%"></div>
-                        </div>
-                        <div class="progress-text" id="submissionProgressText">0 of 0 completed</div>
-                    </div>
-
-                    <!-- Guest List -->
-                    <div class="guest-list" id="guestList">
-                        <!-- Populated dynamically -->
-                    </div>
-
-                    <button id="addGuestBtn" class="btn btn-secondary btn-block" style="margin-top: 16px;">
-                        <span>➕</span>
-                        <span>Add Additional Guest</span>
-                    </button>
-                </div>
-
-                <div class="alert alert-warning">
-                    <span class="alert-icon">🔒</span>
-                    <div class="alert-content">
-                        <strong>Data Privacy:</strong>
-                        Your documents are encrypted and automatically deleted 60 days after submission.
-                    </div>
-                </div>
-
-                <button id="logoutBtn" class="btn btn-secondary btn-block">
-                    <span>🚪</span>
-                    <span>Logout</span>
+            <div style="display: flex; gap: 12px; margin-top: auto;">
+                <button id="backToOverviewBtn" class="btn btn-secondary" style="display: none;">
+                    ← Back
+                </button>
+                <button id="logoutBtn" class="btn btn-secondary">
+                    🚪 Logout
                 </button>
             </div>
-
-            <!-- ========================================
-                 SCREEN 5: SUCCESS
-                 ======================================== -->
-            <div id="successScreen" class="screen">
-                <div class="card" style="text-align: center;">
-                    <div style="font-size: 80px; margin-bottom: 20px;">✅</div>
-                    <h2 style="margin-bottom: 12px; font-size: 24px; font-weight: 700;">Submission Successful!</h2>
-                    <p style="color: var(--text-secondary); margin-bottom: 24px;">
-                        Thank you for submitting your identification documents. Our team will review them shortly.
-                    </p>
-
-                    <div class="alert alert-success">
-                        <span class="alert-icon">✓</span>
-                        <div class="alert-content">
-                            You will receive a confirmation once your documents are verified.
-                        </div>
-                    </div>
-
-                    <button class="btn btn-primary btn-block" id="backToOverviewBtn">
-                        <span>Back to Overview</span>
-                    </button>
-                </div>
-            </div>
-        </main>
-
-        <!-- Footer -->
-        <footer class="footer">
-            <div class="footer-brand">Hostizzy ResIQ</div>
-            <div>© 2025 Hostizzy. All rights reserved.</div>
-            <div class="footer-links">
-                <a href="#" class="footer-link">Privacy Policy</a>
-                <a href="#" class="footer-link">Terms of Service</a>
-                <a href="#" class="footer-link">Help</a>
-            </div>
-        </footer>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div id="loadingOverlay" class="loading-overlay">
-        <div class="loading-content">
-            <div class="spinner"></div>
-            <div class="loading-text" id="loadingText">Loading...</div>
         </div>
     </div>
 
-    <!-- ============================================
-         JAVASCRIPT
-         ============================================ -->
+    <!-- LOADING OVERLAY -->
+    <div id="loading" class="loading"></div>
+
     <script>
-        // ============================================
         // SUPABASE CONFIGURATION
-        // ============================================
         const SUPABASE_URL = 'https://dxthxsguqrxpurorpokq.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dGh4c2d1cXJ4cHVyb3Jwb2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMjc4MTMsImV4cCI6MjA3NTYwMzgxM30.JhGzqUolA-A_fGha-0DhHVl7p1vRq4CZcp5ttdVxjQg';
 
         const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // ============================================
         // APPLICATION STATE
-        // ============================================
         const AppState = {
             reservation: null,
             guestDocuments: [],
+            currentSession: null
         };
 
-        // ============================================
         // UTILITY FUNCTIONS
-        // ============================================
-
-        function showScreen(screenId) {
-            document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
-            document.getElementById(screenId).classList.add('active');
-        }
-
-        function showLoading(message = 'Loading...') {
-            document.getElementById('loadingText').textContent = message;
-            document.getElementById('loadingOverlay').classList.add('active');
-        }
-
-        function hideLoading() {
-            document.getElementById('loadingOverlay').classList.remove('active');
+        function showScreen(screenName) {
+            document.querySelectorAll('.screen').forEach(screen => {
+                screen.classList.remove('active');
+                screen.classList.add('hidden');
+            });
+            const screen = document.getElementById(screenName);
+            if (screen) {
+                screen.classList.add('active');
+                screen.classList.remove('hidden');
+            }
         }
 
         function showToast(message, type = 'info') {
-            const container = document.getElementById('toastContainer');
             const toast = document.createElement('div');
-            toast.className = `toast toast-${type}`;
-
-            const icon = type === 'success' ? '✓' : type === 'error' ? '✕' : 'ℹ';
+            toast.className = `toast ${type}`;
             toast.innerHTML = `
-                <span style="font-size: 20px;">${icon}</span>
-                <span style="flex: 1;">${message}</span>
+                <span>${message}</span>
             `;
-
-            container.appendChild(toast);
+            document.body.appendChild(toast);
 
             setTimeout(() => {
-                toast.style.opacity = '0';
-                toast.style.transform = 'translateX(400px)';
+                toast.style.animation = 'slideUp 0.3s ease-out reverse';
                 setTimeout(() => toast.remove(), 300);
-            }, 4000);
+            }, 3000);
         }
 
-        function formatDate(dateString) {
-            return new Date(dateString).toLocaleDateString('en-IN', {
-                day: 'numeric',
-                month: 'short',
-                year: 'numeric'
-            });
+        function showLoading(show = true) {
+            document.getElementById('loading').classList.toggle('active', show);
         }
 
-        // ============================================
-        // AUTHENTICATION
-        // ============================================
-
+        // AUTH FORM
         document.getElementById('authForm').addEventListener('submit', async (e) => {
             e.preventDefault();
-
             const bookingId = document.getElementById('bookingId').value.trim().toUpperCase();
-            const phone = document.getElementById('guestPhone').value.trim();
+            const guestPhone = document.getElementById('guestPhone').value.trim();
 
-            // Validate inputs
-            if (!bookingId || !phone) {
-                showToast('Please fill in all fields', 'error');
+            if (!bookingId || !guestPhone) {
+                showToast('Please fill all fields', 'error');
                 return;
             }
 
-            if (!/^[0-9]{10}$/.test(phone)) {
-                showToast('Please enter a valid 10-digit phone number', 'error');
-                return;
-            }
-
-            showLoading('Verifying your reservation...');
+            showLoading(true);
 
             try {
-                // Fetch reservation from Supabase
                 const { data: reservation, error } = await supabase
                     .from('reservations')
                     .select('*')
@@ -1011,107 +642,60 @@
 
                 if (error) {
                     console.error('Supabase error:', error);
-                    hideLoading();
-
-                    if (error.code === '406') {
-                        showToast('Booking not found. Please check your Booking ID.', 'error');
-                    } else if (error.message.includes('JWT')) {
-                        showToast('Authentication error. Please contact support.', 'error');
-                    } else {
-                        showToast('Booking not found. Please check your Booking ID.', 'error');
-                    }
-                    return;
-                }
-
-                if (!reservation) {
-                    hideLoading();
+                    showLoading(false);
                     showToast('Booking not found. Please check your Booking ID.', 'error');
                     return;
                 }
 
-                // Verify phone number (last 10 digits match)
-                const dbPhone = (reservation.guest_phone || '').replace(/\D/g, '').slice(-10);
-                const inputPhone = phone.replace(/\D/g, '').slice(-10);
+                if (!reservation) {
+                    showLoading(false);
+                    showToast('Booking not found. Please check your Booking ID.', 'error');
+                    return;
+                }
 
-                if (dbPhone !== inputPhone) {
-                    hideLoading();
+                if (reservation.guest_phone !== guestPhone) {
+                    showLoading(false);
                     showToast('Phone number does not match our records.', 'error');
                     return;
                 }
 
-                // Check if reservation is cancelled
-                if (reservation.status === 'cancelled') {
-                    hideLoading();
-                    showToast('This reservation has been cancelled.', 'error');
-                    return;
-                }
-
-                // Store in state
                 AppState.reservation = reservation;
-
-                // Store in sessionStorage
                 sessionStorage.setItem('guestSession', JSON.stringify({
-                    bookingId: reservation.booking_id,
-                    phone: phone
+                    bookingId,
+                    phone: guestPhone,
+                    timestamp: Date.now()
                 }));
 
-                // Load existing documents
                 await loadGuestDocuments();
-
-                // Show overview
                 showOverviewScreen();
-                hideLoading();
-                showToast('Welcome! Booking verified successfully.', 'success');
-
-            } catch (error) {
-                hideLoading();
-                console.error('Authentication error:', error);
+            } catch (err) {
+                console.error('Authentication error:', err);
                 showToast('An error occurred. Please try again.', 'error');
+            } finally {
+                showLoading(false);
             }
         });
-
-        // ============================================
-        // LOAD GUEST DOCUMENTS
-        // ============================================
 
         async function loadGuestDocuments() {
             try {
                 const { data, error } = await supabase
-                    .from('guest_documents')
+                    .from('guest-id-documents')
                     .select('*')
-                    .eq('booking_id', AppState.reservation.booking_id)
-                    .order('guest_sequence', { ascending: true });
+                    .eq('booking_id', AppState.reservation.booking_id);
 
-                if (error) {
-                    console.error('Error loading documents:', error);
-                    // Don't fail if no documents exist yet
-                    AppState.guestDocuments = [];
-                } else {
-                    AppState.guestDocuments = data || [];
-                }
-            } catch (error) {
-                console.error('Error loading documents:', error);
+                if (error) throw error;
+
+                AppState.guestDocuments = data || [];
+            } catch (err) {
+                console.error('Error loading documents:', err);
                 AppState.guestDocuments = [];
             }
         }
 
-        // ============================================
-        // OVERVIEW SCREEN
-        // ============================================
-
         function showOverviewScreen() {
             const r = AppState.reservation;
-
-            // Set reservation info
-            document.getElementById('propertyName').textContent = r.property_name;
-            document.getElementById('checkInDate').textContent = formatDate(r.check_in);
-            document.getElementById('checkOutDate').textContent = formatDate(r.check_out);
-            document.getElementById('nightsCount').textContent = `${r.nights} Nights`;
-            document.getElementById('guestCount').textContent = `${r.adults} Adults${r.kids > 0 ? ', ' + r.kids + ' Kids' : ''}`;
-
-            // Render guest list
+            document.getElementById('guestGreeting').textContent = `Welcome, ${r.guest_name}!`;
             renderGuestList();
-
             showScreen('overviewScreen');
         }
 
@@ -1120,7 +704,7 @@
             guestList.innerHTML = '';
 
             const r = AppState.reservation;
-            const totalAdults = r.adults;
+            const totalAdults = r.adults || 1;
             const docs = AppState.guestDocuments;
 
             // Primary guest
@@ -1139,27 +723,30 @@
             const percent = total > 0 ? (completed / total) * 100 : 0;
 
             document.getElementById('submissionProgress').style.width = `${percent}%`;
-            document.getElementById('submissionProgressText').textContent =
-                `${completed} of ${total} verified`;
+            document.getElementById('progressText').textContent = `${Math.round(percent)}%`;
+            document.getElementById('submissionProgressText').textContent = `${completed} of ${total} verified`;
         }
 
-        function createGuestItem(sequence, isPrimary, document) {
+        function createGuestItem(sequence, isPrimary, guestDoc) {
             const div = document.createElement('div');
             div.className = 'guest-item';
 
             let statusBadge = '';
             let statusText = 'Not Submitted';
 
-            if (document) {
-                if (document.status === 'verified') {
+            if (guestDoc) {
+                if (guestDoc.status === 'verified') {
                     statusBadge = '<span class="status-badge status-verified">✓ Verified</span>';
                     statusText = 'Verified';
-                } else if (document.status === 'pending') {
+                } else if (guestDoc.status === 'pending') {
                     statusBadge = '<span class="status-badge status-pending">⏳ Pending</span>';
                     statusText = 'Pending Review';
-                } else if (document.status === 'rejected') {
+                } else if (guestDoc.status === 'rejected') {
                     statusBadge = '<span class="status-badge status-rejected">✕ Rejected</span>';
                     statusText = 'Needs Resubmission';
+                } else if (guestDoc.status === 'incomplete') {
+                    statusBadge = '<span class="status-badge status-incomplete">⚠ Incomplete</span>';
+                    statusText = 'Incomplete';
                 }
             }
 
@@ -1167,68 +754,49 @@
                 <div class="guest-info">
                     <div class="guest-name">
                         ${isPrimary ? '👤 ' : ''}
-                        ${document ? document.guest_name : (isPrimary ? AppState.reservation.guest_name : `Guest ${sequence}`)}
+                        ${guestDoc ? guestDoc.guest_name : (isPrimary ? AppState.reservation.guest_name : `Guest ${sequence}`)}
                         ${isPrimary ? ' (Primary)' : ''}
                     </div>
                     <div class="guest-meta">${statusText}</div>
                 </div>
-                ${statusBadge}
+                <div class="guest-status">
+                    ${statusBadge}
+                </div>
             `;
 
             div.addEventListener('click', () => {
-                showToast('Document submission form coming soon!', 'info');
-                // TODO: Implement openGuestForm(sequence, isPrimary, document);
+                showToast('Document submission coming soon!', 'info');
             });
 
             return div;
         }
 
-        // ============================================
-        // NAVIGATION
-        // ============================================
-
-        document.getElementById('backToOverviewBtn').addEventListener('click', () => {
-            showOverviewScreen();
-        });
-
+        // LOGOUT
         document.getElementById('logoutBtn').addEventListener('click', () => {
             sessionStorage.removeItem('guestSession');
             AppState.reservation = null;
             AppState.guestDocuments = [];
+            document.getElementById('authForm').reset();
             showScreen('authScreen');
             showToast('Logged out successfully', 'success');
         });
 
-        document.getElementById('addGuestBtn').addEventListener('click', () => {
-            showToast('Add guest form coming soon!', 'info');
-        });
-
-        // ============================================
-        // SESSION RESTORE
-        // ============================================
-
+        // CHECK SESSION ON LOAD
         window.addEventListener('load', () => {
             const session = sessionStorage.getItem('guestSession');
             if (session) {
-                const { bookingId, phone } = JSON.parse(session);
-                document.getElementById('bookingId').value = bookingId;
-                document.getElementById('guestPhone').value = phone;
-                // Auto-submit
-                document.getElementById('authForm').dispatchEvent(new Event('submit'));
+                try {
+                    const data = JSON.parse(session);
+                    if (Date.now() - data.timestamp < 24 * 60 * 60 * 1000) {
+                        document.getElementById('bookingId').value = data.bookingId;
+                        document.getElementById('guestPhone').value = data.phone;
+                        document.getElementById('authForm').dispatchEvent(new Event('submit'));
+                    }
+                } catch (e) {
+                    console.error('Session restoration failed:', e);
+                }
             }
         });
-
-        // ============================================
-        // PWA SERVICE WORKER
-        // ============================================
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/guest-sw.js')
-                .then(reg => console.log('✅ Service Worker registered'))
-                .catch(err => console.error('❌ SW registration failed:', err));
-        }
-
-        console.log('🏠 Hostizzy Guest Portal - Ready');
     </script>
 </body>
 </html>
