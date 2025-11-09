@@ -5150,11 +5150,19 @@
                     </div>
                 </div>
 
+
                 <!-- Already Verified Message -->
                 <div id="verifiedMessage" style="display: none; text-align: center; padding: 20px; background: #f0fdf4; border: 1px solid #86efac; border-radius: 8px;">
                     <div style="font-size: 48px; margin-bottom: 12px;">✅</div>
                     <div style="font-weight: 600; color: #16a34a; margin-bottom: 4px;">Document Verified</div>
                     <div style="color: #15803d; font-size: 14px;">Verified by <span id="verifiedBy">-</span> on <span id="verifiedAt">-</span></div>
+                    
+                    <!-- Flip Switch to Reject -->
+                    <div style="margin-top: 16px; padding-top: 16px; border-top: 1px solid #86efac;">
+                        <button class="btn btn-danger" style="width: 100%; background: #dc2626;" onclick="reverseApprovalToReject()">
+                            🔄 Revert to Reject (Undo Approval)
+                        </button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -13570,6 +13578,45 @@
                 hideLoading();
                 console.error('Error rejecting document:', error);
                 showToast('Failed to reject document', 'error');
+            }
+        }
+        
+        // ============================================
+        // REVERSE APPROVAL TO REJECT
+        // ============================================
+        async function reverseApprovalToReject() {
+            if (!currentDocumentForReview) return;
+            
+            // Confirm the action
+            if (!confirm('Are you sure you want to revert this approval? The document will be marked as rejected.')) {
+                return;
+            }
+        
+            try {
+                showLoading('Reverting approval...');
+        
+                const { error } = await supabase
+                    .from('guest_documents')
+                    .update({
+                        status: 'rejected',
+                        verified_by: null,
+                        verified_at: null,
+                        rejection_reason: 'Reverted from approved (manual correction)',
+                        staff_notes: 'Auto-reverted by admin'
+                    })
+                    .eq('id', currentDocumentForReview.id);
+        
+                if (error) throw error;
+        
+                hideLoading();
+                showToast('Approval reverted - Document marked as rejected', 'success');
+                closeGuestDocumentModal();
+                await loadGuestDocuments();
+        
+            } catch (error) {
+                hideLoading();
+                console.error('Error reverting approval:', error);
+                showToast('Failed to revert approval', 'error');
             }
         }
         
