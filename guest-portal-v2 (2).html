@@ -1,0 +1,552 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="theme-color" content="#1a73e8">
+  <meta name="description" content="Hostizzy Guest Portal v2 — secure KYC, payments & meals">
+  <title>Hostizzy Guest Portal v2</title>
+
+  <link rel="manifest" href="guest-manifest.v2.json">
+  <link rel="icon" type="image/png" href="assets/logo-192.png">
+  <link rel="apple-touch-icon" href="assets/logo-192.png">
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+  <style>
+    :root{
+      --primary:#1a73e8;--primary-dark:#1557b0;--primary-50:#e8f0fe;
+      --success:#34a853;--warning:#fbbc04;--danger:#ea4335;
+      --ink:#202124;--muted:#5f6368;--border:#dadce0;
+      --bg:#fff;--bg-2:#f8f9fa;--radius:14px;
+      --shadow:0 1px 3px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.24);
+      --shadow-lg:0 8px 24px rgba(0,0,0,.18);
+    }
+    *{box-sizing:border-box;margin:0;padding:0}
+    body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu;background:var(--bg-2);color:var(--ink)}
+    .app{max-width:640px;margin:0 auto;min-height:100vh;background:var(--bg);box-shadow:var(--shadow)}
+    header{position:sticky;top:0;z-index:10;background:var(--primary);color:#fff;padding:18px 20px;box-shadow:var(--shadow)}
+    header h1{font-size:20px;font-weight:700;display:flex;gap:8px;align-items:center;justify-content:center}
+    header .sub{opacity:.95;font-size:13px;text-align:center;margin-top:4px}
+    main{padding:18px}
+    .screen{display:none;animation:fade .25s ease}
+    .screen.active{display:block}
+    @keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+    .card{background:#fff;border-radius:14px;padding:18px;margin-bottom:16px;box-shadow:var(--shadow)}
+    .card .h{display:flex;gap:10px;align-items:center;border-bottom:1px solid var(--bg-2);padding-bottom:10px;margin-bottom:12px}
+    .card .h h2{font-size:16px;font-weight:700}
+    .muted{color:var(--muted);font-size:14px}
+    label{display:block;font-size:14px;font-weight:600;margin-bottom:6px}
+    input, select{width:100%;border:2px solid var(--border);border-radius:10px;padding:12px 14px;font-size:16px;background:#fff}
+    input:focus, select:focus{outline:none;border-color:var(--primary);box-shadow:0 0 0 3px var(--primary-50)}
+    .row{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .btn{display:inline-flex;gap:8px;align-items:center;justify-content:center;border:none;border-radius:10px;padding:13px 18px;font-weight:700;font-size:16px;cursor:pointer}
+    .btn.primary{background:var(--primary);color:#fff}
+    .btn.secondary{background:var(--bg-2);color:var(--ink)}
+    .btn.success{background:var(--success);color:#fff}
+    .btn.block{width:100%}
+    .badge{display:inline-block;padding:4px 10px;border-radius:999px;font-size:12px;font-weight:800;text-transform:uppercase}
+    .b-pending{background:var(--warning);color:#000}
+    .b-verified{background:var(--success);color:#fff}
+    .b-rejected{background:var(--danger);color:#fff}
+    .b-incomplete{background:var(--muted);color:#fff}
+    .list{display:flex;flex-direction:column;gap:12px}
+    .item{background:var(--bg-2);border-radius:12px;padding:14px;display:flex;align-items:center;justify-content:space-between;border:2px solid transparent}
+    .item:hover{border-color:var(--border);background:#fff}
+    .progress{height:8px;background:var(--bg-2);border-radius:6px;overflow:hidden;margin:10px 0}
+    .fill{height:100%;background:var(--primary);width:0;transition:width .3s ease}
+    .center{text-align:center}
+    .help{background:var(--primary-50);color:var(--primary-dark);border-left:4px solid var(--primary);padding:12px;border-radius:10px;margin:10px 0}
+    .warn{background:#fef7e0;color:#7f5f01;border-left:4px solid var(--warning);padding:12px;border-radius:10px;margin:10px 0}
+    .success{background:#e6f4ea;color:#137333;border-left:4px solid var(--success);padding:12px;border-radius:10px;margin:10px 0}
+    .top-progress{font-size:13px;color:var(--muted);margin-bottom:10px}
+    .banner{padding:12px;border-radius:12px;margin-bottom:12px}
+    .banner.warn{background:#fff4cc;border:1px solid #ffe58f}
+    .banner.danger{background:#ffe0e0;border:1px solid #ffb3b3}
+    footer{padding:24px;text-align:center;color:var(--muted);font-size:14px;border-top:1px solid var(--border);margin-top:24px}
+    @media(max-width:480px){main{padding:14px}.row{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <h1>🏠 Hostizzy Guest Portal v2</h1>
+    <div class="sub">Secure KYC • Payments • Property • Meals</div>
+  </header>
+
+  <main>
+    <!-- SCREEN 1: VERIFY -->
+    <section id="scrVerify" class="screen active">
+      <div class="card">
+        <div class="h"><span>🔐</span><h2>Verify your booking</h2></div>
+        <p class="muted">Use your booking code and your phone number. The link is universal — no details in the URL.</p>
+        <form id="formVerify">
+          <label for="bookingId">Booking Code</label>
+          <input id="bookingId" placeholder="e.g., HZ-AB12CD" required autocomplete="off">
+          <label for="phone" style="margin-top:10px">Phone Number</label>
+          <input id="phone" type="tel" inputmode="numeric" pattern="[0-9]{10}" placeholder="10-digit mobile" required autocomplete="tel">
+          <button class="btn primary block" type="submit">Continue →</button>
+        </form>
+      </div>
+      <div class="help">Having trouble? Ping your Hostizzy coordinator with your booking code.</div>
+    </section>
+
+    <!-- SCREEN 2: NAMES (Primary) -->
+    <section id="scrNames" class="screen">
+      <div class="card">
+        <div class="h"><span>📝</span><h2>Enter all guest names</h2></div>
+        <p class="muted">Add names for every adult guest. You can edit later.</p>
+        <div id="namesContainer" class="list"></div>
+        <button id="btnSaveNames" class="btn primary block">Save & Continue</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 3: DASHBOARD -->
+    <section id="scrDash" class="screen">
+      <div id="banners"></div>
+      <div class="card">
+        <div class="h"><span>🏡</span><h2 id="propTitle">Reservation</h2></div>
+        <div class="row">
+          <div><label>Check-in</label><div id="ci" class="muted">—</div></div>
+          <div><label>Check-out</label><div id="co" class="muted">—</div></div>
+          <div><label>Nights</label><div id="nights" class="muted">—</div></div>
+          <div><label>Guests</label><div id="guests" class="muted">—</div></div>
+        </div>
+      </div>
+
+      <!-- injected: Property card (primary only) -->
+      <div id="injectProperty"></div>
+
+      <div class="card">
+        <div class="h"><span>📄</span><h2>KYC Status</h2></div>
+        <div class="top-progress" id="topStepText">Guest 1/1 — Step 1/4</div>
+        <div class="progress"><div id="bar" class="fill"></div></div>
+        <div id="listGuests" class="list"></div>
+        <button id="btnLogout" class="btn secondary block" style="margin-top:10px">Logout</button>
+      </div>
+
+      <!-- injected: Payments card (primary only) -->
+      <div id="injectPayments"></div>
+
+      <div class="card hidden" id="mealsCard">
+        <div class="h"><span>🍽️</span><h2>Meals — Phase 2</h2></div>
+        <div class="success">All guests are verified. You can now select meals for your group.</div>
+        <button id="btnMeals" class="btn success block">Proceed to Meal Selection</button>
+      </div>
+    </section>
+
+    <!-- SCREEN 4: FORM -->
+    <section id="scrForm" class="screen">
+      <div class="card">
+        <div class="h"><span>👤</span><h2 id="formTitle">Guest Information</h2></div>
+        <div id="stepText" class="top-progress">Guest 1/1 — Step 2/4</div>
+        <form id="formGuest">
+          <label for="gName">Full name (as per ID)</label>
+          <input id="gName" required placeholder="Enter full name">
+
+          <div class="row" style="margin-top:10px">
+            <div><label for="gAge">Age</label><input id="gAge" type="number" min="1" max="120" required placeholder="18"></div>
+            <div><label for="gEmail">Email</label><input id="gEmail" type="email" required placeholder="name@email.com"></div>
+          </div>
+
+          <label for="gPhone" style="margin-top:10px">Phone</label>
+          <input id="gPhone" type="tel" inputmode="numeric" pattern="[0-9]{10}" required placeholder="10-digit mobile">
+
+          <div id="idBlock">
+            <label style="margin-top:10px">ID Type</label>
+            <select id="idType" required>
+              <option value="" disabled selected>Select one</option>
+              <option value="aadhar">Aadhar Card</option>
+              <option value="passport">Passport</option>
+              <option value="driving_license">Driver's License</option>
+              <option value="voter_id">Voter ID</option>
+            </select>
+
+            <label for="idNumber" style="margin-top:10px">ID Number</label>
+            <input id="idNumber" placeholder="Enter ID number">
+
+            <div style="margin-top:10px">
+              <label>Document — Front</label>
+              <input id="fileFront" type="file" accept="image/*" capture="environment" required>
+            </div>
+            <div id="backWrap" style="margin-top:10px">
+              <label>Document — Back</label>
+              <input id="fileBack" type="file" accept="image/*" capture="environment">
+            </div>
+            <div id="selfieWrap" style="margin-top:10px">
+              <label>Live Selfie (primary guest only)</label>
+              <input id="fileSelfie" type="file" accept="image/*" capture="user">
+            </div>
+          </div>
+
+          <div class="row" style="margin-top:12px">
+            <button id="btnCancelForm" type="button" class="btn secondary">Cancel</button>
+            <button class="btn primary" type="submit">Save & Submit</button>
+          </div>
+        </form>
+      </div>
+    </section>
+
+    <!-- SCREEN 7: SUCCESS -->
+    <section id="scrDone" class="screen">
+      <div class="card center">
+        <div style="font-size:64px;margin-bottom:12px">✅</div>
+        <h2>Submission successful</h2>
+        <p class="muted" style="margin-top:6px">We’ll review and update the status shortly.</p>
+        <div class="success" style="margin-top:12px">You’ll also get an email when verification is completed.</div>
+        <div style="display:flex; gap:10px; margin-top:14px; flex-wrap:wrap; justify-content:center">
+          <a id="waShare" class="btn secondary">Share on WhatsApp</a>
+          <button id="btnBackDash" class="btn primary">Back to Dashboard</button>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>© 2025 Hostizzy. All rights reserved.</footer>
+</div>
+
+<!-- overlay -->
+<div id="overlay" style="position:fixed;inset:0;background:rgba(0,0,0,.6);display:none;align-items:center;justify-content:center;z-index:9999;">
+  <div style="text-align:center;color:#fff">
+    <div style="width:54px;height:54px;border-radius:50%;border:4px solid rgba(255,255,255,.35);border-top-color:#fff;animation:spin 1s linear infinite;margin:0 auto"></div>
+    <div id="ovText" style="margin-top:10px;font-weight:600">Loading...</div>
+  </div>
+</div>
+<style>@keyframes spin{to{transform:rotate(360deg)}}</style>
+
+<script>
+/* ---------- CONFIG ---------- */
+const SUPABASE_URL = 'https://dxthxsguqrxpurorpokq.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImR4dGh4c2d1cXJ4cHVyb3Jwb2txIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjAwMjc4MTMsImV4cCI6MjA3NTYwMzgxM30.JhGzqUolA-A_fGha-0DhHVl7p1vRq4CZcp5ttdVxjQg';
+const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+/* ---------- STATE ---------- */
+const S = { reservation:null, isPrimary:false, session:null, docs:[], pollTimer:null, currentSeq:null, totalAdults:0 };
+
+/* ---------- HELPERS ---------- */
+const q = (sel)=>document.querySelector(sel);
+const show = id => { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); q('#'+id).classList.add('active'); };
+const loadOn = (msg='Loading...') => { q('#ovText').textContent = msg; q('#overlay').style.display='flex'; };
+const loadOff = ()=>{ q('#overlay').style.display='none'; };
+const fmtDate = d => new Date(d).toLocaleDateString('en-IN',{day:'numeric',month:'short',year:'numeric'});
+const randToken = () => crypto.getRandomValues(new Uint8Array(16)).reduce((a,b)=>a+('0'+b.toString(16)).slice(-2),'');
+
+/* ---------- SESSION (24h) ---------- */
+const SESSION_KEY = 'hz_guest_session_v2';
+function saveSessionLocally(obj){ const payload = {...obj, expiresAt: Date.now()+86400000}; localStorage.setItem(SESSION_KEY, JSON.stringify(payload)); }
+function readSessionLocally(){ const raw=localStorage.getItem(SESSION_KEY); if(!raw) return null; const data=JSON.parse(raw); if(Date.now()>data.expiresAt){ localStorage.removeItem(SESSION_KEY); return null; } return data; }
+
+/* ---------- VERIFY ---------- */
+q('#formVerify').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const booking_id = q('#bookingId').value.trim().toUpperCase();
+  const phone = q('#phone').value.trim();
+
+  loadOn('Verifying booking...');
+  try{
+    const { data: rsv, error } = await client.from('reservations').select('*').eq('booking_id', booking_id).single();
+    if(error || !rsv){ loadOff(); alert('Booking not found.'); return; }
+    if(rsv.status === 'cancelled'){ loadOff(); alert('This reservation is cancelled.'); return; }
+
+    S.reservation = rsv;
+    S.totalAdults = rsv.adults || 1;
+    S.isPrimary = phone.replace(/\D/g,'').slice(-10) === (rsv.guest_phone||'').replace(/\D/g,'').slice(-10);
+
+    // create session row
+    const token = randToken();
+    await client.from('guest_portal_sessions').insert({
+      booking_id, guest_sequence:null, phone_verified:true, verified_at:new Date().toISOString(), session_token:token, guest_names_entered:false
+    });
+    S.session = { booking_id, token, phone }; saveSessionLocally(S.session);
+
+    await ensureNameRowsOrCollect();
+    subscribeRealtime();
+  }catch(err){ console.error(err); alert('Error during verification.'); }
+  finally{ loadOff(); }
+});
+
+/* ---------- Ensure guest name rows ---------- */
+async function ensureNameRowsOrCollect(){
+  await loadDocs();
+  const haveRows = S.docs.length>0;
+  const namesMissing = S.docs.length < S.totalAdults || S.docs.some(d=>!d.guest_name);
+  if(S.isPrimary && (!haveRows || namesMissing)){ renderNamesInputs(); show('scrNames'); }
+  else { await showDashboard(); }
+}
+function renderNamesInputs(){
+  const box=q('#namesContainer'); box.innerHTML='';
+  const count = Math.max(S.totalAdults, S.docs.length||0);
+  for(let i=1;i<=count;i++){
+    const existing = S.docs.find(d=>d.guest_sequence===i);
+    const val = existing?.guest_name || (i===1 ? S.reservation.guest_name : `Guest ${i}`);
+    const row=document.createElement('div'); row.className='item';
+    row.innerHTML = `<div style="flex:1"><div class="muted">Guest ${i}${i===1?' (Primary)':''}</div><input data-seq="${i}" class="nameInput" style="margin-top:6px" value="${val}"></div>`;
+    box.appendChild(row);
+  }
+}
+q('#btnSaveNames').addEventListener('click', async ()=>{
+  loadOn('Saving names...');
+  try{
+    const inputs=[...document.querySelectorAll('.nameInput')];
+    for(const inp of inputs){
+      const seq=parseInt(inp.getAttribute('data-seq')); const name=inp.value.trim(); if(!name) continue;
+      const { data: existing } = await client.from('guest_documents').select('id').eq('booking_id', S.reservation.booking_id).eq('guest_sequence', seq).maybeSingle();
+      const payload={ booking_id:S.reservation.booking_id, guest_type: seq===1?'primary':'additional', guest_sequence:seq, guest_name:name, status:'incomplete' };
+      if(existing){ await client.from('guest_documents').update(payload).eq('id', existing.id); } else { await client.from('guest_documents').insert(payload); }
+    }
+    await client.from('guest_portal_sessions').update({ guest_names_entered:true }).eq('session_token', S.session.token);
+    await loadDocs(); await showDashboard();
+  }catch(e){ console.error(e); alert('Could not save names.'); } finally{ loadOff(); }
+});
+
+/* ---------- LOAD DOCS & POLL ---------- */
+async function loadDocs(){
+  const { data, error } = await client.from('guest_documents').select('*').eq('booking_id', S.reservation.booking_id).order('guest_sequence', {ascending:true});
+  if(!error && data){ S.docs=data; }
+}
+function startPolling(){ stopPolling(); S.pollTimer=setInterval(async ()=>{ if(!q('#scrDash').classList.contains('active')) return; await loadDocs(); renderDashGuests(); updateDashProgress(); maybeShowMeals(); renderBanners(); }, 3000); }
+function stopPolling(){ if(S.pollTimer){ clearInterval(S.pollTimer); S.pollTimer=null; }}
+
+/* ---------- DASHBOARD ---------- */
+async function showDashboard(){
+  const r=S.reservation;
+  q('#propTitle').textContent = r.property_name || 'Reservation';
+  q('#ci').textContent = fmtDate(r.check_in); q('#co').textContent = fmtDate(r.check_out);
+  q('#nights').textContent = (r.nights||1)+' night'+((r.nights||1)>1?'s':''); q('#guests').textContent = `${r.adults||1} adults${r.kids?`, ${r.kids} kids`:''}`;
+
+  renderDashGuests(); updateDashProgress(); maybeShowMeals(); renderBanners();
+  await enhancePrimaryDashboard(); // inject property + payments
+  show('scrDash'); startPolling();
+}
+
+function renderDashGuests(){
+  const list=q('#listGuests'); list.innerHTML='';
+  const total=S.totalAdults || Math.max(1, S.docs.length);
+  for(let i=1;i<=total;i++){
+    const doc=S.docs.find(d=>d.guest_sequence===i);
+    const name=doc?.guest_name || (i===1?(S.reservation.guest_name||'Primary Guest'):`Guest ${i}`);
+    const status=doc?.status || 'incomplete';
+    const badge = status==='verified' ? '<span class="badge b-verified">Verified</span>' :
+                  status==='pending' ? '<span class="badge b-pending">Pending</span>' :
+                  status==='rejected'? '<span class="badge b-rejected">Rejected</span>' :
+                  '<span class="badge b-incomplete">Incomplete</span>';
+    const item=document.createElement('div'); item.className='item';
+    item.innerHTML = `<div><div style="font-weight:700">${name}${i===1?' (Primary)':''}</div><div class="muted">Guest ${i}</div></div><div>${badge}</div>`;
+    item.addEventListener('click', ()=> openGuestForm(i));
+    list.appendChild(item);
+  }
+}
+function updateDashProgress(){
+  const total = Math.max(S.totalAdults, S.docs.length||0) || 1;
+  const verified = (S.docs||[]).filter(d=>d.status==='verified').length;
+  q('#bar').style.width = `${(verified/total)*100}%`;
+  q('#topStepText').textContent = `Guest ${Math.min((S.currentSeq||1), total)}/${total} — Step 2/4`;
+}
+function maybeShowMeals(){
+  const total = Math.max(S.totalAdults, S.docs.length||0) || 1;
+  const verified = (S.docs||[]).filter(d=>d.status==='verified').length;
+  q('#mealsCard').classList.toggle('hidden', verified < total);
+}
+function renderBanners(){
+  const b=q('#banners'); b.innerHTML='';
+  const due = S.paymentTotals?.due ?? null;
+  const checkIn = new Date(S.reservation.check_in);
+  const hoursLeft = (checkIn - new Date())/36e5;
+  if(due && hoursLeft <= 24){ const div=document.createElement('div'); div.className='banner warn'; div.textContent='Payment pending. Please settle dues to avoid check‑in delays.'; b.appendChild(div); }
+  const pendingKyc = (S.docs||[]).some(d=>d.status!=='verified');
+  if(pendingKyc && hoursLeft <= 36){ const div=document.createElement('div'); div.className='banner danger'; div.textContent='Some guests still haven’t completed KYC.'; b.appendChild(div); }
+}
+
+/* ---------- OPEN FORM ---------- */
+function openGuestForm(seq){
+  stopPolling();
+  S.currentSeq=seq; const isPrimary=seq===1; const doc=S.docs.find(d=>d.guest_sequence===seq);
+  q('#formTitle').textContent = isPrimary ? 'Primary Guest — KYC' : `Guest ${seq} — KYC`;
+  q('#stepText').textContent  = `Guest ${seq}/${Math.max(S.totalAdults,S.docs.length||0)||1} — Step 2/4`;
+  q('#gName').value  = doc?.guest_name || (isPrimary?(S.reservation.guest_name||''):`Guest ${seq}`);
+  q('#gAge').value   = doc?.guest_age || '';
+  q('#gEmail').value = doc?.guest_email || (isPrimary ? (S.reservation.guest_email || '') : '');
+  q('#gPhone').value = doc?.guest_phone || (isPrimary ? (S.reservation.guest_phone || '') : '');
+  q('#idType').value = doc?.document_type || '';
+  q('#idNumber').value = doc?.document_number || '';
+  q('#selfieWrap').style.display = isPrimary ? 'block':'none';
+  const needsBack = ['aadhar','driving_license','voter_id'].includes(q('#idType').value);
+  q('#backWrap').style.display = needsBack ? 'block':'none';
+  show('scrForm');
+}
+q('#idType').addEventListener('change', ()=>{ const v=q('#idType').value; q('#backWrap').style.display=(['aadhar','driving_license','voter_id'].includes(v))?'block':'none'; });
+
+/* ---------- IMAGE COMPRESSION ---------- */
+async function compressImage(file, maxW=2000, quality=0.82){
+  const img = new Image(); img.src = URL.createObjectURL(file);
+  await new Promise(res=> img.onload=res);
+  const scale = img.width>maxW ? maxW/img.width : 1;
+  const w=Math.round(img.width*scale), h=Math.round(img.height*scale);
+  const canvas=document.createElement('canvas'); canvas.width=w; canvas.height=h;
+  const ctx=canvas.getContext('2d', { alpha:false }); ctx.drawImage(img,0,0,w,h);
+  const blob = await new Promise(res => canvas.toBlob(res, 'image/jpeg', quality));
+  return new File([blob], file.name.replace(/\.\w+$/,'.jpg'), { type:'image/jpeg' });
+}
+
+/* ---------- SUBMIT FORM ---------- */
+q('#formGuest').addEventListener('submit', async (e)=>{
+  e.preventDefault();
+  const name=q('#gName').value.trim();
+  const age=parseInt(q('#gAge').value,10);
+  const email=q('#gEmail').value.trim();
+  const phone=q('#gPhone').value.trim();
+  if(!name){ alert('Enter full name'); return; }
+  if(!email){ alert('Enter email'); return; }
+  if(!/^[0-9]{10}$/.test(phone)){ alert('Enter a valid 10-digit phone'); return; }
+  const seq=S.currentSeq; const isPrimary=seq===1; const isMinor=age<18;
+  let idType=null,idNumber=null,front=null,back=null,selfie=null;
+  if(!isMinor){
+    idType=q('#idType').value; idNumber=q('#idNumber').value.trim();
+    if(!idType){ alert('Select an ID type'); return; }
+    if(!q('#fileFront').files[0]){ alert('Upload front side'); return; }
+    const needBack=['aadhar','driving_license','voter_id'].includes(idType);
+    if(needBack && !q('#fileBack').files[0]){ alert('Upload back side'); return; }
+    if(isPrimary && !q('#fileSelfie').files[0]){ alert('Primary guest must add a selfie'); return; }
+    front = await compressImage(q('#fileFront').files[0]);
+    back  = q('#fileBack').files[0] ? await compressImage(q('#fileBack').files[0]) : null;
+    selfie= q('#fileSelfie').files[0] ? await compressImage(q('#fileSelfie').files[0], 1600, .8) : null;
+  }
+
+  loadOn('Uploading...');
+  try{
+    let front_url=null,back_url=null,selfie_url=null;
+    const folder = `${S.reservation.booking_id}/guest_${seq}_${name.replace(/\s+/g,'_').toLowerCase()}`;
+    const ts=Date.now();
+    async function upload(n, file){
+      if(!file) return null;
+      const path = `${folder}/${ts}_${n}.jpg`;
+      const { error } = await client.storage.from('guest-id-documents').upload(path, file, { upsert:true });
+      if(error) throw error; return path;
+    }
+    if(!isMinor){
+      front_url = await upload(`${idType}_front`, front);
+      if(back) back_url = await upload(`${idType}_back`, back);
+      if(selfie) selfie_url = await upload(`selfie`, selfie);
+    }
+
+    const payload={ booking_id:S.reservation.booking_id,
+      guest_type:isPrimary?'primary':'additional', guest_sequence:seq,
+      guest_name:name, guest_age:age, guest_phone:phone, guest_email:email,
+      document_type:idType, document_number:idNumber, document_front_url:front_url, document_back_url:back_url, selfie_url:selfie_url,
+      status: isMinor ? 'verified' : 'pending', user_agent:navigator.userAgent };
+
+    const { data: existing } = await client.from('guest_documents').select('id')
+      .eq('booking_id', S.reservation.booking_id).eq('guest_sequence', seq).maybeSingle();
+    if(existing){ await client.from('guest_documents').update(payload).eq('id', existing.id); }
+    else{ await client.from('guest_documents').insert(payload); }
+
+    await loadDocs();
+    const wa = `https://wa.me/?text=${encodeURIComponent(`KYC submitted for ${name}. Booking ${S.reservation.booking_id}.`)}`;
+    q('#waShare').setAttribute('href', wa);
+    show('scrDone');
+  }catch(err){ console.error(err); alert('Could not submit.'); } finally{ loadOff(); }
+});
+
+/* ---------- BUTTONS ---------- */
+q('#btnCancelForm').addEventListener('click', ()=>{ showDashboard(); startPolling(); });
+q('#btnBackDash').addEventListener('click', ()=>{ showDashboard(); startPolling(); });
+q('#btnLogout').addEventListener('click', ()=>{ stopPolling(); localStorage.removeItem(SESSION_KEY); S.reservation=null; S.docs=[]; S.session=null; S.currentSeq=null; show('scrVerify'); });
+q('#btnMeals').addEventListener('click', async ()=>{
+  const tpl = await loadMenuTemplate();
+  alert('Meals screen will use the loaded template:\n'+Object.keys(tpl).join(', '));
+});
+
+/* ---------- PRIMARY DASH EXTRAS ---------- */
+async function fetchProperty(){
+  const code=S.reservation.property_code;
+  if(!code) return null;
+  const { data, error } = await client.from('properties').select('*').eq('property_code', code).maybeSingle();
+  if(error) return null; return data;
+}
+function mapLink(lat,lng){ if(!lat||!lng) return '#'; return `https://www.google.com/maps?q=${lat},${lng}`; }
+async function renderPropertyCard(){
+  const p=await fetchProperty(); if(!p) return;
+  const wrap=document.createElement('div'); wrap.className='card';
+  wrap.innerHTML = `
+    <div class="h"><span>🏘️</span><h2>Property</h2></div>
+    ${p.photo_url?`<img src="${p.photo_url}" alt="${p.name}" style="width:100%;border-radius:12px;margin-bottom:10px">`:''}
+    <div class="row">
+      <div><label>Property</label><div class="muted">${p.name||'-'}</div></div>
+      <div><label>Map</label><div><a href="${mapLink(p.latitude,p.longitude)}" target="_blank">Open Map</a></div></div>
+    </div>
+    <div class="row" style="margin-top:8px">
+      <div><label>Wi‑Fi</label><div class="muted">${p.wifi_ssid||'-'}</div></div>
+      <div><label>Password</label><div class="muted">${p.wifi_password||'-'}</div></div>
+    </div>
+    <div class="help" style="margin-top:10px">${(p.house_rules||'').split('\\n').slice(0,3).join('<br>')}</div>
+    <div class="row" style="margin-top:10px">
+      ${p.guide_url?`<a class="btn secondary" href="${p.guide_url}" target="_blank">Open Guide</a>`:''}
+      <a class="btn secondary" target="_blank" href="https://wa.me/919560494001?text=${encodeURIComponent('Hi, this is '+(S.reservation.guest_name||'Guest')+' for booking '+S.reservation.booking_id)}">WhatsApp Host</a>
+    </div>`;
+  q('#injectProperty').innerHTML=''; q('#injectProperty').appendChild(wrap);
+}
+async function fetchPaymentSummary(){
+  const { data, error } = await client.from('v_payment_summary').select('*').eq('booking_id', S.reservation.booking_id).maybeSingle();
+  if(error) return null; return data;
+}
+async function fetchPaymentLines(){
+  const { data, error } = await client.from('payments').select('*').eq('booking_id', S.reservation.booking_id).order('created_at',{ascending:true});
+  if(error) return []; return data;
+}
+async function renderPaymentsCard(){
+  const totals=await fetchPaymentSummary(); const lines=await fetchPaymentLines();
+  S.paymentTotals = { paid: totals?.total_paid||0, due: Math.max((totals?.total_due||0)-(totals?.total_paid||0),0), status: totals?.settlement_status||'pending' };
+  const wrap=document.createElement('div'); wrap.className='card';
+  const badge = S.paymentTotals.status==='settled' ? '<span class="badge b-verified">Settled</span>' :
+                S.paymentTotals.status==='partial' ? '<span class="badge b-pending">Part‑paid</span>' :
+                '<span class="badge b-rejected">Pending</span>';
+  wrap.innerHTML = `
+    <div class="h"><span>💳</span><h2>Payments</h2></div>
+    <div class="row">
+      <div><label>Paid</label><div style="font-weight:700">₹${(S.paymentTotals.paid).toLocaleString('en-IN')}</div></div>
+      <div><label>Pending</label><div style="font-weight:700">₹${(S.paymentTotals.due).toLocaleString('en-IN')}</div></div>
+      <div style="align-self:end">${badge}</div>
+    </div>
+    <div id="payLines" class="list" style="margin-top:8px"></div>`;
+  const list=wrap.querySelector('#payLines');
+  lines.forEach(li=>{
+    const due=(li.amount_due||0)-(li.amount_paid||0);
+    const invoice = li.invoice_url?`<a href="${li.invoice_url}" target="_blank">Invoice</a>`:'';
+    const paylink = (due>0 && li.payment_link)?`<a href="${li.payment_link}" target="_blank">Pay</a>`:'';
+    const row=document.createElement('div'); row.className='item';
+    row.innerHTML=`<div><div style="font-weight:700">${li.component.replace('_',' ')}</div>
+      <div class="muted">₹${(li.amount_paid||0).toLocaleString('en-IN')} paid / ₹${(li.amount_due||0).toLocaleString('en-IN')} due</div></div>
+      <div style="display:flex;gap:12px;align-items:center">${invoice}${paylink}</div>`;
+    list.appendChild(row);
+  });
+  q('#injectPayments').innerHTML=''; q('#injectPayments').appendChild(wrap);
+}
+async function enhancePrimaryDashboard(){ if(!S.isPrimary) return; await renderPropertyCard(); await renderPaymentsCard(); }
+
+/* ---------- REALTIME ---------- */
+function subscribeRealtime(){
+  const ch = client.channel('guest-live-'+(S.session?.booking_id||''));
+  ch.on('postgres_changes', { event:'*', schema:'public', table:'guest_documents', filter:`booking_id=eq.${S.session.booking_id}` }, async ()=>{ await loadDocs(); renderDashGuests(); updateDashProgress(); maybeShowMeals(); renderBanners(); });
+  ch.on('postgres_changes', { event:'*', schema:'public', table:'payments', filter:`booking_id=eq.${S.session.booking_id}` }, async ()=>{ await renderPaymentsCard(); renderBanners(); });
+  ch.subscribe();
+}
+
+/* ---------- MEALS LOADER ---------- */
+async function loadMenuTemplate(){
+  // fetch from your DB if available; fallback to local json file bundled with PWA
+  try{
+    const res = await fetch('menu-template-standard.json', { cache:'reload' });
+    if(res.ok){ return await res.json(); }
+  }catch(e){}
+  return { breakfast:{}, lunch:{}, barbeque:{}, dinner:{} };
+}
+
+/* ---------- RESTORE ---------- */
+window.addEventListener('load', async ()=>{
+  const ses=readSessionLocally(); if(!ses) return;
+  q('#bookingId').value=ses.booking_id; q('#phone').value=ses.phone;
+  q('#formVerify').dispatchEvent(new Event('submit'));
+});
+</script>
+</body>
+</html>

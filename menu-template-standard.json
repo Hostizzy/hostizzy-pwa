@@ -1,0 +1,112 @@
+{
+  "breakfast": {
+    "title": "Breakfast",
+    "rule": "Choose any 1 Veg & 1 Non-Veg OR 2 Veg",
+    "veg": [
+      "Assorted Paratha",
+      "Poori Bhaji",
+      "Poha",
+      "Vegetable/Paneer Cheelas",
+      "Chole Bhature"
+    ],
+    "nonVeg": [
+      "Eggs to Order"
+    ],
+    "accompaniments": [
+      "Toasts & Preserves",
+      "Tea/Coffee"
+    ]
+  },
+  "lunch": {
+    "title": "Lunch",
+    "rule": "Choose any 1 from each section",
+    "vegMain": [
+      "Gobhi Masala",
+      "Bhindi do Pyaza",
+      "Aloo Capsicum",
+      "Jeera Aloo",
+      "Matar Paneer",
+      "Kadhai Paneer"
+    ],
+    "dal": [
+      "Rajma",
+      "Chole",
+      "Dal Tadka",
+      "Sambhar"
+    ],
+    "nonVeg": [
+      "Chicken Curry",
+      "Chicken Kadhai",
+      "Butter Chicken",
+      "Egg Curry"
+    ],
+    "accompaniments": [
+      "Rice",
+      "Roti",
+      "Raita",
+      "Salad"
+    ]
+  },
+  "barbeque": {
+    "title": "Barbeque Starters/Snacks",
+    "rule": "Choose any 2 Veg + any 2 Non-Veg",
+    "veg": [
+      "Paneer Tikka",
+      "Haryali Paneer Tikka",
+      "Chilli Paneer Dry",
+      "Tandoori Aloo",
+      "Honey Chilli Potato",
+      "Tandoori Gobhi",
+      "Vegetable Pakoda",
+      "Maggi"
+    ],
+    "nonVeg": [
+      "Chicken Tikka",
+      "Chicken Malai Tikka",
+      "Haryali Chicken Tikka",
+      "Chilli Chicken",
+      "Chicken Seekh Kabab"
+    ]
+  },
+  "dinner": {
+    "title": "Dinner",
+    "rule": "Choose any 1 from each section",
+    "dal": [
+      "Dal Makhani",
+      "Dal Tadka",
+      "Dal Achari"
+    ],
+    "paneer": [
+      "Kadhai Paneer",
+      "Butter Paneer",
+      "Matar Paneer",
+      "Chilli Paneer Gravy",
+      "Paneer Bhurji"
+    ],
+    "vegMain": [
+      "Gobhi Masala",
+      "Bhindi Masala",
+      "Jeera Aloo",
+      "Baingan Bharta",
+      "Aloo Beans",
+      "Aloo Shimla Mirch",
+      "Dum Aloo",
+      "Mixed Veg"
+    ],
+    "nonVeg": [
+      "Butter Chicken",
+      "Chicken Curry",
+      "Masala Chicken",
+      "Egg Curry",
+      "Kadhai Chicken"
+    ],
+    "accompaniments": [
+      "Rice",
+      "Roti",
+      "Salad",
+      "Raita",
+      "Papad",
+      "Achar"
+    ]
+  }
+}
