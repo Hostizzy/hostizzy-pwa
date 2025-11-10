@@ -466,16 +466,21 @@ async function loadMealPrefs(){
   const { data, error } = await client
     .from('guest_meal_preferences')
     .select('*')
-    .eq('booking_id', S.reservation.booking_id);
+    .eq('booking_id', S.reservation.booking_id)
+    .maybeSingle();
+  
   if(!error && data){
-    S.mealPrefs = {};
-    data.forEach(pref => {
-      const key = `${pref.guest_sequence}_${pref.meal_type}`;
-      S.mealPrefs[key] = {
-        ...pref,
-        status: pref.status || 'pending'
-      };
-    });
+    // New format: combined meals as JSON
+    S.mealPrefs = {
+      combined: data,
+      status: data.status || 'pending',
+      meals: data.meals || {}, // {breakfast: [...], lunch: [...], ...}
+      dietary_preferences: data.dietary_preferences,
+      special_requests: data.special_requests,
+      approved_by: data.approved_by,
+      approved_at: data.approved_at,
+      rejected_reason: data.rejected_reason
+    };
   }
 }
 
@@ -582,7 +587,7 @@ async function displayMealsOnDashboard(){
   const content = q('#mealsDisplayContent');
   const status = q('#mealsStatus');
   
-  if(!S.mealPrefs || Object.keys(S.mealPrefs).length === 0){
+  if(!S.mealPrefs || !S.mealPrefs.meals || Object.keys(S.mealPrefs.meals).length === 0){
     card.classList.add('hidden');
     return;
   }
@@ -592,62 +597,94 @@ async function displayMealsOnDashboard(){
   
   const mealTypes = ['breakfast', 'lunch', 'barbeque', 'dinner'];
   let displayedCount = 0;
-  let mealStatus = 'saved';
+  const mealStatus = S.mealPrefs.status || 'saved';
   
+  // Display each meal type
   mealTypes.forEach(mealType => {
-    const key = `1_${mealType}`;
-    const pref = S.mealPrefs[key];
+    const meals = S.mealPrefs.meals[mealType]; // Array of meal items
     
-    if(pref && pref.selections){
+    if(meals && meals.length > 0){
       displayedCount++;
-      mealStatus = pref.status || 'saved';
       
       const section = document.createElement('div');
       section.style.marginBottom = '12px';
       section.style.padding = '12px';
       section.style.backgroundColor = 'var(--bg-2)';
       section.style.borderRadius = '8px';
+      section.style.borderLeft = '4px solid var(--primary)';
       
       const title = document.createElement('div');
-      title.style.fontWeight = '600';
+      title.style.fontWeight = '700';
       title.style.marginBottom = '6px';
+      title.style.fontSize = '15px';
       title.textContent = `${getMealEmoji(mealType)} ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`;
       section.appendChild(title);
       
       const selections = document.createElement('div');
       selections.style.fontSize = '14px';
       selections.style.color = 'var(--text-secondary)';
-      selections.innerHTML = pref.selections.map(s => `• ${s}`).join('<br>');
+      selections.style.lineHeight = '1.6';
+      selections.innerHTML = meals.map(s => `<span style="display: inline-block; margin-right: 6px; margin-bottom: 4px;">• ${s}</span>`).join('');
       section.appendChild(selections);
-      
-      if(pref.dietary_preferences){
-        const dietary = document.createElement('div');
-        dietary.style.fontSize = '13px';
-        dietary.style.marginTop = '6px';
-        dietary.style.color = 'var(--muted)';
-        dietary.textContent = `🥗 Dietary: ${pref.dietary_preferences}`;
-        section.appendChild(dietary);
-      }
-      
-      if(pref.special_requests){
-        const special = document.createElement('div');
-        special.style.fontSize = '13px';
-        special.style.marginTop = '4px';
-        special.style.color = 'var(--muted)';
-        special.textContent = `📝 Special: ${pref.special_requests}`;
-        section.appendChild(special);
-      }
       
       content.appendChild(section);
     }
   });
+  
+  // Display dietary preferences if present
+  if(S.mealPrefs.dietary_preferences){
+    const dietarySection = document.createElement('div');
+    dietarySection.style.marginTop = '12px';
+    dietarySection.style.padding = '12px';
+    dietarySection.style.backgroundColor = 'var(--primary-50)';
+    dietarySection.style.borderRadius = '8px';
+    dietarySection.style.borderLeft = '4px solid var(--primary)';
+    
+    const dietaryTitle = document.createElement('div');
+    dietaryTitle.style.fontWeight = '600';
+    dietaryTitle.style.marginBottom = '4px';
+    dietaryTitle.textContent = '🥗 Dietary Preferences';
+    dietarySection.appendChild(dietaryTitle);
+    
+    const dietaryText = document.createElement('div');
+    dietaryText.style.fontSize = '14px';
+    dietaryText.style.color = 'var(--text-primary)';
+    dietaryText.textContent = S.mealPrefs.dietary_preferences;
+    dietarySection.appendChild(dietaryText);
+    
+    content.appendChild(dietarySection);
+  }
+  
+  // Display special requests if present
+  if(S.mealPrefs.special_requests){
+    const specialSection = document.createElement('div');
+    specialSection.style.marginTop = '8px';
+    specialSection.style.padding = '12px';
+    specialSection.style.backgroundColor = '#fef7e0';
+    specialSection.style.borderRadius = '8px';
+    specialSection.style.borderLeft = '4px solid var(--warning)';
+    
+    const specialTitle = document.createElement('div');
+    specialTitle.style.fontWeight = '600';
+    specialTitle.style.marginBottom = '4px';
+    specialTitle.textContent = '⭐ Special Requests';
+    specialSection.appendChild(specialTitle);
+    
+    const specialText = document.createElement('div');
+    specialText.style.fontSize = '14px';
+    specialText.style.color = '#7f5f01';
+    specialText.textContent = S.mealPrefs.special_requests;
+    specialSection.appendChild(specialText);
+    
+    content.appendChild(specialSection);
+  }
   
   if(displayedCount === 0){
     card.classList.add('hidden');
   } else {
     const statusText = mealStatus === 'pending' ? '⏳ Pending Approval' : 
                        mealStatus === 'approved' ? '✅ Approved' : 
-                       mealStatus === 'rejected' ? '❌ Rejected' : '💾 Saved';
+                       mealStatus === 'rejected' ? '❌ Rejected - Action Needed' : '💾 Saved';
     const statusBadge = mealStatus === 'pending' ? '⏳' : mealStatus === 'approved' ? '✅' : mealStatus === 'rejected' ? '❌' : '💾';
     status.textContent = `${statusBadge} Status: ${statusText}`;
     
@@ -1008,41 +1045,48 @@ q('#btnSaveMeals').addEventListener('click', async ()=>{
   try{
     const mealTypes = ['breakfast', 'lunch', 'barbeque', 'dinner'];
     
+    // Build combined meals object
+    const mealsObject = {};
     for(const mealType of mealTypes){
       const selectedItems = selections[mealType] || [];
-      
       if(selectedItems.length > 0){
-        const payload = {
-          booking_id: S.reservation.booking_id,
-          guest_sequence: 1, // Primary guest only
-          meal_type: mealType,
-          selections: selectedItems,
-          dietary_preferences: dietaryPref || null,
-          special_requests: specialReq || null,
-          submitted_at: new Date().toISOString()
-        };
-        
-        // Upsert to guest_meal_preferences
-        const { data: existing } = await client
-          .from('guest_meal_preferences')
-          .select('id')
-          .eq('booking_id', S.reservation.booking_id)
-          .eq('guest_sequence', 1)
-          .eq('meal_type', mealType)
-          .maybeSingle();
-        
-        if(existing){
-          // Reset to pending when guest modifies
-          payload.status = 'pending';
-          payload.approved_by = null;
-          payload.approved_at = null;
-          payload.rejected_reason = null;
-          await client.from('guest_meal_preferences').update(payload).eq('id', existing.id);
-        }else{
-          await client.from('guest_meal_preferences').insert(payload);
-        }
+        mealsObject[mealType] = selectedItems;
       }
-    } 
+    }
+    
+    // Only save if at least one meal type has selections
+    if(Object.keys(mealsObject).length === 0){
+      alert('Please select at least one meal option');
+      return;
+    }
+    
+    const payload = {
+      booking_id: S.reservation.booking_id,
+      guest_sequence: 1,
+      meals: mealsObject, // Combined JSON object
+      dietary_preferences: dietaryPref || null,
+      special_requests: specialReq || null,
+      submitted_at: new Date().toISOString()
+    };
+    
+    // Upsert to guest_meal_preferences (now combined)
+    const { data: existing } = await client
+      .from('guest_meal_preferences')
+      .select('id')
+      .eq('booking_id', S.reservation.booking_id)
+      .eq('guest_sequence', 1)
+      .maybeSingle();
+    
+    if(existing){
+      // Reset to pending when guest modifies
+      payload.status = 'pending';
+      payload.approved_by = null;
+      payload.approved_at = null;
+      payload.rejected_reason = null;
+      await client.from('guest_meal_preferences').update(payload).eq('id', existing.id);
+    }else{
+      await client.from('guest_meal_preferences').insert(payload);
+    }
     await loadMealPrefs();
     // Lock meal selections
     lockMealSelections();
