@@ -1032,6 +1032,11 @@ q('#btnSaveMeals').addEventListener('click', async ()=>{
           .maybeSingle();
         
         if(existing){
+          // Reset to pending when guest modifies
+          payload.status = 'pending';
+          payload.approved_by = null;
+          payload.approved_at = null;
+          payload.rejected_reason = null;
           await client.from('guest_meal_preferences').update(payload).eq('id', existing.id);
         }else{
           await client.from('guest_meal_preferences').insert(payload);
