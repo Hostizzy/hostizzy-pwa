@@ -175,6 +175,15 @@
         <div class="success">All guests are verified. You can now select meals for your group.</div>
         <button id="btnMeals" class="btn success block">Proceed to Meal Selection →</button>
       </div>
+
+      <div class="card hidden" id="mealsDisplayCard">
+        <div class="h"><span>🍽️</span><h2>Selected Meals</h2></div>
+        <div id="mealsDisplayContent"></div>
+        <div id="mealsStatus" class="muted" style="margin-top:12px;font-weight:600"></div>
+        <div class="toolbar" style="margin-top:14px">
+          <button id="btnRequestMealChanges" class="btn secondary block">Request Changes</button>
+        </div>
+      </div>
     </section>
 
     <!-- SCREEN 5: MEAL SELECTION (Primary guest only) -->
@@ -331,32 +340,6 @@ async function loadMenuData(){
   }catch(e){ console.error('Menu load failed:', e); }
 }
 
-/* ---------- GENERATE WHATSAPP LINK ---------- */
-function generateWhatsAppLink(phone, message){
-  const encoded = encodeURIComponent(message);
-  return `https://wa.me/${phone}?text=${encoded}`;
-}
-
-/* ---------- WHATSAPP INTEGRATION ---------- */
-function sendWhatsAppReminder(phone, bookingCode){
-  const message = `👋 Hi! Please complete your KYC verification for booking ${bookingCode}. Visit: resiq.hostizzy.com/guest-portal.html`;
-  const link = generateWhatsAppLink(phone, message);
-  window.open(link, '_blank');
-}
-
-function sendWhatsAppApprovalNotification(phone, propertyName){
-  const message = `✅ Great news! Your KYC is approved for ${propertyName}. You can now select meals for your stay. Visit: resiq.hostizzy.com/guest-portal.html`;
-  const link = generateWhatsAppLink(phone, message);
-  window.open(link, '_blank');
-}
-
-function generateWhatsAppLink(phone, message){
-  const cleanPhone = phone.replace(/\\D/g,'');
-  const countryCode = cleanPhone.length === 10 ? '91' : '';
-  const encoded = encodeURIComponent(message);
-  return `https://wa.me/${countryCode}${cleanPhone}?text=${encoded}`;
-}
-
 /* ---------- VERIFY ---------- */
 q('#formVerify').addEventListener('submit', async (e)=>{
   e.preventDefault();
@@ -386,18 +369,6 @@ q('#formVerify').addEventListener('submit', async (e)=>{
 
     S.session = { booking_id, token, phone };
     saveSessionLocally(S.session);
-
-    // Send WhatsApp reminder if primary guest (24h reminder)
-    if(S.isPrimary){
-      const checkInTime = new Date(rsv.check_in).getTime();
-      const hoursUntilCheckIn = (checkInTime - Date.now()) / (1000 * 60 * 60);
-      if(hoursUntilCheckIn <= 24 && hoursUntilCheckIn > 0){
-        setTimeout(() => {
-          const confirm = window.confirm('📱 Send KYC reminder via WhatsApp?');
-          if(confirm) sendWhatsAppReminder(phone, booking_id);
-        }, 500);
-      }
-    }
 
     // Ensure initial guest name rows exist or ask primary to enter
     await ensureNameRowsOrCollect();
@@ -500,7 +471,10 @@ async function loadMealPrefs(){
     S.mealPrefs = {};
     data.forEach(pref => {
       const key = `${pref.guest_sequence}_${pref.meal_type}`;
-      S.mealPrefs[key] = pref;
+      S.mealPrefs[key] = {
+        ...pref,
+        status: pref.status || 'pending'
+      };
     });
   }
 }
@@ -531,13 +505,6 @@ async function setupApprovalListener(){
           // Show approval notification
           showApprovalNotification(newData.guest_name, S.reservation.property_name);
           
-          // If primary guest approved, send WhatsApp
-          if(newData.guest_sequence === 1 && S.isPrimary){
-            const sendViaWA = confirm(`✅ KYC approved! Send confirmation via WhatsApp to ${S.reservation.guest_phone}?`);
-            if(sendViaWA){
-              sendWhatsAppApprovalNotification(S.reservation.guest_phone, S.reservation.property_name);
-            }
-          }
         }
       }
     )
@@ -603,10 +570,90 @@ async function showDashboard(){
   renderDashGuests();
   updateDashProgress();
   maybeShowMeals();
+  displayMealsOnDashboard();
 
   show('scrDash');
   await setupApprovalListener();
   startPolling();
+}
+
+async function displayMealsOnDashboard(){
+  const card = q('#mealsDisplayCard');
+  const content = q('#mealsDisplayContent');
+  const status = q('#mealsStatus');
+  
+  if(!S.mealPrefs || Object.keys(S.mealPrefs).length === 0){
+    card.classList.add('hidden');
+    return;
+  }
+  
+  card.classList.remove('hidden');
+  content.innerHTML = '';
+  
+  const mealTypes = ['breakfast', 'lunch', 'barbeque', 'dinner'];
+  let displayedCount = 0;
+  let mealStatus = 'saved';
+  
+  mealTypes.forEach(mealType => {
+    const key = `1_${mealType}`;
+    const pref = S.mealPrefs[key];
+    
+    if(pref && pref.selections){
+      displayedCount++;
+      mealStatus = pref.status || 'saved';
+      
+      const section = document.createElement('div');
+      section.style.marginBottom = '12px';
+      section.style.padding = '12px';
+      section.style.backgroundColor = 'var(--bg-2)';
+      section.style.borderRadius = '8px';
+      
+      const title = document.createElement('div');
+      title.style.fontWeight = '600';
+      title.style.marginBottom = '6px';
+      title.textContent = `${getMealEmoji(mealType)} ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`;
+      section.appendChild(title);
+      
+      const selections = document.createElement('div');
+      selections.style.fontSize = '14px';
+      selections.style.color = 'var(--text-secondary)';
+      selections.innerHTML = pref.selections.map(s => `• ${s}`).join('<br>');
+      section.appendChild(selections);
+      
+      if(pref.dietary_preferences){
+        const dietary = document.createElement('div');
+        dietary.style.fontSize = '13px';
+        dietary.style.marginTop = '6px';
+        dietary.style.color = 'var(--muted)';
+        dietary.textContent = `🥗 Dietary: ${pref.dietary_preferences}`;
+        section.appendChild(dietary);
+      }
+      
+      if(pref.special_requests){
+        const special = document.createElement('div');
+        special.style.fontSize = '13px';
+        special.style.marginTop = '4px';
+        special.style.color = 'var(--muted)';
+        special.textContent = `📝 Special: ${pref.special_requests}`;
+        section.appendChild(special);
+      }
+      
+      content.appendChild(section);
+    }
+  });
+  
+  if(displayedCount === 0){
+    card.classList.add('hidden');
+  } else {
+    const statusText = mealStatus === 'pending' ? '⏳ Pending Approval' : 
+                       mealStatus === 'approved' ? '✅ Approved' : 
+                       mealStatus === 'rejected' ? '❌ Rejected' : '💾 Saved';
+    const statusBadge = mealStatus === 'pending' ? '⏳' : mealStatus === 'approved' ? '✅' : mealStatus === 'rejected' ? '❌' : '💾';
+    status.textContent = `${statusBadge} Status: ${statusText}`;
+    
+    // Show request changes button only if not approved
+    q('#btnRequestMealChanges').style.display = mealStatus === 'approved' ? 'none' : 'block';
+  }
 }
 
 function renderDashGuests(){
@@ -779,6 +826,29 @@ q('#formGuest').addEventListener('submit', async (e)=>{
 /* Buttons */
 q('#btnCancelForm').addEventListener('click', ()=>{ showDashboard(); startPolling(); });
 q('#btnBackDash').addEventListener('click', ()=>{ showDashboard(); startPolling(); });
+
+q('#btnRequestMealChanges').addEventListener('click', async ()=>{
+  const reason = prompt('Please tell us what changes you need:');
+  if(!reason || reason.trim() === '') return;
+  
+  loadOn('Sending change request...');
+  try{
+    const { error } = await client.from('meal_change_requests').insert({
+      booking_id: S.reservation.booking_id,
+      reason: reason.trim(),
+      status: 'pending',
+      requested_at: new Date().toISOString()
+    });
+    
+    if(error) throw error;
+    
+    alert('✅ Change request sent! Our team will review and notify you soon.');
+    displayMealsOnDashboard();
+  }catch(err){
+    console.error(err);
+    alert('Could not send change request. Please try again.');
+  }finally{ loadOff(); }
+});
 
 q('#btnLogout').addEventListener('click', ()=>{
   stopPolling();
@@ -967,17 +1037,48 @@ q('#btnSaveMeals').addEventListener('click', async ()=>{
           await client.from('guest_meal_preferences').insert(payload);
         }
       }
-    }
-    
+    } 
     await loadMealPrefs();
-    alert('✅ Meal selections saved successfully!');
-    showDashboard();
+    // Lock meal selections
+    lockMealSelections();
+    showSuccessMessage('✅ Meals saved successfully!');
+    await showDashboard();
     startPolling();
+
   }catch(err){
     console.error(err);
     alert('Could not save meals. Please try again.');
   }finally{ loadOff(); }
 });
+
+function lockMealSelections(){
+  // Disable all checkboxes
+  document.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+    cb.disabled = true;
+  });
+  // Disable save button
+  q('#btnSaveMeals').disabled = true;
+  q('#btnSaveMeals').style.opacity = '0.6';
+  q('#btnSaveMeals').style.cursor = 'not-allowed';
+}
+
+function showSuccessMessage(msg){
+  const notif = document.createElement('div');
+  notif.style.cssText = `
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    background: var(--success);
+    color: white;
+    padding: 16px 20px;
+    border-radius: 10px;
+    z-index: 10000;
+    font-weight: 600;
+  `;
+  notif.textContent = msg;
+  document.body.appendChild(notif);
+  setTimeout(() => notif.remove(), 3000);
+}
 
 q('#btnCancelMeals').addEventListener('click', ()=>{
   showDashboard();
