@@ -587,7 +587,7 @@ async function displayMealsOnDashboard(){
   const content = q('#mealsDisplayContent');
   const status = q('#mealsStatus');
   
-  if(!S.mealPrefs || !S.mealPrefs.meals || Object.keys(S.mealPrefs.meals).length === 0){
+  if(!S.mealPrefs || Object.keys(S.mealPrefs).length === 0){
     card.classList.add('hidden');
     return;
   }
@@ -597,94 +597,62 @@ async function displayMealsOnDashboard(){
   
   const mealTypes = ['breakfast', 'lunch', 'barbeque', 'dinner'];
   let displayedCount = 0;
-  const mealStatus = S.mealPrefs.status || 'saved';
+  let mealStatus = 'saved';
   
-  // Display each meal type
   mealTypes.forEach(mealType => {
-    const meals = S.mealPrefs.meals[mealType]; // Array of meal items
+    const key = `1_${mealType}`;
+    const pref = S.mealPrefs[key];
     
-    if(meals && meals.length > 0){
+    if(pref && pref.selections){
       displayedCount++;
+      mealStatus = pref.status || 'saved';
       
       const section = document.createElement('div');
       section.style.marginBottom = '12px';
       section.style.padding = '12px';
       section.style.backgroundColor = 'var(--bg-2)';
       section.style.borderRadius = '8px';
-      section.style.borderLeft = '4px solid var(--primary)';
       
       const title = document.createElement('div');
-      title.style.fontWeight = '700';
+      title.style.fontWeight = '600';
       title.style.marginBottom = '6px';
-      title.style.fontSize = '15px';
       title.textContent = `${getMealEmoji(mealType)} ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`;
       section.appendChild(title);
       
       const selections = document.createElement('div');
       selections.style.fontSize = '14px';
       selections.style.color = 'var(--text-secondary)';
-      selections.style.lineHeight = '1.6';
-      selections.innerHTML = meals.map(s => `<span style="display: inline-block; margin-right: 6px; margin-bottom: 4px;">• ${s}</span>`).join('');
+      selections.innerHTML = pref.selections.map(s => `• ${s}`).join('<br>');
       section.appendChild(selections);
+      
+      if(pref.dietary_preferences){
+        const dietary = document.createElement('div');
+        dietary.style.fontSize = '13px';
+        dietary.style.marginTop = '6px';
+        dietary.style.color = 'var(--muted)';
+        dietary.textContent = `🥗 Dietary: ${pref.dietary_preferences}`;
+        section.appendChild(dietary);
+      }
+      
+      if(pref.special_requests){
+        const special = document.createElement('div');
+        special.style.fontSize = '13px';
+        special.style.marginTop = '4px';
+        special.style.color = 'var(--muted)';
+        special.textContent = `📝 Special: ${pref.special_requests}`;
+        section.appendChild(special);
+      }
       
       content.appendChild(section);
     }
   });
-  
-  // Display dietary preferences if present
-  if(S.mealPrefs.dietary_preferences){
-    const dietarySection = document.createElement('div');
-    dietarySection.style.marginTop = '12px';
-    dietarySection.style.padding = '12px';
-    dietarySection.style.backgroundColor = 'var(--primary-50)';
-    dietarySection.style.borderRadius = '8px';
-    dietarySection.style.borderLeft = '4px solid var(--primary)';
-    
-    const dietaryTitle = document.createElement('div');
-    dietaryTitle.style.fontWeight = '600';
-    dietaryTitle.style.marginBottom = '4px';
-    dietaryTitle.textContent = '🥗 Dietary Preferences';
-    dietarySection.appendChild(dietaryTitle);
-    
-    const dietaryText = document.createElement('div');
-    dietaryText.style.fontSize = '14px';
-    dietaryText.style.color = 'var(--text-primary)';
-    dietaryText.textContent = S.mealPrefs.dietary_preferences;
-    dietarySection.appendChild(dietaryText);
-    
-    content.appendChild(dietarySection);
-  }
-  
-  // Display special requests if present
-  if(S.mealPrefs.special_requests){
-    const specialSection = document.createElement('div');
-    specialSection.style.marginTop = '8px';
-    specialSection.style.padding = '12px';
-    specialSection.style.backgroundColor = '#fef7e0';
-    specialSection.style.borderRadius = '8px';
-    specialSection.style.borderLeft = '4px solid var(--warning)';
-    
-    const specialTitle = document.createElement('div');
-    specialTitle.style.fontWeight = '600';
-    specialTitle.style.marginBottom = '4px';
-    specialTitle.textContent = '⭐ Special Requests';
-    specialSection.appendChild(specialTitle);
-    
-    const specialText = document.createElement('div');
-    specialText.style.fontSize = '14px';
-    specialText.style.color = '#7f5f01';
-    specialText.textContent = S.mealPrefs.special_requests;
-    specialSection.appendChild(specialText);
-    
-    content.appendChild(specialSection);
-  }
   
   if(displayedCount === 0){
     card.classList.add('hidden');
   } else {
     const statusText = mealStatus === 'pending' ? '⏳ Pending Approval' : 
                        mealStatus === 'approved' ? '✅ Approved' : 
-                       mealStatus === 'rejected' ? '❌ Rejected - Action Needed' : '💾 Saved';
+                       mealStatus === 'rejected' ? '❌ Rejected' : '💾 Saved';
     const statusBadge = mealStatus === 'pending' ? '⏳' : mealStatus === 'approved' ? '✅' : mealStatus === 'rejected' ? '❌' : '💾';
     status.textContent = `${statusBadge} Status: ${statusText}`;
     
@@ -1086,7 +1054,7 @@ q('#btnSaveMeals').addEventListener('click', async ()=>{
       await client.from('guest_meal_preferences').update(payload).eq('id', existing.id);
     }else{
       await client.from('guest_meal_preferences').insert(payload);
-    }
+    } 
     await loadMealPrefs();
     // Lock meal selections
     lockMealSelections();
