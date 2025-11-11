@@ -864,7 +864,7 @@ async function displayMealsOnDashboard(){
       font-size: 13px;
       display: inline-block;
     `;
-    status.textContent = `${statusBadge} Status: ${statusText}`;
+    status.textContent = statusText;
     
     // Show request changes button only if not approved
     q('#btnRequestMealChanges').style.display = mealStatus === 'approved' ? 'none' : 'block';
