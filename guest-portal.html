@@ -738,6 +738,7 @@ async function showDashboard(){
   renderDashGuests();
   updateDashProgress();
   maybeShowMeals();
+  await loadMealPrefs();  // ← ADD THIS LINE
   displayMealsOnDashboard();
 
   show('scrDash');
@@ -1043,26 +1044,26 @@ q('#btnCancelForm').addEventListener('click', ()=>{ showDashboard(); startPollin
 q('#btnBackDash').addEventListener('click', ()=>{ showDashboard(); startPolling(); });
 
 q('#btnRequestMealChanges').addEventListener('click', async ()=>{
-  const reason = prompt('Please tell us what changes you need:');
-  if(!reason || reason.trim() === '') return;
+  const confirmed = confirm('You will be taken back to meal selection to make changes. Continue?');
+  if(!confirmed) return;
   
-  loadOn('Sending change request...');
-  try{
-    const { error } = await client.from('meal_change_requests').insert({
-      booking_id: S.reservation.booking_id,
-      reason: reason.trim(),
-      status: 'pending',
-      requested_at: new Date().toISOString()
-    });
-    
-    if(error) throw error;
-    
-    alert('✅ Change request sent! Our team will review and notify you soon.');
-    displayMealsOnDashboard();
-  }catch(err){
-    console.error(err);
-    alert('Could not send change request. Please try again.');
-  }finally{ loadOff(); }
+  // Clear meal selections so user can re-select
+  S.mealPrefs = {};
+  
+  // Render fresh meal selection screen
+  await renderMealSelection();
+  
+  // Show meal selection screen
+  show('scrMeals');
+  
+  // Update guest count display
+  updateGuestCountDisplay();
+  initializeDietaryAndRequestsUI();
+  
+  // Scroll to top
+  window.scrollTo(0, 0);
+  
+  showSuccessMessage('Edit your meal preferences and save again.');
 });
 
 q('#btnLogout').addEventListener('click', ()=>{
