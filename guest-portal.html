@@ -188,6 +188,18 @@
 
     <!-- SCREEN 5: MEAL SELECTION (Primary guest only) -->
     <section id="scrMeals" class="screen">
+      <!-- Guest Count Header -->
+      <div class="card" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; margin-bottom: 16px;">
+        <div style="display: flex; justify-content: space-between; align-items: center;">
+          <div>
+            <div style="font-size: 13px; opacity: 0.9;">Booking Details</div>
+            <div style="font-size: 18px; font-weight: 700; margin-top: 4px;" id="guestCountDisplay">👥 Loading...</div>
+            <div style="font-size: 12px; opacity: 0.85; margin-top: 4px;" id="datesDisplay">📅 Loading...</div>
+          </div>
+          <div style="font-size: 48px;">🏡</div>
+        </div>
+      </div>
+
       <div class="card">
         <div class="h"><span>🍽️</span><h2>Select Meals for Your Group</h2></div>
         <p class="muted">As primary guest, select meals for all guests. Dietary preferences & special requests are optional.</p>
@@ -196,11 +208,31 @@
       <div id="mealsContainer" class="list"></div>
 
       <div class="card">
-        <label for="dietaryPref">Dietary Preferences (Optional)</label>
-        <input id="dietaryPref" placeholder="e.g., Vegetarian, Vegan, Gluten-free, etc.">
-        <label for="specialReq" style="margin-top:10px">Special Requests (Optional)</label>
-        <input id="specialReq" placeholder="e.g., Extra spice, No onions, etc.">
-        <div class="toolbar" style="margin-top:14px">
+        <!-- Dietary Preferences Section -->
+        <div style="margin-bottom: 16px;">
+          <label style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+            <span>🥗 Dietary Preferences (Optional)</span>
+          </label>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;" id="dietaryOptionsContainer">
+            <!-- Dynamic buttons will be added here -->
+          </div>
+          <input id="dietaryPref" placeholder="Or enter custom dietary preference..." style="margin-top: 8px;">
+          <div id="dietarySelected" style="font-size: 12px; color: var(--muted); margin-top: 6px;"></div>
+        </div>
+
+        <!-- Special Requests Section -->
+        <div style="margin-bottom: 14px; padding-top: 12px; border-top: 1px solid var(--border);">
+          <label style="display: flex; gap: 8px; align-items: center; margin-bottom: 12px;">
+            <span>⭐ Special Requests (Optional)</span>
+          </label>
+          <div style="display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px;" id="requestsOptionsContainer">
+            <!-- Dynamic buttons will be added here -->
+          </div>
+          <input id="specialReq" placeholder="Or enter custom special request..." style="margin-top: 8px;">
+          <div id="requestsSelected" style="font-size: 12px; color: var(--muted); margin-top: 6px;"></div>
+        </div>
+
+        <div class="toolbar" style="margin-top:16px">
           <button id="btnSaveMeals" class="btn success block">Save Meal Selections</button>
           <button id="btnCancelMeals" class="btn secondary block" style="margin-top:8px">Back to Dashboard</button>
         </div>
@@ -462,6 +494,137 @@ async function loadDocs(){
   if(!error && data){ S.docs = data; }
 }
 
+function updateGuestCountDisplay() {
+  if (S.reservation) {
+    const adults = S.reservation.adults || 0;
+    const kids = S.reservation.kids || 0;
+    const total = adults + kids;
+    
+    const checkIn = S.reservation.check_in ? new Date(S.reservation.check_in).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD';
+    const checkOut = S.reservation.check_out ? new Date(S.reservation.check_out).toLocaleDateString('en-IN', { year: 'numeric', month: 'short', day: 'numeric' }) : 'TBD';
+    
+    const nightsCount = S.reservation.check_in && S.reservation.check_out 
+      ? Math.ceil((new Date(S.reservation.check_out) - new Date(S.reservation.check_in)) / (1000 * 60 * 60 * 24))
+      : 0;
+    
+    document.getElementById('guestCountDisplay').textContent = `👥 ${total} Guest${total !== 1 ? 's' : ''} (${adults}A, ${kids}K)`;
+    document.getElementById('datesDisplay').textContent = `📅 ${checkIn} to ${checkOut} • ${nightsCount} Night${nightsCount !== 1 ? 's' : ''}`;
+  }
+}
+
+function initializeDietaryAndRequestsUI() {
+  // Dietary preference options
+  const dietaryOptions = ['Vegetarian', 'Non-Veg', 'Jain', 'Vegan', 'Gluten-Free'];
+  const specialRequestsOptions = ['Spicy', 'No Spice', 'Extra Oil', 'No Onion', 'No Garlic'];
+  
+  let selectedDietary = [];
+  let selectedRequests = [];
+  
+  // Create dietary buttons
+  const dietaryContainer = document.getElementById('dietaryOptionsContainer');
+  dietaryOptions.forEach(option => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = option;
+    btn.style.cssText = `
+      padding: 8px 12px;
+      border: 2px solid var(--border);
+      background: white;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    `;
+    
+    btn.onclick = (e) => {
+      e.preventDefault();
+      selectedDietary = selectedDietary.includes(option) 
+        ? selectedDietary.filter(x => x !== option)
+        : [...selectedDietary, option];
+      
+      if (selectedDietary.includes(option)) {
+        btn.style.background = 'var(--primary)';
+        btn.style.color = 'white';
+        btn.style.borderColor = 'var(--primary)';
+      } else {
+        btn.style.background = 'white';
+        btn.style.color = 'var(--ink)';
+        btn.style.borderColor = 'var(--border)';
+      }
+      
+      updateDietaryDisplay();
+    };
+    
+    dietaryContainer.appendChild(btn);
+  });
+  
+  // Create special requests buttons
+  const requestsContainer = document.getElementById('requestsOptionsContainer');
+  specialRequestsOptions.forEach(option => {
+    const btn = document.createElement('button');
+    btn.type = 'button';
+    btn.textContent = option;
+    btn.style.cssText = `
+      padding: 8px 12px;
+      border: 2px solid var(--border);
+      background: white;
+      border-radius: 20px;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    `;
+    
+    btn.onclick = (e) => {
+      e.preventDefault();
+      selectedRequests = selectedRequests.includes(option) 
+        ? selectedRequests.filter(x => x !== option)
+        : [...selectedRequests, option];
+      
+      if (selectedRequests.includes(option)) {
+        btn.style.background = 'var(--warning)';
+        btn.style.color = 'white';
+        btn.style.borderColor = 'var(--warning)';
+      } else {
+        btn.style.background = 'white';
+        btn.style.color = 'var(--ink)';
+        btn.style.borderColor = 'var(--border)';
+      }
+      
+      updateRequestsDisplay();
+    };
+    
+    requestsContainer.appendChild(btn);
+  });
+  
+  function updateDietaryDisplay() {
+    const display = document.getElementById('dietarySelected');
+    const input = document.getElementById('dietaryPref');
+    
+    if (selectedDietary.length > 0) {
+      display.textContent = `✅ Selected: ${selectedDietary.join(', ')}`;
+      input.value = selectedDietary.join(', ');
+    } else {
+      display.textContent = '';
+      input.value = '';
+    }
+  }
+  
+  function updateRequestsDisplay() {
+    const display = document.getElementById('requestsSelected');
+    const input = document.getElementById('specialReq');
+    
+    if (selectedRequests.length > 0) {
+      display.textContent = `✅ Selected: ${selectedRequests.join(', ')}`;
+      input.value = selectedRequests.join(', ');
+    } else {
+      display.textContent = '';
+      input.value = '';
+    }
+  }
+}
+
 async function loadMealPrefs(){
   const { data, error } = await client
     .from('guest_meal_preferences')
@@ -587,7 +750,7 @@ async function displayMealsOnDashboard(){
   const content = q('#mealsDisplayContent');
   const status = q('#mealsStatus');
   
-  if(!S.mealPrefs || Object.keys(S.mealPrefs).length === 0){
+  if(!S.mealPrefs || !S.mealPrefs.meals || Object.keys(S.mealPrefs.meals).length === 0){
     card.classList.add('hidden');
     return;
   }
@@ -597,63 +760,110 @@ async function displayMealsOnDashboard(){
   
   const mealTypes = ['breakfast', 'lunch', 'barbeque', 'dinner'];
   let displayedCount = 0;
-  let mealStatus = 'saved';
+  const mealStatus = S.mealPrefs.status || 'saved';
   
+  // Display each meal type
   mealTypes.forEach(mealType => {
-    const key = `1_${mealType}`;
-    const pref = S.mealPrefs[key];
+    const meals = S.mealPrefs.meals[mealType]; // Array of meal items
     
-    if(pref && pref.selections){
+    if(meals && meals.length > 0){
       displayedCount++;
-      mealStatus = pref.status || 'saved';
       
       const section = document.createElement('div');
       section.style.marginBottom = '12px';
       section.style.padding = '12px';
       section.style.backgroundColor = 'var(--bg-2)';
       section.style.borderRadius = '8px';
+      section.style.borderLeft = '4px solid var(--primary)';
       
       const title = document.createElement('div');
-      title.style.fontWeight = '600';
+      title.style.fontWeight = '700';
       title.style.marginBottom = '6px';
+      title.style.fontSize = '15px';
       title.textContent = `${getMealEmoji(mealType)} ${mealType.charAt(0).toUpperCase() + mealType.slice(1)}`;
       section.appendChild(title);
       
       const selections = document.createElement('div');
       selections.style.fontSize = '14px';
       selections.style.color = 'var(--text-secondary)';
-      selections.innerHTML = pref.selections.map(s => `• ${s}`).join('<br>');
+      selections.style.lineHeight = '1.6';
+      selections.innerHTML = meals.map(s => `<span style="display: inline-block; margin-right: 6px; margin-bottom: 4px;">• ${s}</span>`).join('');
       section.appendChild(selections);
-      
-      if(pref.dietary_preferences){
-        const dietary = document.createElement('div');
-        dietary.style.fontSize = '13px';
-        dietary.style.marginTop = '6px';
-        dietary.style.color = 'var(--muted)';
-        dietary.textContent = `🥗 Dietary: ${pref.dietary_preferences}`;
-        section.appendChild(dietary);
-      }
-      
-      if(pref.special_requests){
-        const special = document.createElement('div');
-        special.style.fontSize = '13px';
-        special.style.marginTop = '4px';
-        special.style.color = 'var(--muted)';
-        special.textContent = `📝 Special: ${pref.special_requests}`;
-        section.appendChild(special);
-      }
       
       content.appendChild(section);
     }
   });
   
+  // Display dietary preferences if present
+  if(S.mealPrefs.dietary_preferences){
+    const dietarySection = document.createElement('div');
+    dietarySection.style.marginTop = '12px';
+    dietarySection.style.padding = '12px';
+    dietarySection.style.backgroundColor = 'var(--primary-50)';
+    dietarySection.style.borderRadius = '8px';
+    dietarySection.style.borderLeft = '4px solid var(--primary)';
+    
+    const dietaryTitle = document.createElement('div');
+    dietaryTitle.style.fontWeight = '600';
+    dietaryTitle.style.marginBottom = '4px';
+    dietaryTitle.textContent = '🥗 Dietary Preferences';
+    dietarySection.appendChild(dietaryTitle);
+    
+    const dietaryText = document.createElement('div');
+    dietaryText.style.fontSize = '14px';
+    dietaryText.style.color = 'var(--text-primary)';
+    dietaryText.textContent = S.mealPrefs.dietary_preferences;
+    dietarySection.appendChild(dietaryText);
+    
+    content.appendChild(dietarySection);
+  }
+  
+  // Display special requests if present
+  if(S.mealPrefs.special_requests){
+    const specialSection = document.createElement('div');
+    specialSection.style.marginTop = '8px';
+    specialSection.style.padding = '12px';
+    specialSection.style.backgroundColor = '#fef7e0';
+    specialSection.style.borderRadius = '8px';
+    specialSection.style.borderLeft = '4px solid var(--warning)';
+    
+    const specialTitle = document.createElement('div');
+    specialTitle.style.fontWeight = '600';
+    specialTitle.style.marginBottom = '4px';
+    specialTitle.textContent = '⭐ Special Requests';
+    specialSection.appendChild(specialTitle);
+    
+    const specialText = document.createElement('div');
+    specialText.style.fontSize = '14px';
+    specialText.style.color = '#7f5f01';
+    specialText.textContent = S.mealPrefs.special_requests;
+    specialSection.appendChild(specialText);
+    
+    content.appendChild(specialSection);
+  }
+  
   if(displayedCount === 0){
     card.classList.add('hidden');
   } else {
+    const statusBadgeStyle = {
+      'pending': 'background: var(--warning); color: #000;',
+      'approved': 'background: var(--success); color: white;',
+      'rejected': 'background: var(--danger); color: white;',
+      'saved': 'background: var(--muted); color: white;'
+    }[mealStatus] || 'background: var(--muted); color: white;';
+    
     const statusText = mealStatus === 'pending' ? '⏳ Pending Approval' : 
                        mealStatus === 'approved' ? '✅ Approved' : 
-                       mealStatus === 'rejected' ? '❌ Rejected' : '💾 Saved';
-    const statusBadge = mealStatus === 'pending' ? '⏳' : mealStatus === 'approved' ? '✅' : mealStatus === 'rejected' ? '❌' : '💾';
+                       mealStatus === 'rejected' ? '❌ Rejected - Action Needed' : '💾 Saved';
+    
+    status.style.cssText = `
+      ${statusBadgeStyle}
+      padding: 8px 12px;
+      border-radius: 20px;
+      font-weight: 700;
+      font-size: 13px;
+      display: inline-block;
+    `;
     status.textContent = `${statusBadge} Status: ${statusText}`;
     
     // Show request changes button only if not approved
@@ -870,6 +1080,8 @@ q('#btnMeals').addEventListener('click', async ()=>{
   stopPolling();
   await loadMenuData();
   await renderMealSelection();
+  updateGuestCountDisplay();
+  initializeDietaryAndRequestsUI();
   show('scrMeals');
 });
 
@@ -888,13 +1100,19 @@ async function renderMealSelection(){
     
     const card = document.createElement('div');
     card.className = 'card';
+    card.style.cssText = `
+      border-left: 5px solid var(--primary);
+      background: linear-gradient(135deg, rgba(102, 126, 234, 0.02) 0%, rgba(236, 72, 153, 0.02) 100%);
+    `;
     card.innerHTML = `
-      <div class="h">
-        <span>${getMealEmoji(mealType)}</span>
-        <h2>${menu.title}</h2>
+      <div class="h" style="border-bottom: 2px solid var(--primary); padding-bottom: 12px;">
+        <span style="font-size: 28px;">${getMealEmoji(mealType)}</span>
+        <div>
+          <h2>${menu.title}</h2>
+          <div class="muted" style="font-size: 12px; margin-top: 2px;">${menu.rule}</div>
+        </div>
       </div>
-      <p class="muted" style="margin-bottom:12px">${menu.rule}</p>
-      <div id="meal_${mealType}" data-meal="${mealType}" class="mealOptions"></div>
+      <div id="meal_${mealType}" data-meal="${mealType}" class="mealOptions" style="margin-top: 12px;"></div>
     `;
     container.appendChild(card);
     
@@ -1054,7 +1272,7 @@ q('#btnSaveMeals').addEventListener('click', async ()=>{
       await client.from('guest_meal_preferences').update(payload).eq('id', existing.id);
     }else{
       await client.from('guest_meal_preferences').insert(payload);
-    } 
+    }
     await loadMealPrefs();
     // Lock meal selections
     lockMealSelections();
