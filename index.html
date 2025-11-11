@@ -415,36 +415,58 @@
             border-color: var(--primary);
         }
 
-        /* Navigation */
+         /* Navigation - New Top Bar Only */
         .navbar {
             background: white;
             border-bottom: 1px solid var(--border);
-            padding: 16px 0;
-            position: sticky;
+            padding: 0;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 100;
             box-shadow: var(--shadow);
+            height: 60px;
+            display: flex;
+            align-items: center;
         }
 
         .navbar-content {
-            max-width: 1400px;
-            margin: 0 auto;
+            max-width: 100%;
+            width: 100%;
             padding: 0 24px;
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 100%;
         }
 
         .navbar-brand {
             font-size: 24px;
             font-weight: 700;
             color: var(--primary);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            text-decoration: none;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+
+        .navbar-brand:hover {
+            opacity: 0.8;
+        }
+
+        .navbar-brand-text {
+            font-size: 16px;
+            font-weight: 700;
         }
 
         .navbar-menu {
             display: flex;
-            gap: 8px;
+            gap: 16px;
             align-items: center;
+            margin-left: auto;
         }
 
         .nav-link {
@@ -455,6 +477,7 @@
             font-weight: 500;
             transition: all 0.2s;
             cursor: pointer;
+            font-size: 14px;
         }
 
         .nav-link:hover {
@@ -465,6 +488,12 @@
         .nav-link.active {
             background: var(--primary);
             color: white;
+        }
+
+        /* Hide nav-primary & nav-secondary for simplicity */
+        .nav-primary,
+        .nav-secondary {
+            display: none !important;
         }
 
         /* More Dropdown Container */
@@ -717,18 +746,35 @@
             }
         }
 
-        /* Container */
+        /* Container - Adjusted for new navigation */
         .container {
             max-width: 1400px;
             margin: 0 auto;
             padding: 24px;
-            padding-bottom: 120px; /* Increased from 100px */
+            padding-bottom: 24px;
+            margin-left: 0;
+            transition: margin-left 0.3s ease;
+        }
+
+        @media (min-width: 1025px) {
+            .container {
+                margin-left: 240px;
+                padding-bottom: 24px;
+            }
+        }
+
+        @media (min-width: 769px) and (max-width: 1024px) {
+            .container {
+                margin-left: 80px;
+                padding-bottom: 24px;
+            }
         }
 
         @media (max-width: 768px) {
             .container {
                 padding: 16px;
-                padding-bottom: 140px; /* Extra space on mobile */
+                padding-bottom: 140px;
+                margin-left: 0;
             }
         }
 
@@ -1197,8 +1243,171 @@
             background-color: #10b981;
         }
 
-        input:checked + .slider:before {
+         input:checked + .slider:before {
             transform: translateX(24px);
+        }
+
+        /* ========================================
+           SIDEBAR NAVIGATION (DESKTOP & TABLET)
+           ======================================== */
+        
+        .app-container {
+            display: flex;
+            height: 100vh;
+            flex-direction: column;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex: 1;
+            overflow: hidden;
+        }
+
+        /* Desktop Sidebar */
+        .sidebar {
+            display: none;
+            width: 240px;
+            background: white;
+            border-right: 1px solid var(--border);
+            overflow-y: auto;
+            position: fixed;
+            left: 0;
+            top: 60px;
+            height: calc(100vh - 60px);
+            z-index: 50;
+            flex-direction: column;
+        }
+
+        .sidebar.active {
+            display: flex;
+        }
+
+        .sidebar-header {
+            padding: 20px 16px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .sidebar-title {
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            letter-spacing: 0.5px;
+            margin-bottom: 12px;
+        }
+
+        .sidebar-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 12px 8px;
+            flex: 1;
+        }
+
+        .sidebar-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            color: var(--text-secondary);
+            text-decoration: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
+            border: 2px solid transparent;
+        }
+
+        .sidebar-item:hover {
+            background: var(--background);
+            color: var(--text-primary);
+        }
+
+        .sidebar-item.active {
+            background: var(--primary);
+            color: white;
+            border-left: 2px solid var(--primary-dark);
+        }
+
+        .sidebar-item-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .sidebar-item-label {
+            flex: 1;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .sidebar-footer {
+            padding: 16px 8px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .sidebar-item-badge {
+            background: var(--primary);
+            color: white;
+            font-size: 10px;
+            padding: 2px 6px;
+            border-radius: 4px;
+            flex-shrink: 0;
+        }
+
+        /* Sidebar Collapse Toggle */
+        .sidebar-collapse-btn {
+            background: none;
+            border: none;
+            padding: 12px 16px;
+            cursor: pointer;
+            color: var(--text-secondary);
+            font-size: 18px;
+            transition: all 0.2s ease;
+        }
+
+        .sidebar-collapse-btn:hover {
+            color: var(--text-primary);
+        }
+
+        /* Tablet Compact Sidebar (Icons Only) */
+        .sidebar.compact {
+            width: 80px;
+        }
+
+        .sidebar.compact .sidebar-item-label {
+            display: none;
+        }
+
+        .sidebar.compact .sidebar-item {
+            justify-content: center;
+            padding: 12px 8px;
+        }
+
+        .sidebar.compact .sidebar-title {
+            display: none;
+        }
+
+        .sidebar.compact .sidebar-item-icon {
+            font-size: 24px;
+        }
+
+        /* Main Content Area */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .content-area {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
         }
 
         /* Mobile Navigation */
@@ -1206,20 +1415,26 @@
             display: none;
         }
 
+         /* Mobile Top Bar (replaces navbar on mobile) */
         .mobile-header {
             display: none;
             background: white;
-            padding: 12px 16px;
+            padding: 0;
             border-bottom: 1px solid var(--border);
-            position: sticky;
+            position: fixed;
             top: 0;
+            left: 0;
+            right: 0;
             z-index: 99;
+            height: 60px;
         }
         
         .mobile-header-content {
             display: flex;
             justify-content: space-between;
             align-items: center;
+            height: 100%;
+            padding: 0 16px;
         }
         
         .mobile-menu-btn {
@@ -1227,22 +1442,39 @@
             border: none;
             font-size: 24px;
             cursor: pointer;
-            padding: 4px;
+            padding: 8px;
+            color: var(--text-primary);
+            transition: all 0.2s ease;
+        }
+
+        .mobile-menu-btn:active {
+            transform: scale(0.95);
+        }
+
+        .mobile-header-logo {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .mobile-header-spacer {
+            flex: 1;
         }
         
-        /* Mobile Sidebar */
+        /* Mobile Sidebar - Hamburger Menu */
         .mobile-sidebar {
             display: none;
             position: fixed;
-            top: 0;
+            top: 60px;
             left: -100%;
             width: 280px;
-            height: 100%;
+            height: calc(100vh - 140px);
             background: white;
             z-index: 1001;
-            transition: left 0.3s;
+            transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             box-shadow: 2px 0 10px rgba(0,0,0,0.1);
             overflow-y: auto;
+            flex-direction: column;
         }
         
         .mobile-sidebar.active {
@@ -1250,23 +1482,35 @@
         }
         
         .mobile-sidebar-header {
-            padding: 20px;
+            padding: 20px 16px;
             border-bottom: 1px solid var(--border);
+            font-size: 12px;
+            font-weight: 700;
+            text-transform: uppercase;
+            color: var(--text-tertiary);
+            letter-spacing: 0.5px;
         }
         
         .mobile-sidebar-menu {
-            padding: 8px;
+            padding: 12px 8px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
         }
         
         .mobile-sidebar-link {
             display: flex;
             align-items: center;
+            gap: 12px;
             padding: 12px 16px;
-            color: var(--text-primary);
+            color: var(--text-secondary);
             text-decoration: none;
-            border-radius: 6px;
-            margin-bottom: 4px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: all 0.2s ease;
+            font-size: 14px;
+            font-weight: 500;
         }
         
         .mobile-sidebar-link.active {
@@ -1276,8 +1520,26 @@
         
         .mobile-sidebar-link:hover {
             background: var(--background);
+            color: var(--text-primary);
+        }
+
+        .mobile-sidebar-icon {
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .mobile-sidebar-text {
+            flex: 1;
         }
         
+        .mobile-sidebar-footer {
+            padding: 12px 8px;
+            border-top: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
         .mobile-overlay {
             display: none;
             position: fixed;
@@ -1471,11 +1733,126 @@
             color: var(--text-secondary);
         }
 
+       /* Desktop Sidebar (1025px+) */
+        @media (min-width: 1025px) {
+            body {
+                padding-top: 60px;
+            }
+
+            .app-wrapper {
+                margin-top: 60px;
+            }
+
+            .sidebar {
+                display: flex;
+            }
+
+            .navbar {
+                position: fixed;
+            }
+
+            .container {
+                margin-left: 240px;
+                padding-top: 0;
+            }
+
+            .mobile-header {
+                display: none !important;
+            }
+
+            .mobile-nav {
+                display: none !important;
+            }
+
+            .mobile-sidebar {
+                display: none !important;
+            }
+
+            .mobile-overlay {
+                display: none !important;
+            }
+        }
+
+        /* Tablet Compact Sidebar (769px - 1024px) */
+        @media (min-width: 769px) and (max-width: 1024px) {
+            body {
+                padding-top: 60px;
+            }
+
+            .app-wrapper {
+                margin-top: 60px;
+            }
+
+            .sidebar {
+                display: flex;
+                width: 80px;
+            }
+
+            .sidebar.compact {
+                width: 80px;
+            }
+
+            .sidebar-item-label {
+                display: none;
+            }
+
+            .sidebar-item {
+                justify-content: center;
+                padding: 12px 8px;
+            }
+
+            .sidebar-title {
+                display: none;
+            }
+
+            .sidebar-item-icon {
+                font-size: 24px;
+            }
+
+            .container {
+                margin-left: 80px;
+                padding-top: 0;
+            }
+
+            .navbar {
+                position: fixed;
+            }
+
+            .mobile-header {
+                display: none !important;
+            }
+
+            .mobile-nav {
+                display: none !important;
+            }
+
+            .mobile-sidebar {
+                display: none !important;
+            }
+
+            .mobile-overlay {
+                display: none !important;
+            }
+        }
+
+        /* Mobile Bottom Navigation (<769px) */
         @media (max-width: 768px) {
+            body {
+                padding-top: 60px;
+            }
+
             .navbar {
                 display: none;
             }
-            
+
+            .sidebar {
+                display: none;
+            }
+
+            .mobile-header {
+                display: block;
+            }
+
             .mobile-nav {
                 display: block;
                 position: fixed;
@@ -3249,54 +3626,28 @@
             <div class="pull-to-refresh-arrow" id="pullToRefreshArrow">⬇️</div>
         </div>
 
-        <!-- Desktop Navigation -->
+        <!-- Desktop/Tablet Top Navigation Bar -->
         <nav class="navbar">
             <div class="navbar-content">
-                <div class="navbar-brand">
-                    <img src="assets/logo.png" alt="ResIQ" class="navbar-logo">
+                <!-- Logo + Home (clickable) -->
+                <div class="navbar-brand" onclick="showView('home')" style="cursor: pointer;">
+                    <img src="assets/logo-132.png" alt="ResIQ" class="navbar-logo">
                 </div>
-                <div class="navbar-menu">
-                    <!-- Primary Navigation (always visible) -->
-                    <a class="nav-link nav-primary active" onclick="showView('home')">Home</a>
-                    <a class="nav-link nav-primary active" onclick="showView('dashboard')">Dashboard</a>
-                    <a class="nav-link nav-primary" onclick="showView('reservations')">Reservations</a>
-                    <a class="nav-link nav-primary" onclick="showView('guests')">Guests</a>
-                    <a class="nav-link nav-primary" onclick="showView('guestDocuments')">Documents</a>
-                    <a class="nav-link nav-primary" onclick="showView('payments')">Payments</a>
 
-                    <!-- Secondary Navigation (hidden on tablet, shown in More dropdown) -->
-                     <a class="nav-link nav-primary" onclick="showView('meals')">Meals</a>
-                    <a class="nav-link nav-secondary" onclick="showView('availability')">Availability</a>
-                    <a class="nav-link nav-secondary" onclick="showView('properties')">Properties</a>
-                    <a class="nav-link nav-secondary" onclick="showView('performance')">Performance</a>
-                    <a class="nav-link nav-secondary" onclick="showView('team')">Team</a>
-                    
-                    <!-- More Dropdown (visible only on tablet) -->
-                    <div class="more-dropdown-container" style="display: none;">
-                        <button class="nav-link more-dropdown-btn" onclick="toggleMoreDropdown()">
-                            More ▼
-                        </button>
-                        <div class="more-dropdown-menu" id="moreDropdownMenu">
-                            <a class="more-dropdown-item" onclick="showView('meals'); closeMoreDropdown();">🍽️ Meals</a>
-                            <a class="more-dropdown-item" onclick="showView('availability'); closeMoreDropdown();">📆 Availability</a>
-                            <a class="more-dropdown-item" onclick="showView('properties'); closeMoreDropdown();">🏠 Properties</a>
-                            <a class="more-dropdown-item" onclick="showView('performance'); closeMoreDropdown();">📊 Performance</a>
-                            <a class="more-dropdown-item" onclick="showView('team'); closeMoreDropdown();">👥 Team</a>
-                        </div>
-                    </div>
-                    
-                    <span class="nav-separator" style="margin: 0 8px; color: var(--border);">|</span>
-                    
-                    <!-- User Menu Dropdown -->
+                <!-- Spacer -->
+                <div style="flex: 1;"></div>
+
+                <!-- Profile Dropdown (Desktop & Tablet) -->
+                <div class="navbar-menu">
                     <div class="user-menu-container">
                         <button class="user-menu-btn" onclick="toggleUserMenu()">
                             <span class="user-icon">👤</span>
-                            <span id="userEmail" class="user-email">admin@hostizzy.com</span>
+                            <span id="userEmail" class="user-email">Account</span>
                             <span class="user-menu-arrow">▼</span>
                         </button>
                         <div class="user-menu-dropdown" id="userMenuDropdown">
                             <div class="user-menu-header">
-                                <div class="user-menu-email" id="userEmailDropdown">admin@hostizzy.com</div>
+                                <div class="user-menu-email" id="userEmailDropdown">user@hostizzy.com</div>
                                 <div class="user-menu-status">
                                     <span class="online-indicator"></span> Online
                                 </div>
@@ -3312,16 +3663,201 @@
             </div>
         </nav>
 
+        <!-- Desktop Sidebar -->
+        <aside class="sidebar">
+            <!-- Main Navigation Menu -->
+            <div class="sidebar-menu">
+                <div class="sidebar-title">Navigation</div>
+                
+                <!-- Dashboard -->
+                <a class="sidebar-item active" onclick="showView('dashboard')">
+                    <span class="sidebar-item-icon">📊</span>
+                    <span class="sidebar-item-label">Dashboard</span>
+                </a>
+
+                <!-- Reservations -->
+                <a class="sidebar-item" onclick="showView('reservations')">
+                    <span class="sidebar-item-icon">📅</span>
+                    <span class="sidebar-item-label">Reservations</span>
+                </a>
+
+                <!-- Guests -->
+                <a class="sidebar-item" onclick="showView('guests')">
+                    <span class="sidebar-item-icon">👥</span>
+                    <span class="sidebar-item-label">Guests</span>
+                </a>
+
+                <!-- Payments -->
+                <a class="sidebar-item" onclick="showView('payments')">
+                    <span class="sidebar-item-icon">💰</span>
+                    <span class="sidebar-item-label">Payments</span>
+                </a>
+
+                <!-- Meals -->
+                <a class="sidebar-item" onclick="showView('meals')">
+                    <span class="sidebar-item-icon">🍽️</span>
+                    <span class="sidebar-item-label">Meals</span>
+                </a>
+
+                <!-- Properties -->
+                <a class="sidebar-item" onclick="showView('properties')">
+                    <span class="sidebar-item-icon">🏘️</span>
+                    <span class="sidebar-item-label">Properties</span>
+                </a>
+
+                <!-- Documents -->
+                <a class="sidebar-item" onclick="showView('guestDocuments')">
+                    <span class="sidebar-item-icon">📄</span>
+                    <span class="sidebar-item-label">Documents</span>
+                </a>
+
+                <!-- Performance -->
+                <a class="sidebar-item" onclick="showView('performance')">
+                    <span class="sidebar-item-icon">📈</span>
+                    <span class="sidebar-item-label">Analytics</span>
+                </a>
+
+                <!-- Availability -->
+                <a class="sidebar-item" onclick="showView('availability')">
+                    <span class="sidebar-item-icon">📆</span>
+                    <span class="sidebar-item-label">Availability</span>
+                </a>
+
+                <!-- Team -->
+                <a class="sidebar-item" onclick="showView('team')">
+                    <span class="sidebar-item-icon">👨‍💼</span>
+                    <span class="sidebar-item-label">Team</span>
+                </a>
+            </div>
+
+            <!-- Sidebar Footer (Settings & Support) -->
+            <div class="sidebar-footer">
+                <div class="sidebar-title" style="padding: 0 16px;">More</div>
+                
+                <!-- Settings -->
+                <a class="sidebar-item" onclick="showView('settings')">
+                    <span class="sidebar-item-icon">⚙️</span>
+                    <span class="sidebar-item-label">Settings</span>
+                </a>
+
+                <!-- Logout -->
+                <a class="sidebar-item" onclick="logout()">
+                    <span class="sidebar-item-icon">🚪</span>
+                    <span class="sidebar-item-label">Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Mobile Top Header -->
+        <div class="mobile-header">
+            <div class="mobile-header-content">
+                <!-- Hamburger Menu Button -->
+                <button class="mobile-menu-btn" onclick="toggleMobileSidebar()">
+                    <span id="hamburgerIcon">☰</span>
+                </button>
+
+                <!-- Logo (Center) -->
+                <div class="mobile-header-logo" onclick="showView('home')" style="cursor: pointer;">
+                    🏠 ResIQ
+                </div>
+
+                <!-- Profile Button -->
+                <button class="mobile-menu-btn" onclick="toggleUserMenuMobile()">👤</button>
+            </div>
+        </div>
+
+        <!-- Mobile Sidebar (Hamburger Menu) -->
+        <aside class="mobile-sidebar" id="mobileSidebar">
+            <div class="mobile-sidebar-header">
+                ☰ Menu
+            </div>
+
+            <div class="mobile-sidebar-menu">
+                <!-- Dashboard -->
+                <a class="mobile-sidebar-link active" onclick="showView('dashboard'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">📊</span>
+                    <span class="mobile-sidebar-text">Dashboard</span>
+                </a>
+
+                <!-- Reservations -->
+                <a class="mobile-sidebar-link" onclick="showView('reservations'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">📅</span>
+                    <span class="mobile-sidebar-text">Reservations</span>
+                </a>
+
+                <!-- Guests -->
+                <a class="mobile-sidebar-link" onclick="showView('guests'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">👥</span>
+                    <span class="mobile-sidebar-text">Guests</span>
+                </a>
+
+                <!-- Payments -->
+                <a class="mobile-sidebar-link" onclick="showView('payments'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">💰</span>
+                    <span class="mobile-sidebar-text">Payments</span>
+                </a>
+
+                <!-- Meals -->
+                <a class="mobile-sidebar-link" onclick="showView('meals'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">🍽️</span>
+                    <span class="mobile-sidebar-text">Meals</span>
+                </a>
+
+                <!-- Properties -->
+                <a class="mobile-sidebar-link" onclick="showView('properties'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">🏘️</span>
+                    <span class="mobile-sidebar-text">Properties</span>
+                </a>
+
+                <!-- Documents -->
+                <a class="mobile-sidebar-link" onclick="showView('guestDocuments'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">📄</span>
+                    <span class="mobile-sidebar-text">Documents</span>
+                </a>
+
+                <!-- Analytics -->
+                <a class="mobile-sidebar-link" onclick="showView('performance'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">📈</span>
+                    <span class="mobile-sidebar-text">Analytics</span>
+                </a>
+
+                <!-- Availability -->
+                <a class="mobile-sidebar-link" onclick="showView('availability'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">📆</span>
+                    <span class="mobile-sidebar-text">Availability</span>
+                </a>
+
+                <!-- Team -->
+                <a class="mobile-sidebar-link" onclick="showView('team'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">👨‍💼</span>
+                    <span class="mobile-sidebar-text">Team</span>
+                </a>
+            </div>
+
+            <div class="mobile-sidebar-footer">
+                <!-- Settings -->
+                <a class="mobile-sidebar-link" onclick="showView('settings'); closeMobileSidebar();">
+                    <span class="mobile-sidebar-icon">⚙️</span>
+                    <span class="mobile-sidebar-text">Settings</span>
+                </a>
+
+                <!-- Logout -->
+                <a class="mobile-sidebar-link" onclick="logout();">
+                    <span class="mobile-sidebar-icon">🚪</span>
+                    <span class="mobile-sidebar-text">Logout</span>
+                </a>
+            </div>
+        </aside>
+
+        <!-- Mobile Overlay (for sidebar backdrop) -->
+        <div class="mobile-overlay" id="mobileOverlay" onclick="closeMobileSidebar()"></div>
+
         <!-- Mobile Bottom Navigation -->
         <div class="mobile-nav">
             <div class="mobile-nav-items">
                 <a class="mobile-nav-item" onclick="showView('home')">
                     <div class="mobile-nav-icon">🏠</div>
                     <div>Home</div>
-                </a>
-                <a class="mobile-nav-item active" onclick="showView('dashboard')">
-                    <div class="mobile-nav-icon">📊</div>
-                    <div>Dashboard</div>
                 </a>
                 <a class="mobile-nav-item" onclick="showView('reservations')">
                     <div class="mobile-nav-icon">📅</div>
@@ -3330,6 +3866,10 @@
                 <a class="mobile-nav-item" onclick="showView('guests')">
                     <div class="mobile-nav-icon">👥</div>
                     <div>Guests</div>
+                </a>
+                <a class="mobile-nav-item" onclick="showView('meals')">
+                    <div class="mobile-nav-icon">🍽️</div>
+                    <div>Meals</div>
                 </a>
                 <a class="mobile-nav-item" onclick="showView('payments')">
                     <div class="mobile-nav-icon">💰</div>
@@ -16505,6 +17045,115 @@
     </style>
 
     <script>
+
+        // ==========================================
+        // NEW NAVIGATION FUNCTIONS
+        // ==========================================
+
+        // Toggle Mobile Sidebar
+        function toggleMobileSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            const hamburger = document.getElementById('hamburgerIcon');
+            
+            sidebar.classList.toggle('active');
+            overlay.classList.toggle('active');
+            
+            // Animate hamburger icon
+            hamburger.textContent = sidebar.classList.contains('active') ? '✕' : '☰';
+        }
+
+        // Close Mobile Sidebar
+        function closeMobileSidebar() {
+            const sidebar = document.getElementById('mobileSidebar');
+            const overlay = document.getElementById('mobileOverlay');
+            const hamburger = document.getElementById('hamburgerIcon');
+            
+            sidebar.classList.remove('active');
+            overlay.classList.remove('active');
+            hamburger.textContent = '☰';
+        }
+
+        // Toggle User Menu (Mobile)
+        function toggleUserMenuMobile() {
+            const userMenu = document.getElementById('userMenuDropdown');
+            userMenu.classList.toggle('active');
+        }
+
+        // Update Active Navigation Item
+        function setActiveNavItem(viewName) {
+            // Clear all active sidebar items
+            document.querySelectorAll('.sidebar-item').forEach(item => {
+                item.classList.remove('active');
+            });
+            
+            document.querySelectorAll('.mobile-sidebar-link').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            document.querySelectorAll('.mobile-nav-item').forEach(item => {
+                item.classList.remove('active');
+            });
+
+            // Set active based on view name
+            const sidebarSelector = `.sidebar-item[onclick*="'${viewName}'"]`;
+            const mobileSidebarSelector = `.mobile-sidebar-link[onclick*="'${viewName}'"]`;
+            const mobileNavSelector = `.mobile-nav-item[onclick*="'${viewName}'"]`;
+
+            const sidebarItem = document.querySelector(sidebarSelector);
+            const mobileSidebarItem = document.querySelector(mobileSidebarSelector);
+            const mobileNavItem = document.querySelector(mobileNavSelector);
+
+            if (sidebarItem) sidebarItem.classList.add('active');
+            if (mobileSidebarItem) mobileSidebarItem.classList.add('active');
+            if (mobileNavItem) mobileNavItem.classList.add('active');
+        }
+
+        // Toggle Sidebar Compact Mode (Tablet)
+        function toggleSidebarCompact() {
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+                sidebar.classList.toggle('compact');
+            }
+        }
+
+        // Close all dropdowns on view change
+        function closeAllMenus() {
+            closeMobileSidebar();
+            document.getElementById('userMenuDropdown').classList.remove('active');
+            document.getElementById('moreDropdownMenu').classList.remove('active');
+        }
+
+        // Handle responsive sidebar on window resize
+        window.addEventListener('resize', () => {
+            const width = window.innerWidth;
+            
+            if (width >= 1025) {
+                // Desktop - show sidebar
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar) sidebar.classList.remove('compact');
+                closeMobileSidebar();
+            } else if (width >= 769 && width <= 1024) {
+                // Tablet - show compact sidebar
+                const sidebar = document.querySelector('.sidebar');
+                if (sidebar) sidebar.classList.add('compact');
+                closeMobileSidebar();
+            } else {
+                // Mobile - hide sidebar
+                closeMobileSidebar();
+            }
+        });
+
+        // Update existing showView function to call setActiveNavItem
+        const originalShowView = window.showView;
+        if (originalShowView) {
+            window.showView = function(viewName) {
+                originalShowView(viewName);
+                setActiveNavItem(viewName);
+                closeAllMenus();
+                window.scrollTo(0, 0);
+            };
+        }
         // ==========================================
         // PWA SERVICE WORKER & INSTALL PROMPT
         // ==========================================
