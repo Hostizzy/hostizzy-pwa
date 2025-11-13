@@ -1,6 +1,6 @@
 # ResIQ - Hospitality Property Management System
 
-![ResIQ Banner](assets/logo-195.png)
+![ResIQ Banner](assets/logo-132.png)
 
 > Enterprise-grade Property Management System for vacation rentals, farmhouses, homestays, and villas. Built for founders who need complete control over their reservations, guests, payments, and team operations.
 
