@@ -13424,7 +13424,7 @@
             const properties = await db.getProperties();
             
             const propertyFilter = document.getElementById('calendarPropertyFilter');
-            if (propertyFilter.kids.length === 1) {
+            if (propertyFilter && propertyFilter.children.length === 1) {
                 propertyFilter.innerHTML = '<option value="">All Properties</option>' + 
                     properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('');
             }
@@ -17120,8 +17120,10 @@
         // Close all dropdowns on view change
         function closeAllMenus() {
             closeMobileSidebar();
-            document.getElementById('userMenuDropdown').classList.remove('active');
-            document.getElementById('moreDropdownMenu').classList.remove('active');
+            const userMenu = document.getElementById('userMenuDropdown');
+            if (userMenu) userMenu.classList.remove('active');
+            const moreMenu = document.getElementById('moreDropdownMenu');
+            if (moreMenu) moreMenu.classList.remove('active');
         }
 
         // Handle responsive sidebar on window resize
