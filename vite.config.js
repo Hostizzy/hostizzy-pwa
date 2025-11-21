@@ -34,6 +34,14 @@ export default defineConfig({
       }
     })
   ],
+  optimizeDeps: {
+    include: ['@supabase/supabase-js'],
+    entries: [
+      'index.html',
+      'guest-portal.html',
+      'offline.html'
+    ]
+  },
   build: {
     outDir: 'dist',
     sourcemap: true,
