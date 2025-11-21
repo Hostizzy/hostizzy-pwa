@@ -20,14 +20,17 @@ import './scripts/utils.js'       // Formatters, validators, helpers
 import './scripts/ui.js'          // UI utilities (toasts, loading, modals)
 
 // Core modules
-import './scripts/database.js'    // DB operations, IndexedDB
-import './scripts/auth.js'        // Login, logout, session management
-import './scripts/templates.js'   // WhatsApp message templates
-import './scripts/whatsapp.js'    // WhatsApp integration
+import './scripts/database.js'      // DB operations, IndexedDB
+import './scripts/auth.js'          // Login, logout, session management
+import './scripts/templates.js'     // WhatsApp message templates
+import './scripts/whatsapp.js'      // WhatsApp integration
+
+// Feature modules
+import './scripts/reservations.js'  // Reservation CRUD, modals, filtering
 
 // Import legacy JavaScript (remaining code to be extracted)
 // TODO: Extract remaining modules:
-// - reservations.js, payments.js, properties.js, guests.js
+// - payments.js, properties.js, guests.js
 // - dashboard.js, analytics.js, notifications.js
 // - pwa.js, navigation.js, sync.js
 import './scripts/legacy.js'
