@@ -34,11 +34,12 @@ import './scripts/properties.js'    // Property management, iCal sync
 // Auxiliary modules
 import './scripts/navigation.js'      // View management, routing
 import './scripts/notifications.js'   // Push notifications, browser notifications
+import './scripts/pwa.js'             // PWA installation, service worker
+import './scripts/sync.js'            // Online/offline sync
 
 // Import legacy JavaScript (remaining code to be extracted)
 // TODO: Extract remaining modules:
-// - dashboard.js, analytics.js
-// - pwa.js, sync.js
+// - dashboard.js, analytics.js (complex visualization modules - TBD)
 import './scripts/legacy.js'
 
 console.log('✅ ResIQ loaded successfully (modular version)')
