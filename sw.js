@@ -1,35 +1,58 @@
-const CACHE_VERSION = 'v3.0.1';
-const CACHE_NAME = `resiq-${CACHE_VERSION}`;
+/**
+ * ResIQ Service Worker
+ * Version: 4.0.0
+ * Features: Caching, Push Notifications, Background Sync, Offline Support
+ */
 
-// Files to cache
-const urlsToCache = [
+const CACHE_VERSION = 'v4.0.0';
+const CACHE_NAME = `resiq-${CACHE_VERSION}`;
+const OFFLINE_URL = '/offline.html';
+
+// Files to cache for offline support
+const STATIC_CACHE = [
   '/',
   '/index.html',
-  '/manifest.json'
+  '/offline.html',
+  '/manifest.json',
+  '/assets/logo.png',
+  '/assets/logo-192.png',
+  '/assets/logo-512-maskable.png'
 ];
 
-// Install event - cache files
+// API endpoints to cache with network-first strategy
+const API_CACHE_NAME = `resiq-api-${CACHE_VERSION}`;
+
+// ============================================
+// INSTALL EVENT - Cache static assets
+// ============================================
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+  console.log('[SW] Installing service worker v4.0.0...');
+
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then((cache) => {
-        console.log('[SW] Caching app shell');
-        return cache.addAll(urlsToCache);
+        console.log('[SW] Caching app shell and static assets');
+        return cache.addAll(STATIC_CACHE);
       })
       .then(() => self.skipWaiting())
+      .catch((error) => {
+        console.error('[SW] Cache failed:', error);
+      })
   );
 });
 
-// Activate event - clean old caches
+// ============================================
+// ACTIVATE EVENT - Clean old caches
+// ============================================
 self.addEventListener('activate', (event) => {
   console.log('[SW] Activating service worker...');
+
   event.waitUntil(
     caches.keys()
       .then((cacheNames) => {
         return Promise.all(
           cacheNames
-            .filter((name) => name !== CACHE_NAME)
+            .filter((name) => name.startsWith('resiq-') && name !== CACHE_NAME && name !== API_CACHE_NAME)
             .map((name) => {
               console.log('[SW] Deleting old cache:', name);
               return caches.delete(name);
@@ -40,22 +63,95 @@ self.addEventListener('activate', (event) => {
   );
 });
 
-// Fetch event - network first, fallback to cache
+// ============================================
+// FETCH EVENT - Network-first with cache fallback
+// ============================================
 self.addEventListener('fetch', (event) => {
   const { request } = event;
-  
+  const url = new URL(request.url);
+
   // Skip non-GET requests
   if (request.method !== 'GET') return;
-  
-  // Skip Supabase API calls
-  if (request.url.includes('supabase.co')) {
+
+  // Skip Supabase API calls - handle separately
+  if (url.hostname.includes('supabase.co')) {
     return;
   }
-  
+
+  // Skip chrome-extension and other non-http(s) requests
+  if (!url.protocol.startsWith('http')) {
+    return;
+  }
+
+  // Handle navigation requests (HTML pages)
+  if (request.mode === 'navigate') {
+    event.respondWith(
+      fetch(request)
+        .then((response) => {
+          // Cache successful navigation responses
+          if (response.status === 200) {
+            const responseClone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(request, responseClone);
+            });
+          }
+          return response;
+        })
+        .catch(() => {
+          // Return cached page or offline page
+          return caches.match(request)
+            .then((cachedResponse) => {
+              if (cachedResponse) {
+                return cachedResponse;
+              }
+              // Return offline page for navigation requests
+              return caches.match(OFFLINE_URL);
+            });
+        })
+    );
+    return;
+  }
+
+  // Handle static assets - Cache first, network fallback
+  if (request.destination === 'image' ||
+      request.destination === 'style' ||
+      request.destination === 'script' ||
+      request.destination === 'font') {
+    event.respondWith(
+      caches.match(request)
+        .then((cachedResponse) => {
+          if (cachedResponse) {
+            // Return cache, but also update in background
+            fetch(request).then((networkResponse) => {
+              if (networkResponse.status === 200) {
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(request, networkResponse);
+                });
+              }
+            }).catch(() => {});
+            return cachedResponse;
+          }
+
+          // Not in cache, fetch from network
+          return fetch(request)
+            .then((response) => {
+              if (response.status === 200) {
+                const responseClone = response.clone();
+                caches.open(CACHE_NAME).then((cache) => {
+                  cache.put(request, responseClone);
+                });
+              }
+              return response;
+            });
+        })
+    );
+    return;
+  }
+
+  // Default: Network first with cache fallback
   event.respondWith(
     fetch(request)
       .then((response) => {
-        // Clone and cache successful responses
         if (response.status === 200) {
           const responseClone = response.clone();
           caches.open(CACHE_NAME).then((cache) => {
@@ -65,8 +161,238 @@ self.addEventListener('fetch', (event) => {
         return response;
       })
       .catch(() => {
-        // Network failed, try cache
         return caches.match(request);
       })
   );
 });
+
+// ============================================
+// PUSH NOTIFICATIONS
+// ============================================
+self.addEventListener('push', (event) => {
+  console.log('[SW] Push notification received');
+
+  let notificationData = {
+    title: 'ResIQ Notification',
+    body: 'You have a new update',
+    icon: '/assets/logo-192.png',
+    badge: '/assets/logo-96.png',
+    tag: 'resiq-notification',
+    requireInteraction: false,
+    data: {
+      url: '/'
+    }
+  };
+
+  // Parse push data if available
+  if (event.data) {
+    try {
+      const data = event.data.json();
+      notificationData = {
+        ...notificationData,
+        ...data,
+        icon: data.icon || notificationData.icon,
+        badge: data.badge || notificationData.badge
+      };
+    } catch (e) {
+      // If not JSON, use text as body
+      notificationData.body = event.data.text();
+    }
+  }
+
+  const options = {
+    body: notificationData.body,
+    icon: notificationData.icon,
+    badge: notificationData.badge,
+    tag: notificationData.tag,
+    requireInteraction: notificationData.requireInteraction,
+    vibrate: [100, 50, 100],
+    data: notificationData.data,
+    actions: notificationData.actions || [
+      {
+        action: 'open',
+        title: 'Open App'
+      },
+      {
+        action: 'dismiss',
+        title: 'Dismiss'
+      }
+    ]
+  };
+
+  event.waitUntil(
+    self.registration.showNotification(notificationData.title, options)
+  );
+});
+
+// Handle notification click
+self.addEventListener('notificationclick', (event) => {
+  console.log('[SW] Notification clicked:', event.action);
+
+  event.notification.close();
+
+  if (event.action === 'dismiss') {
+    return;
+  }
+
+  // Get the URL to open
+  const urlToOpen = event.notification.data?.url || '/';
+
+  event.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true })
+      .then((clientList) => {
+        // Check if app is already open
+        for (const client of clientList) {
+          if (client.url.includes(self.registration.scope) && 'focus' in client) {
+            client.postMessage({
+              type: 'NOTIFICATION_CLICK',
+              url: urlToOpen,
+              data: event.notification.data
+            });
+            return client.focus();
+          }
+        }
+        // App not open, open new window
+        if (clients.openWindow) {
+          return clients.openWindow(urlToOpen);
+        }
+      })
+  );
+});
+
+// Handle notification close
+self.addEventListener('notificationclose', (event) => {
+  console.log('[SW] Notification closed');
+});
+
+// ============================================
+// BACKGROUND SYNC
+// ============================================
+self.addEventListener('sync', (event) => {
+  console.log('[SW] Background sync triggered:', event.tag);
+
+  if (event.tag === 'resiq-sync-reservations') {
+    event.waitUntil(syncReservations());
+  } else if (event.tag === 'resiq-sync-payments') {
+    event.waitUntil(syncPayments());
+  } else if (event.tag === 'resiq-sync-all') {
+    event.waitUntil(syncAllData());
+  }
+});
+
+// Sync reservations from IndexedDB
+async function syncReservations() {
+  console.log('[SW] Syncing pending reservations...');
+
+  try {
+    // Notify the main thread to handle sync
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_RESERVATIONS'
+      });
+    });
+    return true;
+  } catch (error) {
+    console.error('[SW] Reservation sync failed:', error);
+    throw error;
+  }
+}
+
+// Sync payments from IndexedDB
+async function syncPayments() {
+  console.log('[SW] Syncing pending payments...');
+
+  try {
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_PAYMENTS'
+      });
+    });
+    return true;
+  } catch (error) {
+    console.error('[SW] Payment sync failed:', error);
+    throw error;
+  }
+}
+
+// Sync all pending data
+async function syncAllData() {
+  console.log('[SW] Syncing all pending data...');
+
+  try {
+    const clients = await self.clients.matchAll();
+    clients.forEach(client => {
+      client.postMessage({
+        type: 'SYNC_ALL'
+      });
+    });
+    return true;
+  } catch (error) {
+    console.error('[SW] Full sync failed:', error);
+    throw error;
+  }
+}
+
+// ============================================
+// PERIODIC BACKGROUND SYNC (if supported)
+// ============================================
+self.addEventListener('periodicsync', (event) => {
+  console.log('[SW] Periodic sync triggered:', event.tag);
+
+  if (event.tag === 'resiq-periodic-sync') {
+    event.waitUntil(syncAllData());
+  }
+});
+
+// ============================================
+// MESSAGE HANDLER - Communication with main thread
+// ============================================
+self.addEventListener('message', (event) => {
+  console.log('[SW] Message received:', event.data);
+
+  if (event.data && event.data.type === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
+
+  if (event.data && event.data.type === 'CACHE_URLS') {
+    event.waitUntil(
+      caches.open(CACHE_NAME).then((cache) => {
+        return cache.addAll(event.data.urls);
+      })
+    );
+  }
+
+  if (event.data && event.data.type === 'CLEAR_CACHE') {
+    event.waitUntil(
+      caches.delete(CACHE_NAME).then(() => {
+        console.log('[SW] Cache cleared');
+      })
+    );
+  }
+
+  // Handle push subscription status request
+  if (event.data && event.data.type === 'GET_PUSH_STATUS') {
+    self.registration.pushManager.getSubscription()
+      .then((subscription) => {
+        event.source.postMessage({
+          type: 'PUSH_STATUS',
+          subscribed: !!subscription
+        });
+      });
+  }
+});
+
+// ============================================
+// ERROR HANDLING
+// ============================================
+self.addEventListener('error', (event) => {
+  console.error('[SW] Error:', event.error);
+});
+
+self.addEventListener('unhandledrejection', (event) => {
+  console.error('[SW] Unhandled rejection:', event.reason);
+});
+
+console.log('[SW] Service Worker loaded - v4.0.0');
