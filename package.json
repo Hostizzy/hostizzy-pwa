@@ -1,0 +1,24 @@
+{
+  "name": "resiq-rms",
+  "version": "1.0.0",
+  "description": "ResIQ - Property Management System for Vacation Rentals by Hostizzy",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "vite": "^5.0.11",
+    "vite-plugin-pwa": "^0.17.4",
+    "@types/node": "^20.10.7",
+    "typescript": "^5.3.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
