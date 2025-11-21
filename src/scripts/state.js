@@ -60,6 +60,7 @@ export function setSyncInProgress(status) {
 }
 
 // Make available globally for legacy code
+window.state = state
 window.allReservations = allReservations
 window.allPayments = allPayments
 window.selectedReservations = selectedReservations
