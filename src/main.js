@@ -12,15 +12,24 @@ import { createClient } from '@supabase/supabase-js'
 // Make Supabase available globally (for legacy code compatibility)
 window.createClient = createClient
 
-// Import legacy JavaScript
-// Note: This contains all the original functionality from index.html
-// In Phase 2, we'll modularize this into:
-// - config.js (Supabase setup, constants)
-// - auth.js (login, logout, session)
-// - database.js (DB operations)
+// Import modular scripts (Phase 2 - In Progress)
+// Foundation modules
+import './scripts/config.js'      // Supabase setup, constants
+import './scripts/state.js'       // Global state management
+import './scripts/utils.js'       // Formatters, validators, helpers
+import './scripts/ui.js'          // UI utilities (toasts, loading, modals)
+
+// Core modules
+import './scripts/database.js'    // DB operations, IndexedDB
+import './scripts/auth.js'        // Login, logout, session management
+import './scripts/templates.js'   // WhatsApp message templates
+import './scripts/whatsapp.js'    // WhatsApp integration
+
+// Import legacy JavaScript (remaining code to be extracted)
+// TODO: Extract remaining modules:
 // - reservations.js, payments.js, properties.js, guests.js
-// - notifications.js, pwa.js
-// - ui.js, utils.js
+// - dashboard.js, analytics.js, notifications.js
+// - pwa.js, navigation.js, sync.js
 import './scripts/legacy.js'
 
 console.log('✅ ResIQ loaded successfully (modular version)')
