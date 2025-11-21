@@ -10,9 +10,10 @@ This document tracks the progress of breaking down legacy.js (11,175 lines) into
 | `state.js` | ✅ Complete | ~90 | 10 | Global state management |
 | `utils.js` | ✅ Complete | ~210 | 20+ | Formatters, helpers, validators |
 | `ui.js` | ✅ Complete | ~180 | 20+ | Toasts, loading, modals |
-| `database.js` | 🔄 In Progress | ~800 | 30+ | DB operations, IndexedDB |
-| `auth.js` | ⏳ Pending | ~200 | 5 | Login, logout, session |
-| `templates.js` | ⏳ Pending | ~100 | 5 | WhatsApp message templates |
+| `database.js` | ✅ Complete | ~280 | 30+ | DB operations, IndexedDB |
+| `auth.js` | ✅ Complete | ~180 | 10 | Login, logout, session |
+| `templates.js` | ✅ Complete | ~130 | 5 | WhatsApp message templates |
+| `whatsapp.js` | ✅ Complete | ~300 | 10 | WhatsApp integration |
 | `reservations.js` | ⏳ Pending | ~2000 | 40+ | Reservation CRUD, modals |
 | `payments.js` | ⏳ Pending | ~1500 | 30+ | Payment CRUD, analytics |
 | `properties.js` | ⏳ Pending | ~600 | 15 | Property management |
@@ -23,11 +24,10 @@ This document tracks the progress of breaking down legacy.js (11,175 lines) into
 | `pwa.js` | ⏳ Pending | ~400 | 8 | Service worker, offline |
 | `navigation.js` | ⏳ Pending | ~300 | 5 | View management, routing |
 | `sync.js` | ⏳ Pending | ~400 | 8 | Online/offline sync |
-| `whatsapp.js` | ⏳ Pending | ~300 | 5 | WhatsApp integration |
 
-## Modules Created (✅ 4/18)
+## Modules Created (✅ 8/18)
 
-### 1. config.js
+### 1. config.js ✅
 **Purpose:** Central configuration and constants
 
 **Exports:**
@@ -40,7 +40,7 @@ This document tracks the progress of breaking down legacy.js (11,175 lines) into
 
 ---
 
-### 2. state.js
+### 2. state.js ✅
 **Purpose:** Centralized state management
 
 **Exports:**
@@ -49,12 +49,13 @@ This document tracks the progress of breaking down legacy.js (11,175 lines) into
 - `setAllReservations()`, `setAllPayments()` - State updaters
 - `setCurrentUser()` - User management
 - `selectedReservations` - Selection management
+- `currentWhatsAppBooking`, `setCurrentWhatsAppBooking()` - WhatsApp state
 
 **Dependencies:** None
 
 ---
 
-### 3. utils.js
+### 3. utils.js ✅
 **Purpose:** Utility functions and formatters
 
 **Exports:**
@@ -71,7 +72,7 @@ This document tracks the progress of breaking down legacy.js (11,175 lines) into
 
 ---
 
-### 4. ui.js
+### 4. ui.js ✅
 **Purpose:** UI interaction utilities
 
 **Exports:**
@@ -86,27 +87,86 @@ This document tracks the progress of breaking down legacy.js (11,175 lines) into
 
 ---
 
-## Modules Remaining (⏳ 14/18)
+### 5. database.js ✅
+**Purpose:** Database operations and IndexedDB management
+
+**Exports:**
+- `initOfflineDB()` - Initialize IndexedDB
+- `db.getReservations()`, `db.saveReservation()` - Reservation CRUD
+- `db.getPayments()`, `db.savePayment()` - Payment operations
+- `db.getProperties()` - Property operations
+- `db.getGuests()` - Guest operations
+- `db.getTeamMembers()` - Team member operations
+- All offline sync functions
+
+**Dependencies:** `config.js`
+
+---
+
+### 6. auth.js ✅
+**Purpose:** Authentication and session management
+
+**Exports:**
+- `login()` - User login with credentials
+- `logout()` - User logout
+- `checkSession()` - Session restoration
+- `getCurrentUser()` - Get current user
+- `isLoggedIn()`, `hasRole()`, `hasAnyRole()` - Auth checks
+- `hidePerformanceForStaff()` - Role-based UI
+
+**Dependencies:** `database.js`, `state.js`, `ui.js`
+
+---
+
+### 7. templates.js ✅
+**Purpose:** WhatsApp message templates
+
+**Exports:**
+- `whatsappTemplates` - Template object with 5 templates
+  - `booking_confirmation`
+  - `payment_reminder`
+  - `check_in_instructions`
+  - `thank_you`
+  - `custom`
+- `getWhatsAppTemplate()` - Template getter function
+
+**Dependencies:** `utils.js`
+
+---
+
+### 8. whatsapp.js ✅
+**Purpose:** WhatsApp integration and communication logging
+
+**Exports:**
+- `generateWhatsAppLink()` - Generate WhatsApp Web links
+- `sendWhatsAppMessage()` - Send WhatsApp messages
+- `logCommunication()` - Log communications to DB
+- `openWhatsAppMenu()`, `closeWhatsAppModal()` - Modal management
+- `previewWhatsAppMessage()` - Message preview
+- `confirmSendWhatsApp()` - Send confirmation
+- `loadCommunicationHistory()` - Load message history
+
+**Dependencies:** `config.js`, `templates.js`, `state.js`, `ui.js`, `auth.js`
+
+---
+
+## Modules Remaining (⏳ 10/18)
 
 ### High Priority
-1. **database.js** - Core DB operations (currently extracting)
-2. **auth.js** - Authentication flows
-3. **reservations.js** - Largest feature module
-4. **payments.js** - Second largest feature
+1. **reservations.js** - Largest feature module (~2000 lines)
+2. **payments.js** - Second largest feature (~1500 lines)
+3. **guests.js** - KYC and documents (~1200 lines)
+4. **properties.js** - Property management (~600 lines)
 
 ### Medium Priority
-5. **guests.js** - KYC and documents
-6. **properties.js** - Property management
-7. **dashboard.js** - Dashboard rendering
-8. **notifications.js** - Push notifications
+5. **dashboard.js** - Dashboard rendering (~800 lines)
+6. **notifications.js** - Push notifications (~600 lines)
+7. **analytics.js** - Reports and charts (~500 lines)
 
 ### Lower Priority
-9. **analytics.js** - Reports and charts
-10. **pwa.js** - PWA functionality
-11. **navigation.js** - View routing
-12. **sync.js** - Offline sync
-13. **whatsapp.js** - WhatsApp integration
-14. **templates.js** - Message templates
+8. **pwa.js** - PWA functionality (~400 lines)
+9. **sync.js** - Offline sync (~400 lines)
+10. **navigation.js** - View routing (~300 lines)
 
 ---
 
@@ -114,12 +174,13 @@ This document tracks the progress of breaking down legacy.js (11,175 lines) into
 
 ### Approach
 1. ✅ Extract foundational modules first (config, state, utils, ui)
-2. 🔄 Extract database layer (database.js, auth.js)
-3. ⏳ Extract feature modules (reservations, payments, guests, properties)
-4. ⏳ Extract auxiliary modules (dashboard, analytics, notifications, PWA)
-5. ⏳ Update main.js to import all modules
-6. ⏳ Test build and functionality
-7. ⏳ Remove legacy.js
+2. ✅ Extract database layer (database.js, auth.js)
+3. ✅ Extract communication modules (templates.js, whatsapp.js)
+4. 🔄 Extract feature modules (reservations, payments, guests, properties)
+5. ⏳ Extract auxiliary modules (dashboard, analytics, notifications, PWA, sync, navigation)
+6. ⏳ Update main.js to import all modules (ongoing)
+7. ⏳ Test build and functionality
+8. ⏳ Remove legacy.js
 
 ### Principles
 - ✅ Keep backwards compatibility (window.* global exports)
@@ -183,13 +244,15 @@ After all modules complete:
 
 ## Estimated Timeline
 
-- ✅ **Phase 2A (Foundations):** Complete (4 modules)
-- 🔄 **Phase 2B (Database & Auth):** 1 day (2 modules)
-- ⏳ **Phase 2C (Feature Modules):** 3-4 days (4 modules)
-- ⏳ **Phase 2D (Auxiliary Modules):** 2-3 days (8 modules)
-- ⏳ **Phase 2E (Testing & Cleanup):** 2-3 days
+- ✅ **Phase 2A (Foundations):** Complete (4 modules: config, state, utils, ui)
+- ✅ **Phase 2B (Database & Auth):** Complete (2 modules: database, auth)
+- ✅ **Phase 2C (Communication):** Complete (2 modules: templates, whatsapp)
+- 🔄 **Phase 2D (Feature Modules):** In Progress (0/4 modules: reservations, payments, guests, properties)
+- ⏳ **Phase 2E (Auxiliary Modules):** 2-3 days (6 modules: dashboard, analytics, notifications, PWA, sync, navigation)
+- ⏳ **Phase 2F (Testing & Cleanup):** 2-3 days
 
-**Total:** ~8-11 days for complete modularization
+**Progress:** 8/18 modules complete (44%)
+**Estimated Remaining:** ~5-7 days for complete modularization
 
 ---
 
@@ -210,27 +273,27 @@ After all modules complete:
 
 ```
 src/
-├── main.js                 (entry point)
+├── main.js                 (entry point, updated with 8 modules)
 ├── scripts/
-│   ├── config.js          ✅ Complete
-│   ├── state.js           ✅ Complete
-│   ├── utils.js           ✅ Complete
-│   ├── ui.js              ✅ Complete
-│   ├── database.js        🔄 In Progress
-│   ├── auth.js            ⏳ Pending
-│   ├── templates.js       ⏳ Pending
-│   ├── reservations.js    ⏳ Pending
-│   ├── payments.js        ⏳ Pending
-│   ├── properties.js      ⏳ Pending
-│   ├── guests.js          ⏳ Pending
-│   ├── dashboard.js       ⏳ Pending
-│   ├── analytics.js       ⏳ Pending
-│   ├── notifications.js   ⏳ Pending
-│   ├── pwa.js             ⏳ Pending
-│   ├── navigation.js      ⏳ Pending
-│   ├── sync.js            ⏳ Pending
-│   ├── whatsapp.js        ⏳ Pending
-│   └── legacy.js          (to be removed after all modules extracted)
+│   ├── config.js          ✅ Complete (~40 lines)
+│   ├── state.js           ✅ Complete (~90 lines)
+│   ├── utils.js           ✅ Complete (~210 lines)
+│   ├── ui.js              ✅ Complete (~180 lines)
+│   ├── database.js        ✅ Complete (~280 lines)
+│   ├── auth.js            ✅ Complete (~180 lines)
+│   ├── templates.js       ✅ Complete (~130 lines)
+│   ├── whatsapp.js        ✅ Complete (~300 lines)
+│   ├── reservations.js    ⏳ Pending (~2000 lines)
+│   ├── payments.js        ⏳ Pending (~1500 lines)
+│   ├── guests.js          ⏳ Pending (~1200 lines)
+│   ├── properties.js      ⏳ Pending (~600 lines)
+│   ├── dashboard.js       ⏳ Pending (~800 lines)
+│   ├── analytics.js       ⏳ Pending (~500 lines)
+│   ├── notifications.js   ⏳ Pending (~600 lines)
+│   ├── pwa.js             ⏳ Pending (~400 lines)
+│   ├── sync.js            ⏳ Pending (~400 lines)
+│   ├── navigation.js      ⏳ Pending (~300 lines)
+│   └── legacy.js          (~9,700 lines remaining to extract)
 └── styles/
     └── ... (already modularized in Phase 1)
 ```
