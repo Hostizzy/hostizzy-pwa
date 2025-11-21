@@ -2913,5 +2913,20 @@
 
     <!-- Vite will inject the bundled script here -->
     <script type="module" src="/src/main.js"></script>
+
+    <!-- Hide splash screen after app loads -->
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splashScreen');
+                if (splash) {
+                    splash.style.opacity = '0';
+                    setTimeout(() => {
+                        splash.style.display = 'none';
+                    }, 500);
+                }
+            }, 1000);
+        });
+    </script>
 </body>
 </html>
