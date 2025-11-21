@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="theme-color" content="#1e5a8e">
+    <title>ResIQ - Offline</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            background: linear-gradient(135deg, #1e5a8e 0%, #2563eb 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .offline-container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .offline-icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 24px;
+            background: #f1f5f9;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 40px;
+        }
+
+        h1 {
+            color: #1e293b;
+            font-size: 24px;
+            margin-bottom: 12px;
+        }
+
+        p {
+            color: #64748b;
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 24px;
+        }
+
+        .retry-btn {
+            background: linear-gradient(135deg, #1e5a8e 0%, #2563eb 100%);
+            color: white;
+            border: none;
+            padding: 14px 32px;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: transform 0.2s, box-shadow 0.2s;
+        }
+
+        .retry-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(37, 99, 235, 0.3);
+        }
+
+        .retry-btn:active {
+            transform: translateY(0);
+        }
+
+        .status {
+            margin-top: 20px;
+            padding: 12px;
+            background: #fef3c7;
+            border-radius: 8px;
+            color: #92400e;
+            font-size: 14px;
+            display: none;
+        }
+
+        .status.online {
+            background: #d1fae5;
+            color: #065f46;
+        }
+
+        .logo {
+            width: 120px;
+            margin-bottom: 20px;
+        }
+
+        .features {
+            margin-top: 24px;
+            padding-top: 24px;
+            border-top: 1px solid #e2e8f0;
+            text-align: left;
+        }
+
+        .features h3 {
+            color: #1e293b;
+            font-size: 14px;
+            margin-bottom: 12px;
+        }
+
+        .feature-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            color: #64748b;
+            font-size: 13px;
+            margin-bottom: 8px;
+        }
+
+        .feature-item span {
+            color: #10b981;
+        }
+    </style>
+</head>
+<body>
+    <div class="offline-container">
+        <img src="/assets/logo-192.png" alt="ResIQ Logo" class="logo" onerror="this.style.display='none'">
+
+        <div class="offline-icon">
+            <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="#64748b" stroke-width="2">
+                <line x1="1" y1="1" x2="23" y2="23"></line>
+                <path d="M16.72 11.06A10.94 10.94 0 0 1 19 12.55"></path>
+                <path d="M5 12.55a10.94 10.94 0 0 1 5.17-2.39"></path>
+                <path d="M10.71 5.05A16 16 0 0 1 22.58 9"></path>
+                <path d="M1.42 9a15.91 15.91 0 0 1 4.7-2.88"></path>
+                <path d="M8.53 16.11a6 6 0 0 1 6.95 0"></path>
+                <line x1="12" y1="20" x2="12.01" y2="20"></line>
+            </svg>
+        </div>
+
+        <h1>You're Offline</h1>
+        <p>It looks like you've lost your internet connection. Don't worry - ResIQ will work once you're back online.</p>
+
+        <button class="retry-btn" onclick="checkConnection()">
+            Try Again
+        </button>
+
+        <div class="status" id="status"></div>
+
+        <div class="features">
+            <h3>While offline, you can still:</h3>
+            <div class="feature-item">
+                <span>&#10003;</span> View cached reservations
+            </div>
+            <div class="feature-item">
+                <span>&#10003;</span> Create new bookings (syncs when online)
+            </div>
+            <div class="feature-item">
+                <span>&#10003;</span> Record payments offline
+            </div>
+            <div class="feature-item">
+                <span>&#10003;</span> Access guest documents
+            </div>
+        </div>
+    </div>
+
+    <script>
+        function checkConnection() {
+            const status = document.getElementById('status');
+
+            if (navigator.onLine) {
+                status.textContent = 'Connection restored! Redirecting...';
+                status.className = 'status online';
+                status.style.display = 'block';
+                setTimeout(() => {
+                    window.location.href = '/';
+                }, 1000);
+            } else {
+                status.textContent = 'Still offline. Please check your connection.';
+                status.className = 'status';
+                status.style.display = 'block';
+                setTimeout(() => {
+                    status.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        // Auto-detect when back online
+        window.addEventListener('online', () => {
+            const status = document.getElementById('status');
+            status.textContent = 'Connection restored! Redirecting...';
+            status.className = 'status online';
+            status.style.display = 'block';
+            setTimeout(() => {
+                window.location.href = '/';
+            }, 1500);
+        });
+    </script>
+</body>
+</html>
