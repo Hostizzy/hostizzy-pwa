@@ -118,7 +118,6 @@ npm run test:coverage # Generate coverage report
 **Coverage Exclusions:**
 - `node_modules/`
 - `dist/`
-- `src/scripts/legacy.js`
 - Test files themselves
 
 ---

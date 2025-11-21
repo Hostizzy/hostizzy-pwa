@@ -11,7 +11,6 @@ export default defineConfig({
       exclude: [
         'node_modules/',
         'dist/',
-        'src/scripts/legacy.js',
         '**/*.spec.ts',
         '**/*.test.ts',
         '**/types/**'

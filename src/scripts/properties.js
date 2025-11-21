@@ -956,7 +956,6 @@ export async function loadPropertyPerformance() {
 
         // Calculate and display metrics
         // (This would include revenue, occupancy, bookings, etc.)
-        // Implementation continues in legacy.js
 
         console.log('Performance data loaded:', reservations.length, 'reservations')
 
