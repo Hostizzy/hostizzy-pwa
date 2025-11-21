@@ -14117,9 +14117,18 @@
         // PUSH NOTIFICATION SUBSCRIPTION (PWA)
         // ============================================
 
-        // VAPID public key - Replace with your own from web-push library or push service
-        // Generate at: https://web-push-codelab.glitch.me/ or use web-push npm package
+        // VAPID public key - Generate at: https://web-push-codelab.glitch.me/
+        // IMPORTANT: Replace this with your actual VAPID public key
+        // After generating keys, paste your PUBLIC key here (not the private key!)
         const VAPID_PUBLIC_KEY = 'YOUR_VAPID_PUBLIC_KEY_HERE';
+
+        // Instructions:
+        // 1. Go to https://web-push-codelab.glitch.me/
+        // 2. Click "Generate VAPID Keys"
+        // 3. Copy the PUBLIC key (NOT the private key)
+        // 4. Replace 'YOUR_VAPID_PUBLIC_KEY_HERE' above with your public key
+        // 5. Add both keys to Supabase Vault (Settings → Vault → Secrets)
+        // 6. Deploy and test!
 
         // Check if push notifications are supported
         function isPushSupported() {
