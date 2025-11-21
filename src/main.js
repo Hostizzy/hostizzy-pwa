@@ -36,10 +36,10 @@ import './scripts/navigation.js'      // View management, routing
 import './scripts/notifications.js'   // Push notifications, browser notifications
 import './scripts/pwa.js'             // PWA installation, service worker
 import './scripts/sync.js'            // Online/offline sync
+import './scripts/dashboard.js'       // Dashboard rendering, metrics, filters
+import './scripts/analytics.js'       // Charts, reports, visualizations
 
-// Import legacy JavaScript (remaining code to be extracted)
-// TODO: Extract remaining modules:
-// - dashboard.js, analytics.js (complex visualization modules - TBD)
+// Import legacy JavaScript (remaining helper functions and utilities)
 import './scripts/legacy.js'
 
 console.log('✅ ResIQ loaded successfully (modular version)')
