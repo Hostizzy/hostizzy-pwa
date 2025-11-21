@@ -55,15 +55,17 @@
                 <img src="assets/logo.png" alt="ResIQ" class="logo-img">
                 <p>Property Management System</p>
             </div>
-            <div class="form-group">
-                <label>Email</label>
-                <input type="email" id="loginEmail" placeholder="admin@hostizzy.com">
-            </div>
-            <div class="form-group">
-                <label>Password</label>
-                <input type="password" id="loginPassword" placeholder="••••••••">
-            </div>
-            <button class="btn btn-primary" style="width: 100%;" onclick="login()">Login</button>
+            <form onsubmit="login(); return false;">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="loginEmail" placeholder="admin@hostizzy.com" autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" placeholder="••••••••" autocomplete="current-password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Login</button>
+            </form>
         </div>
     </div>
 
@@ -2086,27 +2088,29 @@
                 <h3 class="modal-title">Add Team Member</h3>
                 <button class="close-btn" onclick="closeTeamModal()">&times;</button>
             </div>
-            <div class="form-group">
-                <label>Name *</label>
-                <input type="text" id="teamMemberName" required>
-            </div>
-            <div class="form-group">
-                <label>Email *</label>
-                <input type="email" id="teamMemberEmail" required>
-            </div>
-            <div class="form-group">
-                <label>Password *</label>
-                <input type="password" id="teamMemberPassword" required>
-            </div>
-            <div class="form-group">
-                <label>Role</label>
-                <select id="teamMemberRole">
-                    <option value="admin">Admin</option>
-                    <option value="manager">Manager</option>
-                    <option value="staff">Staff</option>
-                </select>
-            </div>
-            <button class="btn btn-primary" style="width: 100%;" onclick="saveTeamMember()">Add Member</button>
+            <form onsubmit="saveTeamMember(); return false;">
+                <div class="form-group">
+                    <label>Name *</label>
+                    <input type="text" id="teamMemberName" required autocomplete="name">
+                </div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="teamMemberEmail" required autocomplete="email">
+                </div>
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="teamMemberPassword" required autocomplete="new-password">
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select id="teamMemberRole">
+                        <option value="admin">Admin</option>
+                        <option value="manager">Manager</option>
+                        <option value="staff">Staff</option>
+                    </select>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%;">Add Member</button>
+            </form>
         </div>
     </div>
 
