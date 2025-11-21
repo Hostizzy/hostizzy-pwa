@@ -10249,7 +10249,12 @@
                     
                     const result = await db.saveReservation(reservation);
                     console.log('Saved reservation:', result);
-                    
+
+                    // Send push notification for new bookings only (not edits)
+                    if (!editId) {
+                        notifyNewBooking(reservation);
+                    }
+
                     closeReservationModal();
                     await loadReservations();
                     await loadDashboard();
@@ -10650,8 +10655,14 @@
                         // Create new payment
                         await db.savePayment(paymentData);
                         showToast('Success', 'Payment saved successfully!', '✅');
+
+                        // Send push notification for payment received
+                        const reservation = await db.getReservation(bookingId);
+                        if (reservation) {
+                            notifyPaymentReceived(bookingId, amount, reservation.guest_name);
+                        }
                     }
-                    
+
                     await recalculatePaymentStatus(bookingId);
                     closePaymentModal();
                     await loadPayments();
@@ -14195,24 +14206,68 @@
             }
         }
 
-        // Save subscription to server (placeholder - implement with your backend)
+        // Save subscription to Supabase
         async function savePushSubscription(subscription) {
-            // TODO: Send to your Supabase backend or push notification service
-            // Example with Supabase:
-            // await supabase.from('push_subscriptions').upsert({
-            //     user_id: userData?.id,
-            //     endpoint: subscription.endpoint,
-            //     keys: JSON.stringify(subscription.toJSON().keys),
-            //     created_at: new Date().toISOString()
-            // });
-            console.log('[Push] Subscription saved locally');
-            localStorage.setItem('pushSubscription', JSON.stringify(subscription.toJSON()));
+            try {
+                const subJSON = subscription.toJSON();
+                const userData = JSON.parse(localStorage.getItem('userData') || '{}');
+
+                // Prepare subscription data
+                const subscriptionData = {
+                    user_id: userData?.id || null,
+                    user_type: 'staff',  // Can be 'staff', 'owner', or 'guest'
+                    user_email: userData?.email || '',
+                    endpoint: subscription.endpoint,
+                    expiration_time: subscription.expirationTime ? new Date(subscription.expirationTime).toISOString() : null,
+                    p256dh_key: subJSON.keys.p256dh,
+                    auth_key: subJSON.keys.auth,
+                    user_agent: navigator.userAgent,
+                    notification_types: ['kyc_submitted', 'payment_received', 'new_booking', 'checkin_today'],
+                    enabled: true
+                };
+
+                // Upsert to database (update if endpoint exists, insert if new)
+                const { data, error } = await supabase
+                    .from('push_subscriptions')
+                    .upsert(subscriptionData, {
+                        onConflict: 'endpoint',
+                        returning: 'representation'
+                    });
+
+                if (error) throw error;
+
+                console.log('[Push] Subscription saved to database:', data);
+
+                // Also save to localStorage as backup
+                localStorage.setItem('pushSubscription', JSON.stringify(subJSON));
+
+                showToast('✅ Push notifications enabled', 'You will receive important updates');
+                return data;
+            } catch (error) {
+                console.error('[Push] Failed to save subscription:', error);
+                showToast('⚠️ Push notifications error', 'Could not enable push notifications');
+                throw error;
+            }
         }
 
-        // Remove subscription from server
+        // Remove subscription from Supabase
         async function removePushSubscription(subscription) {
-            localStorage.removeItem('pushSubscription');
-            console.log('[Push] Subscription removed');
+            try {
+                const { error } = await supabase
+                    .from('push_subscriptions')
+                    .delete()
+                    .eq('endpoint', subscription.endpoint);
+
+                if (error) throw error;
+
+                console.log('[Push] Subscription removed from database');
+                localStorage.removeItem('pushSubscription');
+
+                showToast('🔕 Push notifications disabled', 'You will no longer receive push notifications');
+            } catch (error) {
+                console.error('[Push] Failed to remove subscription:', error);
+                localStorage.removeItem('pushSubscription');
+            }
         }
 
         // Get current push subscription status
@@ -14262,6 +14317,131 @@
                         window.location.href = event.data.url;
                     }
                 }
+            });
+        }
+
+        // ============================================
+        // NOTIFICATION TRIGGERS (Phase 3)
+        // ============================================
+
+        // Helper function to call Edge Function for sending push
+        async function sendPushNotification(notificationType, payload, options = {}) {
+            try {
+                const { data: { session } } = await supabase.auth.getSession();
+                if (!session) {
+                    console.log('[Push] No session, skipping push notification');
+                    return;
+                }
+
+                const response = await fetch(`${supabase.supabaseUrl}/functions/v1/send-push`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${session.access_token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        notificationType,
+                        payload,
+                        ...options
+                    })
+                });
+
+                const result = await response.json();
+                console.log('[Push] Notification sent:', result);
+                return result;
+            } catch (error) {
+                console.error('[Push] Failed to send notification:', error);
+            }
+        }
+
+        // Trigger: KYC Document Submitted
+        async function notifyKYCSubmitted(bookingId, guestName) {
+            await sendPushNotification('kyc_submitted', {
+                title: '📄 New KYC Document',
+                body: `${guestName} submitted documents for booking #${bookingId}`,
+                icon: '/assets/logo-192.png',
+                badge: '/assets/logo-96.png',
+                url: `/?view=guest-documents&booking=${bookingId}`,
+                requireInteraction: true
+            }, {
+                userTypes: ['staff'],  // Only notify staff
+                bookingId: bookingId
+            });
+        }
+
+        // Trigger: KYC Document Verified
+        async function notifyKYCVerified(bookingId, guestName) {
+            await sendPushNotification('kyc_verified', {
+                title: '✅ Documents Verified',
+                body: `Documents for ${guestName} (booking #${bookingId}) have been approved`,
+                icon: '/assets/logo-192.png',
+                badge: '/assets/logo-96.png',
+                url: `/?view=guest-documents&booking=${bookingId}`
+            }, {
+                bookingId: bookingId
+            });
+        }
+
+        // Trigger: Payment Received
+        async function notifyPaymentReceived(bookingId, amount, guestName) {
+            await sendPushNotification('payment_received', {
+                title: '💰 Payment Received',
+                body: `${guestName} paid ₹${amount.toLocaleString('en-IN')} for booking #${bookingId}`,
+                icon: '/assets/logo-192.png',
+                badge: '/assets/logo-96.png',
+                url: `/?view=payments&booking=${bookingId}`
+            }, {
+                userTypes: ['staff', 'admin'],
+                bookingId: bookingId
+            });
+        }
+
+        // Trigger: New Booking Created
+        async function notifyNewBooking(booking) {
+            await sendPushNotification('new_booking', {
+                title: '🏨 New Booking',
+                body: `${booking.guest_name} booked ${booking.property_name} for ${booking.nights} nights`,
+                icon: '/assets/logo-192.png',
+                badge: '/assets/logo-96.png',
+                url: `/?view=reservations&booking=${booking.booking_id}`,
+                requireInteraction: false
+            }, {
+                userTypes: ['staff', 'admin', 'manager'],
+                bookingId: booking.booking_id
+            });
+        }
+
+        // Trigger: Check-in Today Reminder
+        async function notifyCheckinToday(reservations) {
+            if (!reservations || reservations.length === 0) return;
+
+            const guestList = reservations.map(r => r.guest_name).join(', ');
+            const bookingIds = reservations.map(r => r.booking_id);
+
+            await sendPushNotification('checkin_today', {
+                title: '🔔 Check-ins Today',
+                body: `${reservations.length} guest(s) checking in: ${guestList}`,
+                icon: '/assets/logo-192.png',
+                badge: '/assets/logo-96.png',
+                url: '/?view=reservations&filter=urgent',
+                requireInteraction: false
+            }, {
+                userTypes: ['staff', 'admin', 'manager']
+            });
+        }
+
+        // Trigger: Payment Overdue
+        async function notifyPaymentOverdue(booking) {
+            await sendPushNotification('payment_overdue', {
+                title: '⚠️ Payment Overdue',
+                body: `Booking #${booking.booking_id} has overdue payment of ₹${booking.balance.toLocaleString('en-IN')}`,
+                icon: '/assets/logo-192.png',
+                badge: '/assets/logo-96.png',
+                url: `/?view=payments&booking=${booking.booking_id}`,
+                requireInteraction: true
+            }, {
+                userTypes: ['admin', 'manager'],
+                bookingId: booking.booking_id
             });
         }
 
@@ -14744,9 +14924,16 @@
                     .eq('id', currentDocumentForReview.id);
         
                 if (error) throw error;
-        
+
                 hideLoading();
                 showToast('Document approved successfully!', 'success');
+
+                // Send push notification
+                notifyKYCVerified(
+                    currentDocumentForReview.booking_id,
+                    currentDocumentForReview.guest_name
+                );
+
                 closeGuestDocumentModal();
                 await loadGuestDocuments();
         
