@@ -31,10 +31,13 @@ import './scripts/payments.js'      // Payment CRUD, multi-entry, reminders
 import './scripts/guests.js'        // Guest management, KYC documents
 import './scripts/properties.js'    // Property management, iCal sync
 
+// Auxiliary modules
+import './scripts/navigation.js'    // View management, routing
+
 // Import legacy JavaScript (remaining code to be extracted)
 // TODO: Extract remaining modules:
 // - dashboard.js, analytics.js, notifications.js
-// - pwa.js, navigation.js, sync.js
+// - pwa.js, sync.js
 import './scripts/legacy.js'
 
 console.log('✅ ResIQ loaded successfully (modular version)')
