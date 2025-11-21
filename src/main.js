@@ -32,11 +32,12 @@ import './scripts/guests.js'        // Guest management, KYC documents
 import './scripts/properties.js'    // Property management, iCal sync
 
 // Auxiliary modules
-import './scripts/navigation.js'    // View management, routing
+import './scripts/navigation.js'      // View management, routing
+import './scripts/notifications.js'   // Push notifications, browser notifications
 
 // Import legacy JavaScript (remaining code to be extracted)
 // TODO: Extract remaining modules:
-// - dashboard.js, analytics.js, notifications.js
+// - dashboard.js, analytics.js
 // - pwa.js, sync.js
 import './scripts/legacy.js'
 
