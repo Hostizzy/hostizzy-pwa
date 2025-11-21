@@ -294,6 +294,100 @@ export function updateTopPropertiesStats(filteredReservations = null) {
 }
 
 // ==========================================
+// PERFORMANCE VIEW INITIALIZATION
+// ==========================================
+
+/**
+ * Initialize Performance/Analytics View
+ */
+export async function initializePerformanceView() {
+    try {
+        const { db } = await import('./database.js')
+        const { showToast } = await import('./ui.js')
+
+        // Get data
+        const properties = await db.getProperties()
+        const reservations = await db.getReservations()
+        const payments = await db.getAllPayments()
+
+        // Store in window.state if needed
+        if (!window.state.properties) window.state.properties = properties
+        if (!window.state.reservations) window.state.reservations = reservations
+        if (!window.state.payments) window.state.payments = payments
+
+        // Populate property dropdown
+        const propertyFilter = document.getElementById('performancePropertyFilter')
+        if (propertyFilter) {
+            propertyFilter.innerHTML = '<option value="">🏠 All Properties</option>' +
+                properties.map(p => `<option value="${p.id}">${p.name}</option>`).join('')
+        }
+
+        // Set default date range to current year
+        const today = new Date()
+        const startDateInput = document.getElementById('performanceStartDate')
+        const endDateInput = document.getElementById('performanceEndDate')
+
+        if (startDateInput && endDateInput) {
+            startDateInput.value = `${today.getFullYear()}-01-01`
+            endDateInput.value = today.toISOString().split('T')[0]
+        }
+
+        // Filter active reservations (non-cancelled)
+        const activeReservations = reservations.filter(r => r.status !== 'cancelled')
+
+        // Render all analytics
+        renderPaymentMethodChart(payments, 'performancePaymentMethods')
+        renderChannelDistribution(activeReservations, 'performanceChannels')
+        renderBookingTypeBreakdown(activeReservations, 'performanceBookingTypes')
+        sortPropertiesBy('revenue', activeReservations)
+
+        console.log('✅ Performance view initialized with', {
+            properties: properties.length,
+            reservations: activeReservations.length,
+            payments: payments.length
+        })
+
+    } catch (error) {
+        console.error('Performance initialization error:', error)
+        const { showToast } = await import('./ui.js')
+        showToast('Error', 'Failed to initialize performance view', '❌')
+    }
+}
+
+/**
+ * Load property performance data (called when filters change)
+ */
+export async function loadPropertyPerformance() {
+    try {
+        const propertyId = document.getElementById('performancePropertyFilter')?.value
+        const { db } = await import('./database.js')
+
+        // Get all reservations
+        let reservations = await db.getReservations()
+        const payments = await db.getAllPayments()
+
+        // Filter by property if selected
+        if (propertyId) {
+            reservations = reservations.filter(r => r.property_id == propertyId)
+        }
+
+        // Filter out cancelled
+        const activeReservations = reservations.filter(r => r.status !== 'cancelled')
+
+        // Re-render all analytics with filtered data
+        renderPaymentMethodChart(payments, 'performancePaymentMethods')
+        renderChannelDistribution(activeReservations, 'performanceChannels')
+        renderBookingTypeBreakdown(activeReservations, 'performanceBookingTypes')
+        sortPropertiesBy(currentSortBy, activeReservations)
+
+    } catch (error) {
+        console.error('Performance load error:', error)
+        const { showToast } = await import('./ui.js')
+        showToast('Error', 'Failed to load performance data', '❌')
+    }
+}
+
+// ==========================================
 // GLOBAL EXPORTS FOR LEGACY COMPATIBILITY
 // ==========================================
 
@@ -303,6 +397,8 @@ if (typeof window !== 'undefined') {
     window.renderBookingTypeBreakdown = renderBookingTypeBreakdown
     window.sortPropertiesBy = sortPropertiesBy
     window.updateTopPropertiesStats = updateTopPropertiesStats
+    window.initializePerformanceView = initializePerformanceView
+    window.loadPropertyPerformance = loadPropertyPerformance
 }
 
 console.log('✅ Analytics module loaded')
