@@ -201,6 +201,49 @@ export function exportToCSV(data, filename = 'export.csv') {
     URL.revokeObjectURL(url)
 }
 
+// Filter State Management (localStorage)
+export function saveFilterState(viewName, filters) {
+    try {
+        const filterState = JSON.parse(localStorage.getItem('filterState') || '{}')
+        filterState[viewName] = {
+            ...filters,
+            timestamp: Date.now()
+        }
+        localStorage.setItem('filterState', JSON.stringify(filterState))
+        console.log(`✅ Saved ${viewName} filters:`, filters)
+    } catch (error) {
+        console.error('Error saving filter state:', error)
+    }
+}
+
+export function loadFilterState(viewName) {
+    try {
+        const filterState = JSON.parse(localStorage.getItem('filterState') || '{}')
+        const viewFilters = filterState[viewName]
+
+        // Return filters if they exist and are less than 24 hours old
+        if (viewFilters && (Date.now() - viewFilters.timestamp) < 86400000) {
+            console.log(`✅ Loaded ${viewName} filters:`, viewFilters)
+            return viewFilters
+        }
+        return null
+    } catch (error) {
+        console.error('Error loading filter state:', error)
+        return null
+    }
+}
+
+export function clearFilterState(viewName) {
+    try {
+        const filterState = JSON.parse(localStorage.getItem('filterState') || '{}')
+        delete filterState[viewName]
+        localStorage.setItem('filterState', JSON.stringify(filterState))
+        console.log(`✅ Cleared ${viewName} filters`)
+    } catch (error) {
+        console.error('Error clearing filter state:', error)
+    }
+}
+
 // Make utilities available globally for legacy code
 if (typeof window !== 'undefined') {
     window.formatCurrency = formatCurrency
