@@ -1,0 +1,13 @@
+/* Main Stylesheet - Entry Point */
+
+/* Import all styles in order */
+@import './variables.css';
+@import './base.css';
+@import './legacy.css';
+
+/* Note: legacy.css contains all the original styles from index.html
+   In Phase 2, we'll organize this into:
+   - components.css (buttons, cards, modals, forms)
+   - layout.css (grid, flex, containers, navbar, sidebar)
+   - views.css (dashboard, reservations, payments, etc)
+*/
