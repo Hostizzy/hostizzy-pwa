@@ -14,10 +14,10 @@ This document tracks the progress of breaking down legacy.js (11,175 lines) into
 | `auth.js` | ✅ Complete | ~180 | 10 | Login, logout, session |
 | `templates.js` | ✅ Complete | ~130 | 5 | WhatsApp message templates |
 | `whatsapp.js` | ✅ Complete | ~300 | 10 | WhatsApp integration |
-| `reservations.js` | ⏳ Pending | ~2000 | 40+ | Reservation CRUD, modals |
-| `payments.js` | ⏳ Pending | ~1500 | 30+ | Payment CRUD, analytics |
-| `properties.js` | ⏳ Pending | ~600 | 15 | Property management |
-| `guests.js` | ⏳ Pending | ~1200 | 25 | KYC, documents, approval |
+| `reservations.js` | ✅ Complete | ~900 | 25+ | Reservation CRUD, modals |
+| `payments.js` | ✅ Complete | ~1200 | 30+ | Payment CRUD, multi-entry |
+| `properties.js` | ✅ Complete | ~900 | 20+ | Property management, iCal sync |
+| `guests.js` | ✅ Complete | ~1400 | 35+ | Guest profiles, KYC, documents |
 | `dashboard.js` | ⏳ Pending | ~800 | 15 | Dashboard rendering, stats |
 | `analytics.js` | ⏳ Pending | ~500 | 10 | Charts, reports, trends |
 | `notifications.js` | ⏳ Pending | ~600 | 10 | Push notifications |
@@ -25,7 +25,7 @@ This document tracks the progress of breaking down legacy.js (11,175 lines) into
 | `navigation.js` | ⏳ Pending | ~300 | 5 | View management, routing |
 | `sync.js` | ⏳ Pending | ~400 | 8 | Online/offline sync |
 
-## Modules Created (✅ 8/18)
+## Modules Created (✅ 12/18 = 67%)
 
 ### 1. config.js ✅
 **Purpose:** Central configuration and constants
@@ -247,12 +247,12 @@ After all modules complete:
 - ✅ **Phase 2A (Foundations):** Complete (4 modules: config, state, utils, ui)
 - ✅ **Phase 2B (Database & Auth):** Complete (2 modules: database, auth)
 - ✅ **Phase 2C (Communication):** Complete (2 modules: templates, whatsapp)
-- 🔄 **Phase 2D (Feature Modules):** In Progress (0/4 modules: reservations, payments, guests, properties)
-- ⏳ **Phase 2E (Auxiliary Modules):** 2-3 days (6 modules: dashboard, analytics, notifications, PWA, sync, navigation)
+- ✅ **Phase 2D (Feature Modules):** Complete (4/4 modules: reservations, payments, guests, properties)
+- 🔄 **Phase 2E (Auxiliary Modules):** In Progress (6 modules: dashboard, analytics, notifications, PWA, sync, navigation)
 - ⏳ **Phase 2F (Testing & Cleanup):** 2-3 days
 
-**Progress:** 8/18 modules complete (44%)
-**Estimated Remaining:** ~5-7 days for complete modularization
+**Progress:** 12/18 modules complete (67%)
+**Estimated Remaining:** ~2-3 days for complete modularization
 
 ---
 
@@ -283,10 +283,10 @@ src/
 │   ├── auth.js            ✅ Complete (~180 lines)
 │   ├── templates.js       ✅ Complete (~130 lines)
 │   ├── whatsapp.js        ✅ Complete (~300 lines)
-│   ├── reservations.js    ⏳ Pending (~2000 lines)
-│   ├── payments.js        ⏳ Pending (~1500 lines)
-│   ├── guests.js          ⏳ Pending (~1200 lines)
-│   ├── properties.js      ⏳ Pending (~600 lines)
+│   ├── reservations.js    ✅ Complete (~900 lines)
+│   ├── payments.js        ✅ Complete (~1200 lines)
+│   ├── guests.js          ✅ Complete (~1400 lines)
+│   ├── properties.js      ✅ Complete (~900 lines)
 │   ├── dashboard.js       ⏳ Pending (~800 lines)
 │   ├── analytics.js       ⏳ Pending (~500 lines)
 │   ├── notifications.js   ⏳ Pending (~600 lines)
@@ -300,4 +300,47 @@ src/
 
 ---
 
-Last Updated: 2025-01-21
+Last Updated: 2025-11-21
+
+---
+
+## Recent Progress (Session Update)
+
+### Completed in This Session:
+9. **reservations.js** ✅ (~900 lines)
+   - Reservation CRUD operations
+   - Modal management
+   - Filtering with state persistence
+   - Auto status updates
+   - Tax/revenue calculations
+   - OTA booking handling
+
+10. **payments.js** ✅ (~1200 lines)
+    - Payment CRUD operations
+    - Multi-payment entry system (desktop table + mobile cards)
+    - Payment reminders with urgent indicators
+    - Payment history viewing
+    - Auto-fill helpers
+    - OTA fee handling
+
+11. **guests.js** ✅ (~1400 lines)
+    - Guest profile management
+    - Guest list with table/card views
+    - KYC document management
+    - Document approval/rejection workflow
+    - Guest portal integration
+    - CSV export functionality
+
+12. **properties.js** ✅ (~900 lines)
+    - Property CRUD operations
+    - iCal sync (Airbnb, Booking.com)
+    - Sync status management
+    - Auto-sync (6-hour intervals)
+    - Performance view integration
+    - Availability management
+
+### Extraction Stats:
+- **Lines extracted this session:** ~4,400 lines
+- **Functions extracted:** ~110+ functions
+- **Progress increase:** 44% → 67% (+23%)
+- **Commits:** 5 commits (reservations, payments, guests, properties, progress)
