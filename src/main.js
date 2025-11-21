@@ -29,10 +29,10 @@ import './scripts/whatsapp.js'      // WhatsApp integration
 import './scripts/reservations.js'  // Reservation CRUD, modals, filtering
 import './scripts/payments.js'      // Payment CRUD, multi-entry, reminders
 import './scripts/guests.js'        // Guest management, KYC documents
+import './scripts/properties.js'    // Property management, iCal sync
 
 // Import legacy JavaScript (remaining code to be extracted)
 // TODO: Extract remaining modules:
-// - properties.js
 // - dashboard.js, analytics.js, notifications.js
 // - pwa.js, navigation.js, sync.js
 import './scripts/legacy.js'
