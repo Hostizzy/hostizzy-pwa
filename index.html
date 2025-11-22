@@ -898,32 +898,72 @@
 
         <!-- Guests View -->
         <div id="guestsView" class="container hidden">
-            <div class="card-header">
-                <h2>👥 Guest Directory</h2>
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
-                    <button class="btn btn-secondary btn-sm" onclick="exportGuestsCSV()">📥 Export CSV</button>
+            <!-- ✨ Premium Header -->
+            <div class="page-header animate-fade-in-down">
+                <div>
+                    <h2 class="page-title">👥 Guest Directory</h2>
+                    <p class="page-subtitle">Manage your guest relationships and history</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn-premium btn-premium-outline btn-premium-sm" onclick="exportGuestsCSV()">
+                        📥 Export CSV
+                    </button>
                 </div>
             </div>
 
-            <div class="card">
-                <!-- Filters and Search -->
-                <div class="filters">
-                    <div class="filter-item" style="flex: 1; max-width: 400px;">
-                        <input type="text" id="searchGuests" placeholder="🔍 Search by name, phone, or email..." onkeyup="searchGuests()" style="width: 100%;">
+            <!-- ✨ Premium Guest Statistics -->
+            <div class="stats-grid animate-fade-in-up" style="margin-bottom: var(--space-6);">
+                <div class="stat-card-premium hover-lift" style="background: var(--gradient-primary);">
+                    <div class="stat-card-icon">👥</div>
+                    <div class="stat-card-value" id="guestStatTotal">0</div>
+                    <div class="stat-card-label">Total Guests</div>
+                </div>
+                <div class="stat-card-premium hover-lift" style="background: var(--gradient-success);">
+                    <div class="stat-card-icon">🌟</div>
+                    <div class="stat-card-value" id="guestStatRepeat">0</div>
+                    <div class="stat-card-label">Repeat Guests</div>
+                </div>
+                <div class="stat-card-premium hover-lift" style="background: var(--gradient-warning);">
+                    <div class="stat-card-icon">👑</div>
+                    <div class="stat-card-value" id="guestStatVIP">0</div>
+                    <div class="stat-card-label">VIP (5+ Stays)</div>
+                </div>
+                <div class="stat-card-premium hover-lift" style="background: var(--gradient-purple);">
+                    <div class="stat-card-icon">💎</div>
+                    <div class="stat-card-value" id="guestStatHighValue">0</div>
+                    <div class="stat-card-label">High Value (₹50K+)</div>
+                </div>
+                <div class="stat-card-premium hover-lift" style="background: var(--gradient-ocean);">
+                    <div class="stat-card-icon">📊</div>
+                    <div class="stat-card-value" id="guestStatAvgStays">0</div>
+                    <div class="stat-card-label">Avg Stays/Guest</div>
+                </div>
+            </div>
+
+            <!-- ✨ Premium Search & Filters Card -->
+            <div class="card-premium animate-fade-in-up animate-delay-1">
+                <div class="widget-header">
+                    <h3 class="widget-title">Guest List</h3>
+                </div>
+
+                <!-- Premium Filters -->
+                <div style="padding: var(--space-4); border-bottom: 1px solid var(--neutral-200); display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center;">
+                    <div class="search-premium" style="flex: 1; min-width: 280px;">
+                        <span class="search-premium-icon">🔍</span>
+                        <input type="text" id="searchGuests" class="search-premium-input" placeholder="Search by name, phone, or email..." onkeyup="searchGuests()">
                     </div>
-                    
-                    <!-- View Toggle -->
-                    <div style="display: flex; gap: 8px; align-items: center;">
-                        <button class="btn btn-sm" id="tableViewBtn" onclick="switchGuestView('table')" style="background: var(--primary); color: white;">
+
+                    <div class="btn-group">
+                        <button class="btn-premium btn-premium-sm btn-premium-primary" id="tableViewBtn" onclick="switchGuestView('table')">
                             📊 Table
                         </button>
-                        <button class="btn btn-sm" id="cardViewBtn" onclick="switchGuestView('cards')" style="background: var(--secondary); color: white;">
+                        <button class="btn-premium btn-premium-sm btn-premium-outline" id="cardViewBtn" onclick="switchGuestView('cards')">
                             🎴 Cards
                         </button>
                     </div>
-                    
-                    <div class="filter-item" style="max-width: 180px;">
-                        <select id="guestTypeFilter" onchange="filterGuests()">
+
+                    <div class="select-premium" style="min-width: 180px;">
+                        <select id="guestTypeFilter" onchange="filterGuests()" style="width: 100%; padding: var(--space-2) var(--space-3); border: 2px solid var(--neutral-300); border-radius: var(--radius-lg); font-size: var(--text-sm);">
                             <option value="">All Guests</option>
                             <option value="repeat">🌟 Repeat Guests</option>
                             <option value="new">✨ New Guests</option>
@@ -931,47 +971,23 @@
                             <option value="highvalue">💎 High Value (₹50K+)</option>
                         </select>
                     </div>
-                    
-                    <div class="filter-item" style="max-width: 140px;">
-                        <select id="guestsPerPage" onchange="changeGuestsPerPage()">
+
+                    <div class="select-premium" style="min-width: 120px;">
+                        <select id="guestsPerPage" onchange="changeGuestsPerPage()" style="width: 100%; padding: var(--space-2) var(--space-3); border: 2px solid var(--neutral-300); border-radius: var(--radius-lg); font-size: var(--text-sm);">
                             <option value="25">Show 25</option>
                             <option value="50" selected>Show 50</option>
                             <option value="100">Show 100</option>
                             <option value="all">Show All</option>
                         </select>
                     </div>
-                    
-                    <button class="btn btn-secondary btn-sm" onclick="clearGuestFilters()">Clear</button>
-                </div>
 
-                <!-- Guest Statistics Summary -->
-                <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 16px; padding: 20px; background: var(--background-alt); border-radius: 8px; margin-bottom: 20px;">
-                    <div style="text-align: center;">
-                        <div style="font-size: 28px; font-weight: 700; color: var(--primary);" id="guestStatTotal">0</div>
-                        <div style="font-size: 12px; color: var(--text-secondary);">Total Guests</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 28px; font-weight: 700; color: var(--success);" id="guestStatRepeat">0</div>
-                        <div style="font-size: 12px; color: var(--text-secondary);">Repeat Guests</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 28px; font-weight: 700; color: var(--warning);" id="guestStatVIP">0</div>
-                        <div style="font-size: 12px; color: var(--text-secondary);">VIP (5+ Stays)</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 28px; font-weight: 700; color: #ec4899;" id="guestStatHighValue">0</div>
-                        <div style="font-size: 12px; color: var(--text-secondary);">High Value (₹50K+)</div>
-                    </div>
-                    <div style="text-align: center;">
-                        <div style="font-size: 28px; font-weight: 700; color: #06b6d4;" id="guestStatAvgStays">0</div>
-                        <div style="font-size: 12px; color: var(--text-secondary);">Avg Stays/Guest</div>
-                    </div>
+                    <button class="btn-premium btn-premium-ghost btn-premium-sm" onclick="clearGuestFilters()">Clear</button>
                 </div>
 
                 <!-- Table View Container -->
                 <div id="guestTableView" style="display: block;">
                     <div class="table-container">
-                        <table>
+                        <table class="table-premium">
                             <thead>
                                 <tr>
                                     <th onclick="sortGuestsTable('name')" style="cursor: pointer;">
@@ -993,7 +1009,12 @@
                                 </tr>
                             </thead>
                             <tbody id="guestTableBody">
-                                <tr><td colspan="6" class="text-center">Loading guests...</td></tr>
+                                <tr><td colspan="6" class="text-center" style="padding: var(--space-8);">
+                                    <div class="empty-state-premium">
+                                        <div class="empty-state-icon">👥</div>
+                                        <div class="empty-state-title">Loading guests...</div>
+                                    </div>
+                                </td></tr>
                             </tbody>
                         </table>
                     </div>
@@ -1141,61 +1162,71 @@
 
         <!-- Payments View -->
         <div id="paymentsView" class="container hidden">
-            <h2 style="margin-bottom: 24px;">💰 Payments Management</h2>
-            
-            <div class="stats-grid" id="paymentStatsGrid">
+            <!-- ✨ Premium Header -->
+            <div class="page-header animate-fade-in-down">
+                <div>
+                    <h2 class="page-title">💰 Payments</h2>
+                    <p class="page-subtitle">Track and manage all payment transactions</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn-premium btn-premium-outline btn-premium-sm" onclick="exportPaymentsCSV()">
+                        📥 Export
+                    </button>
+                    <button class="btn-premium btn-premium-primary" onclick="openMultiPaymentModal()">
+                        ➕ Add Payment
+                    </button>
+                </div>
+            </div>
+
+            <!-- ✨ Premium Stats Grid -->
+            <div class="stats-grid animate-fade-in-up" id="paymentStatsGrid" style="margin-bottom: var(--space-8);">
                 <!-- Stats will be populated by JavaScript -->
             </div>
 
-            <!-- Payment Reminders -->
-            <div class="card" id="paymentRemindersCard" style="display: none;">
-                <div class="card-header" onclick="togglePaymentReminders()" style="cursor: pointer; user-select: none;">
-                    <h3 class="card-title">⚠️ Payment Reminders <span id="paymentRemindersIcon">🔽</span></h3>
-                    <span id="paymentRemindersCount" style="font-size: 14px; color: var(--text-secondary);"></span>
+            <!-- ✨ Payment Reminders (Premium Card) -->
+            <div class="card-premium animate-fade-in-up animate-delay-1" id="paymentRemindersCard" style="display: none; margin-bottom: var(--space-6);">
+                <div class="widget-header" onclick="togglePaymentReminders()" style="cursor: pointer; user-select: none;">
+                    <h3 class="widget-title">⚠️ Payment Reminders <span id="paymentRemindersIcon">🔽</span></h3>
+                    <span id="paymentRemindersCount" style="font-size: var(--text-sm); color: var(--neutral-500);"></span>
                 </div>
-                <div id="paymentRemindersList" style="display: block;">
+                <div id="paymentRemindersList" style="display: block; padding: var(--space-4);">
                     <!-- Content will be populated by JavaScript -->
                 </div>
             </div>
 
-            <!-- Payment Records -->
-            <div class="card">
-                <div class="card-header">
-                    <h3 class="card-title">Payment Records</h3>
-                    <div style="display: flex; gap: 8px;">
-                        <button class="btn btn-primary btn-sm" onclick="openMultiPaymentModal()">➕ Add Multiple</button>
-                        <button class="btn btn-secondary btn-sm" onclick="exportPaymentsCSV()">📥 Export</button>
-                    </div>
+            <!-- ✨ Payment Records (Premium Table) -->
+            <div class="card-premium animate-fade-in-up animate-delay-2">
+                <div class="widget-header">
+                    <h3 class="widget-title">Payment Records</h3>
                 </div>
 
-                <div class="filters">
-                    <div class="filter-item" style="flex: 1; max-width: 350px;">
-                        <input type="text" id="searchPayments" placeholder="🔍 Search by guest, booking ID..." onkeypress="if(event.key==='Enter') filterPayments()" style="width: 100%;">
+                <!-- ✨ Premium Search & Filters -->
+                <div style="padding: var(--space-4); border-bottom: 1px solid var(--neutral-200); display: flex; gap: var(--space-3); flex-wrap: wrap; align-items: center;">
+                    <div class="search-premium" style="flex: 1; min-width: 250px;">
+                        <span class="search-premium-icon">🔍</span>
+                        <input type="text" id="searchPayments" class="search-premium-input" placeholder="Search by guest, booking ID..." onkeypress="if(event.key==='Enter') filterPayments()">
                     </div>
-                    <button class="btn btn-primary btn-sm" onclick="filterPayments()" style="white-space: nowrap;">
-                        🔍 Search
-                    </button>
-                    <div class="filter-item" style="max-width: 200px;">
-                        <select id="paymentPropertyFilter" onchange="filterPayments()">
+                    <div class="select-premium" style="min-width: 180px;">
+                        <select id="paymentPropertyFilter" onchange="filterPayments()" style="width: 100%; padding: var(--space-2) var(--space-3); border: 2px solid var(--neutral-300); border-radius: var(--radius-lg); font-size: var(--text-sm);">
                             <option value="">All Properties</option>
                             <!-- Will be populated dynamically -->
                         </select>
                     </div>
-                    <div class="filter-item" style="max-width: 200px;">
-                        <select id="paymentStatusFilter" onchange="filterPayments()">
+                    <div class="select-premium" style="min-width: 150px;">
+                        <select id="paymentStatusFilter" onchange="filterPayments()" style="width: 100%; padding: var(--space-2) var(--space-3); border: 2px solid var(--neutral-300); border-radius: var(--radius-lg); font-size: var(--text-sm);">
                             <option value="">All Status</option>
                             <option value="paid">Paid</option>
                             <option value="pending">Pending</option>
                             <option value="partial">Partial</option>
                         </select>
                     </div>
-                    <button class="btn btn-secondary btn-sm" onclick="clearPaymentFilters()" style="white-space: nowrap;">
+                    <button class="btn-premium btn-premium-ghost btn-premium-sm" onclick="clearPaymentFilters()">
                         Clear
                     </button>
                 </div>
 
                 <div class="table-container">
-                    <table>
+                    <table class="table-premium">
                         <thead>
                             <tr>
                                 <th>Booking ID</th>
@@ -1210,7 +1241,12 @@
                             </tr>
                         </thead>
                         <tbody id="paymentsTableBody">
-                            <tr><td colspan="8" class="text-center">Loading...</td></tr>
+                            <tr><td colspan="9" class="text-center" style="padding: var(--space-8);">
+                                <div class="empty-state-premium">
+                                    <div class="empty-state-icon">💰</div>
+                                    <div class="empty-state-title">Loading payments...</div>
+                                </div>
+                            </td></tr>
                         </tbody>
                     </table>
                 </div>
@@ -1266,11 +1302,21 @@
 
         <!-- Properties View -->
         <div id="propertiesView" class="container hidden">
-            <div class="card-header">
-                <h2>Properties</h2>
-                <button class="btn btn-primary" onclick="openPropertyModal()">+ Add Property</button>
+            <!-- ✨ Premium Header -->
+            <div class="page-header animate-fade-in-down">
+                <div>
+                    <h2 class="page-title">🏠 Properties</h2>
+                    <p class="page-subtitle">Manage your property portfolio</p>
+                </div>
+                <div class="page-actions">
+                    <button class="btn-premium btn-premium-primary" onclick="openPropertyModal()">
+                        ➕ Add Property
+                    </button>
+                </div>
             </div>
-            <div id="propertiesGrid" class="stats-grid"></div>
+
+            <!-- ✨ Premium Properties Grid -->
+            <div id="propertiesGrid" class="card-grid animate-fade-in-up"></div>
         </div>
         <!-- Performance View -->
         <div id="performanceView" class="container hidden">
