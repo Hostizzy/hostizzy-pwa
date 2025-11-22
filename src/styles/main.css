@@ -16,6 +16,11 @@
 @import './command-palette.css';
 @import './premium-features.css';
 
+/* Import APP-STORE QUALITY PREMIUM SYSTEM - Phase 2 */
+@import './premium-components.css';
+@import './premium-animations.css';
+@import './premium-layouts.css';
+
 /* Note: Premium Design System provides:
    - Complete visual transformation with modern design
    - Dark mode support with theme toggle

@@ -819,31 +819,49 @@ export async function deleteReservation(booking_id) {
 // ============================================
 
 /**
- * Switch between calendar and list view for reservations
+ * Switch between kanban, calendar and list view for reservations
  */
 export function switchReservationView(view) {
+    const kanbanContainer = document.getElementById('reservationKanbanContainer')
     const calendarContainer = document.getElementById('reservationCalendarContainer')
     const listContainer = document.getElementById('reservationListContainer')
+    const kanbanBtn = document.getElementById('kanbanViewBtn')
     const calendarBtn = document.getElementById('calendarViewBtn')
     const listBtn = document.getElementById('listViewBtn')
 
-    if (!calendarContainer || !listContainer || !calendarBtn || !listBtn) {
+    if (!kanbanContainer || !calendarContainer || !listContainer || !kanbanBtn || !calendarBtn || !listBtn) {
         console.warn('View switching elements not found')
         return
     }
 
-    if (view === 'calendar') {
-        // Show calendar, hide list
-        calendarContainer.style.display = 'block'
-        listContainer.style.display = 'none'
+    // Reset all buttons to outline style
+    kanbanBtn.classList.remove('btn-premium-primary')
+    kanbanBtn.classList.add('btn-premium-outline')
+    calendarBtn.classList.remove('btn-premium-primary')
+    calendarBtn.classList.add('btn-premium-outline')
+    listBtn.classList.remove('btn-premium-primary')
+    listBtn.classList.add('btn-premium-outline')
 
-        // Update button styles
-        calendarBtn.style.background = 'var(--brand-primary)'
-        calendarBtn.style.color = 'white'
-        calendarBtn.classList.remove('btn-secondary')
-        listBtn.style.background = ''
-        listBtn.style.color = ''
-        listBtn.classList.add('btn-secondary')
+    // Hide all containers
+    kanbanContainer.style.display = 'none'
+    calendarContainer.style.display = 'none'
+    listContainer.style.display = 'none'
+
+    if (view === 'kanban') {
+        // Show kanban board
+        kanbanContainer.style.display = 'block'
+        kanbanBtn.classList.remove('btn-premium-outline')
+        kanbanBtn.classList.add('btn-premium-primary')
+
+        // Render kanban board
+        if (typeof window.renderKanbanBoard === 'function') {
+            window.renderKanbanBoard()
+        }
+    } else if (view === 'calendar') {
+        // Show calendar
+        calendarContainer.style.display = 'block'
+        calendarBtn.classList.remove('btn-premium-outline')
+        calendarBtn.classList.add('btn-premium-primary')
 
         // Render calendar for current month
         if (typeof window.renderCalendar === 'function') {
@@ -851,17 +869,10 @@ export function switchReservationView(view) {
             window.renderCalendar(now.getFullYear(), now.getMonth())
         }
     } else {
-        // Show list, hide calendar
-        calendarContainer.style.display = 'none'
+        // Show list (default)
         listContainer.style.display = 'block'
-
-        // Update button styles
-        listBtn.style.background = 'var(--brand-primary)'
-        listBtn.style.color = 'white'
-        listBtn.classList.remove('btn-secondary')
-        calendarBtn.style.background = ''
-        calendarBtn.style.color = ''
-        calendarBtn.classList.add('btn-secondary')
+        listBtn.classList.remove('btn-premium-outline')
+        listBtn.classList.add('btn-premium-primary')
     }
 }
 

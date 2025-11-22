@@ -44,6 +44,7 @@ import './scripts/analytics.js'       // Charts, reports, visualizations
 import './scripts/command-palette.js'  // Command Palette (CMD+K)
 import './scripts/quick-actions.js'    // Quick Actions menu + FAB
 import './scripts/premium-features.js' // Theme Selector, Notifications, Calendar, Forecasting
+import './scripts/premium-views.js'    // Kanban Board, Smart Search, Advanced Filters, Interactive Stats
 
 // Import legacy JavaScript (remaining helper functions and utilities)
 // REMOVED: All functionality has been successfully modularized
@@ -78,8 +79,15 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof window.initRevenueForecasting === 'function') {
             window.initRevenueForecasting()
         }
+        if (typeof window.initAdvancedFilters === 'function') {
+            window.initAdvancedFilters()
+        }
+        if (typeof window.initSmartSearch === 'function') {
+            window.initSmartSearch()
+        }
     }, 500)
 
     console.log('✨ Premium features activated!')
     console.log('🎨 Color themes, 🔔 Notifications, 📅 Calendar, 📈 Forecasting ready!')
+    console.log('🎯 Kanban Board, 🔍 Smart Search, ⚙️ Advanced Filters ready!')
 })

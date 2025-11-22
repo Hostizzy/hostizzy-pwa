@@ -1137,25 +1137,51 @@
 
         <!-- Reservations View -->
         <div id="reservationsView" class="container hidden">
-            <div class="card-header">
-                <h2>Reservations</h2>
-                <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
-                    <!-- ✨ View Toggle (NEW) -->
-                    <div class="btn-group" style="margin-right: 12px;">
-                        <button class="btn btn-sm" id="listViewBtn" onclick="switchReservationView('list')" style="background: var(--brand-primary); color: white; border-radius: 8px 0 0 8px;">
-                            📋 List
-                        </button>
-                        <button class="btn btn-sm btn-secondary" id="calendarViewBtn" onclick="switchReservationView('calendar')" style="border-radius: 0 8px 8px 0;">
-                            📅 Calendar
-                        </button>
+            <!-- ✨ Premium Header with Search & Actions -->
+            <div class="page-header animate-fade-in-down">
+                <div>
+                    <h2 class="page-title">Reservations</h2>
+                    <p class="page-subtitle">Manage all your property bookings</p>
+                </div>
+                <div class="page-actions">
+                    <div class="search-premium">
+                        <span class="search-premium-icon">🔍</span>
+                        <input type="text" id="smartSearch" class="search-premium-input" placeholder="Search by name, email, booking ID...">
                     </div>
-                    <button class="btn btn-success btn-sm" onclick="openImportModal()">📤 Import CSV</button>
-                    <button class="btn btn-secondary btn-sm" onclick="exportCSV()">📥 Export CSV</button>
-                    <button class="btn btn-primary" onclick="openReservationModal()">+ New Reservation</button>
+                    <button class="btn-premium btn-premium-outline btn-premium-sm" onclick="toggleAdvancedFilters()">
+                        ⚙️ Filters
+                    </button>
+                    <button class="btn-premium btn-premium-primary" onclick="openReservationModal()">
+                        ➕ New Booking
+                    </button>
                 </div>
             </div>
 
-            <!-- ✨ Calendar View Container (NEW PREMIUM FEATURE) -->
+            <!-- ✨ View Toggle - Kanban | Calendar | List -->
+            <div class="flex justify-between items-center" style="margin-bottom: 24px; flex-wrap: wrap; gap: 12px;">
+                <div class="btn-group">
+                    <button class="btn-premium btn-premium-sm btn-premium-primary" id="kanbanViewBtn" onclick="switchReservationView('kanban')" style="border-radius: 8px 0 0 8px;">
+                        🎯 Kanban
+                    </button>
+                    <button class="btn-premium btn-premium-sm btn-premium-outline" id="calendarViewBtn" onclick="switchReservationView('calendar')" style="border-radius: 0;">
+                        📅 Calendar
+                    </button>
+                    <button class="btn-premium btn-premium-sm btn-premium-outline" id="listViewBtn" onclick="switchReservationView('list')" style="border-radius: 0 8px 8px 0;">
+                        📋 List
+                    </button>
+                </div>
+                <div style="display: flex; gap: 12px;">
+                    <button class="btn-premium btn-premium-ghost btn-premium-sm" onclick="openImportModal()">📤 Import</button>
+                    <button class="btn-premium btn-premium-ghost btn-premium-sm" onclick="exportCSV()">📥 Export</button>
+                </div>
+            </div>
+
+            <!-- ✨ Kanban Board View (NEW APP-STORE QUALITY) -->
+            <div id="reservationKanbanContainer" style="display: block; margin-bottom: 24px;">
+                <div id="kanbanBoardContainer"></div>
+            </div>
+
+            <!-- ✨ Calendar View Container (PREMIUM FEATURE) -->
             <div id="reservationCalendarContainer" class="calendar-container" style="display: none; margin-bottom: 24px;">
                 <div id="bookingCalendar"></div>
             </div>
