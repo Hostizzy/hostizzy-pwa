@@ -40,8 +40,32 @@ import './scripts/sync.js'            // Online/offline sync
 import './scripts/dashboard.js'       // Dashboard rendering, metrics, filters
 import './scripts/analytics.js'       // Charts, reports, visualizations
 
+// Premium Features - NEW!
+import './scripts/command-palette.js' // Command Palette (CMD+K)
+import './scripts/quick-actions.js'   // Quick Actions menu + FAB
+
 // Import legacy JavaScript (remaining helper functions and utilities)
 // REMOVED: All functionality has been successfully modularized
 // import './scripts/legacy.js'
 
 console.log('✅ ResIQ loaded successfully (100% modular version)')
+
+// Initialize Premium Features
+document.addEventListener('DOMContentLoaded', () => {
+    // Initialize theme (dark/light mode)
+    if (typeof window.initTheme === 'function') {
+        window.initTheme()
+    }
+
+    // Initialize command palette after a short delay
+    setTimeout(() => {
+        if (typeof window.initCommandPalette === 'function') {
+            window.initCommandPalette()
+        }
+        if (typeof window.initQuickActions === 'function') {
+            window.initQuickActions()
+        }
+    }, 500)
+
+    console.log('✨ Premium features activated!')
+})
