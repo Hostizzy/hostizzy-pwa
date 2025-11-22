@@ -23,20 +23,24 @@ export let currentWhatsAppBooking = null
 export function setAllReservations(reservations) {
     allReservations = reservations
     state.reservations = reservations
+    window.allReservations = reservations  // Update window reference
 }
 
 export function setAllPayments(payments) {
     allPayments = payments
     state.payments = payments
+    window.allPayments = payments  // Update window reference
 }
 
 export function setCurrentUser(user) {
     currentUser = user
     state.user = user
+    window.currentUser = user  // Update window reference
 }
 
 export function setCurrentWhatsAppBooking(booking) {
     currentWhatsAppBooking = booking
+    window.currentWhatsAppBooking = booking  // Update window reference
 }
 
 export function addSelectedReservation(id) {
