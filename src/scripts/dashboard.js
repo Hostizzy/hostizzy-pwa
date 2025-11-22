@@ -445,6 +445,118 @@ export async function clearDashboardFilters() {
 }
 
 // ==========================================
+// MONTHLY COMPARISON
+// ==========================================
+
+/**
+ * Calculate and display this month's performance with comparison to last month
+ */
+export function calculateMonthlyMetrics() {
+    try {
+        const now = new Date()
+        const currentMonth = now.getMonth()
+        const currentYear = now.getFullYear()
+
+        // Update month label
+        const monthNames = ['January', 'February', 'March', 'April', 'May', 'June',
+                            'July', 'August', 'September', 'October', 'November', 'December']
+        const monthLabel = document.getElementById('currentMonthLabel')
+        if (monthLabel) monthLabel.textContent = `${monthNames[currentMonth]} ${currentYear}`
+
+        const allReservations = getAllReservations()
+
+        // Filter current month reservations (based on check-in date)
+        const currentMonthReservations = allReservations.filter(r => {
+            const checkIn = new Date(r.check_in)
+            return checkIn.getMonth() === currentMonth && checkIn.getFullYear() === currentYear
+        })
+
+        // Filter last month reservations
+        const lastMonth = currentMonth === 0 ? 11 : currentMonth - 1
+        const lastMonthYear = currentMonth === 0 ? currentYear - 1 : currentYear
+
+        const lastMonthReservations = allReservations.filter(r => {
+            const checkIn = new Date(r.check_in)
+            return checkIn.getMonth() === lastMonth && checkIn.getFullYear() === lastMonthYear
+        })
+
+        // Calculate Nights
+        const currentNights = currentMonthReservations.reduce((sum, r) => sum + (parseInt(r.nights) || 0), 0)
+        const lastNights = lastMonthReservations.reduce((sum, r) => sum + (parseInt(r.nights) || 0), 0)
+        const nightsChange = lastNights > 0 ? ((currentNights - lastNights) / lastNights * 100) : 0
+
+        // Calculate Revenue
+        const currentRevenue = currentMonthReservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0)
+        const lastRevenue = lastMonthReservations.reduce((sum, r) => sum + (parseFloat(r.total_amount) || 0), 0)
+        const revenueChange = lastRevenue > 0 ? ((currentRevenue - lastRevenue) / lastRevenue * 100) : 0
+
+        // Calculate Hostizzy Revenue
+        const currentHostizzy = currentMonthReservations.reduce((sum, r) => sum + (parseFloat(r.hostizzy_revenue) || 0), 0)
+        const lastHostizzy = lastMonthReservations.reduce((sum, r) => sum + (parseFloat(r.hostizzy_revenue) || 0), 0)
+        const hostizzyChange = lastHostizzy > 0 ? ((currentHostizzy - lastHostizzy) / lastHostizzy * 100) : 0
+
+        // Update UI - Nights
+        const monthNights = document.getElementById('monthNights')
+        if (monthNights) monthNights.textContent = currentNights
+        updateTrendDisplay('monthNightsChange', nightsChange)
+
+        // Update UI - Revenue
+        const monthRevenue = document.getElementById('monthRevenue')
+        if (monthRevenue) {
+            if (currentRevenue >= 100000) {
+                monthRevenue.textContent = '₹' + (currentRevenue / 100000).toFixed(2) + 'L'
+            } else {
+                monthRevenue.textContent = '₹' + (currentRevenue / 1000).toFixed(1) + 'K'
+            }
+        }
+        updateTrendDisplay('monthRevenueChange', revenueChange)
+
+        // Update UI - Hostizzy Revenue
+        const monthHostizzyRevenue = document.getElementById('monthHostizzyRevenue')
+        if (monthHostizzyRevenue) {
+            if (currentHostizzy >= 100000) {
+                monthHostizzyRevenue.textContent = '₹' + (currentHostizzy / 100000).toFixed(2) + 'L'
+            } else {
+                monthHostizzyRevenue.textContent = '₹' + (currentHostizzy / 1000).toFixed(1) + 'K'
+            }
+        }
+        updateTrendDisplay('monthHostizzyChange', hostizzyChange)
+
+    } catch (error) {
+        console.error('Error calculating monthly metrics:', error)
+    }
+}
+
+/**
+ * Update trend display with arrows and colors
+ */
+export function updateTrendDisplay(elementId, changePercent) {
+    const el = document.getElementById(elementId)
+    if (!el) return
+
+    const arrow = el.querySelector('.trend-arrow')
+    const value = el.querySelector('.trend-value')
+
+    if (!arrow || !value) return
+
+    const change = parseFloat(changePercent)
+
+    if (change > 0) {
+        arrow.textContent = '↑'
+        arrow.className = 'trend-arrow trend-up'
+        value.textContent = '+' + Math.abs(change).toFixed(1) + '%'
+    } else if (change < 0) {
+        arrow.textContent = '↓'
+        arrow.className = 'trend-arrow trend-down'
+        value.textContent = '-' + Math.abs(change).toFixed(1) + '%'
+    } else {
+        arrow.textContent = '→'
+        arrow.className = 'trend-arrow trend-neutral'
+        value.textContent = '0%'
+    }
+}
+
+// ==========================================
 // GLOBAL EXPORTS FOR LEGACY COMPATIBILITY
 // ==========================================
 
@@ -453,6 +565,8 @@ if (typeof window !== 'undefined') {
     window.applyQuickFilter = applyQuickFilter
     window.updateFilterInfo = updateFilterInfo
     window.clearDashboardFilters = clearDashboardFilters
+    window.calculateMonthlyMetrics = calculateMonthlyMetrics
+    window.updateTrendDisplay = updateTrendDisplay
 }
 
 console.log('✅ Dashboard module loaded')
