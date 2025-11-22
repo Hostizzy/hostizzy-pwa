@@ -41,8 +41,9 @@ import './scripts/dashboard.js'       // Dashboard rendering, metrics, filters
 import './scripts/analytics.js'       // Charts, reports, visualizations
 
 // Premium Features - NEW!
-import './scripts/command-palette.js' // Command Palette (CMD+K)
-import './scripts/quick-actions.js'   // Quick Actions menu + FAB
+import './scripts/command-palette.js'  // Command Palette (CMD+K)
+import './scripts/quick-actions.js'    // Quick Actions menu + FAB
+import './scripts/premium-features.js' // Theme Selector, Notifications, Calendar, Forecasting
 
 // Import legacy JavaScript (remaining helper functions and utilities)
 // REMOVED: All functionality has been successfully modularized
@@ -57,7 +58,7 @@ document.addEventListener('DOMContentLoaded', () => {
         window.initTheme()
     }
 
-    // Initialize command palette after a short delay
+    // Initialize all premium features after a short delay
     setTimeout(() => {
         if (typeof window.initCommandPalette === 'function') {
             window.initCommandPalette()
@@ -65,7 +66,20 @@ document.addEventListener('DOMContentLoaded', () => {
         if (typeof window.initQuickActions === 'function') {
             window.initQuickActions()
         }
+        if (typeof window.initThemeSelector === 'function') {
+            window.initThemeSelector()
+        }
+        if (typeof window.initNotificationCenter === 'function') {
+            window.initNotificationCenter()
+        }
+        if (typeof window.initCalendarView === 'function') {
+            window.initCalendarView()
+        }
+        if (typeof window.initRevenueForecasting === 'function') {
+            window.initRevenueForecasting()
+        }
     }, 500)
 
     console.log('✨ Premium features activated!')
+    console.log('🎨 Color themes, 🔔 Notifications, 📅 Calendar, 📈 Forecasting ready!')
 })

@@ -208,8 +208,7 @@ function getAllCommands() {
             description: 'View your dashboard and analytics',
             icon: '📊',
             action: 'navigate:dashboard',
-            keywords: ['home', 'dashboard', 'overview'],
-            shortcut: 'G then D'
+            keywords: ['home', 'dashboard', 'overview']
         },
         {
             category: '🧭 Navigation',
@@ -217,8 +216,7 @@ function getAllCommands() {
             description: 'View and manage all bookings',
             icon: '📅',
             action: 'navigate:reservations',
-            keywords: ['bookings', 'reservations'],
-            shortcut: 'G then R'
+            keywords: ['bookings', 'reservations', 'calendar']
         },
         {
             category: '🧭 Navigation',
@@ -226,8 +224,7 @@ function getAllCommands() {
             description: 'View payment records and history',
             icon: '💰',
             action: 'navigate:payments',
-            keywords: ['money', 'transactions'],
-            shortcut: 'G then P'
+            keywords: ['money', 'transactions']
         },
         {
             category: '🧭 Navigation',
@@ -235,8 +232,7 @@ function getAllCommands() {
             description: 'Manage guest information',
             icon: '👥',
             action: 'navigate:guests',
-            keywords: ['customers', 'users'],
-            shortcut: 'G then G'
+            keywords: ['customers', 'users']
         },
         {
             category: '🧭 Navigation',
@@ -244,8 +240,7 @@ function getAllCommands() {
             description: 'Manage your properties',
             icon: '🏠',
             action: 'navigate:properties',
-            keywords: ['listings', 'homes'],
-            shortcut: 'G then H'
+            keywords: ['listings', 'homes']
         },
         {
             category: '🧭 Navigation',
@@ -253,8 +248,7 @@ function getAllCommands() {
             description: 'View performance metrics',
             icon: '📈',
             action: 'navigate:performance',
-            keywords: ['stats', 'metrics', 'reports'],
-            shortcut: 'G then A'
+            keywords: ['stats', 'metrics', 'reports', 'charts']
         },
 
         // Quick Actions
@@ -264,8 +258,7 @@ function getAllCommands() {
             description: 'Create a new booking',
             icon: '➕',
             action: 'create:reservation',
-            keywords: ['add booking', 'new reservation'],
-            shortcut: 'N then R'
+            keywords: ['add booking', 'new reservation']
         },
         {
             category: '⚡ Quick Actions',
@@ -273,8 +266,7 @@ function getAllCommands() {
             description: 'Record a new payment',
             icon: '💳',
             action: 'create:payment',
-            keywords: ['add payment', 'new transaction'],
-            shortcut: 'N then P'
+            keywords: ['add payment', 'new transaction']
         },
         {
             category: '⚡ Quick Actions',
@@ -282,8 +274,7 @@ function getAllCommands() {
             description: 'Add a new guest',
             icon: '👤',
             action: 'create:guest',
-            keywords: ['add guest', 'new customer'],
-            shortcut: 'N then G'
+            keywords: ['add guest', 'new customer']
         },
 
         // Settings
@@ -293,8 +284,23 @@ function getAllCommands() {
             description: 'Switch between light and dark theme',
             icon: '🌙',
             action: 'toggle:darkMode',
-            keywords: ['theme', 'appearance'],
-            shortcut: 'CMD+SHIFT+D'
+            keywords: ['theme', 'appearance']
+        },
+        {
+            category: '⚙️ Settings',
+            title: 'Change Color Theme',
+            description: 'Select from multiple color schemes',
+            icon: '🎨',
+            action: 'open:themeSelector',
+            keywords: ['colors', 'appearance', 'customize']
+        },
+        {
+            category: '⚙️ Settings',
+            title: 'Notifications',
+            description: 'View all notifications',
+            icon: '🔔',
+            action: 'open:notifications',
+            keywords: ['alerts', 'updates']
         },
         {
             category: '⚙️ Settings',
@@ -326,6 +332,18 @@ export function executeCommand(action) {
         case 'toggle':
             if (target === 'darkMode') {
                 toggleDarkMode()
+            }
+            break
+
+        case 'open':
+            if (target === 'themeSelector') {
+                if (typeof window.openThemeSelector === 'function') {
+                    window.openThemeSelector()
+                }
+            } else if (target === 'notifications') {
+                if (typeof window.toggleNotificationCenter === 'function') {
+                    window.toggleNotificationCenter()
+                }
             }
             break
 

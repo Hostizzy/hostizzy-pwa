@@ -14,6 +14,7 @@
 /* Import PREMIUM DESIGN SYSTEM - Complete Transformation */
 @import './premium-design.css';
 @import './command-palette.css';
+@import './premium-features.css';
 
 /* Note: Premium Design System provides:
    - Complete visual transformation with modern design
@@ -26,6 +27,9 @@
    - Beautiful gradient backgrounds
    - Enhanced badge system
    - Modern notification center
+   - Calendar view for bookings
+   - Revenue forecasting widget
+   - Color theme selector (6 themes)
    - Data visualization components
    - Professional color palette
    - Advanced typography system
