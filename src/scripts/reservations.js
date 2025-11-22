@@ -843,3 +843,5 @@ if (typeof window !== 'undefined') {
     window.editReservation = editReservation
     window.deleteReservation = deleteReservation
 }
+
+console.log('✅ Reservations CRUD and filtering module loaded')
