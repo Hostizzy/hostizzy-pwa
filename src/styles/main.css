@@ -8,10 +8,14 @@
 /* Import modern Airbnb-inspired design system (overrides legacy for modern look) */
 @import './modern.css';
 
-/* Note: modern.css provides:
-   - Clean Airbnb-like design language
+/* Import enhanced view-specific styles */
+@import './enhanced-views.css';
+
+/* Note: Design system provides:
+   - Clean Airbnb-like design language (modern.css)
    - Modern color palette and shadows
    - Smooth animations and transitions
    - Better typography and spacing
    - Enhanced component styles
+   - Beautiful view-specific layouts (enhanced-views.css)
 */
