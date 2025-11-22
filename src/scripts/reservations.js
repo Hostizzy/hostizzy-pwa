@@ -815,6 +815,57 @@ export async function deleteReservation(booking_id) {
 }
 
 // ============================================
+// VIEW SWITCHING (Calendar vs List)
+// ============================================
+
+/**
+ * Switch between calendar and list view for reservations
+ */
+export function switchReservationView(view) {
+    const calendarContainer = document.getElementById('reservationCalendarContainer')
+    const listContainer = document.getElementById('reservationListContainer')
+    const calendarBtn = document.getElementById('calendarViewBtn')
+    const listBtn = document.getElementById('listViewBtn')
+
+    if (!calendarContainer || !listContainer || !calendarBtn || !listBtn) {
+        console.warn('View switching elements not found')
+        return
+    }
+
+    if (view === 'calendar') {
+        // Show calendar, hide list
+        calendarContainer.style.display = 'block'
+        listContainer.style.display = 'none'
+
+        // Update button styles
+        calendarBtn.style.background = 'var(--brand-primary)'
+        calendarBtn.style.color = 'white'
+        calendarBtn.classList.remove('btn-secondary')
+        listBtn.style.background = ''
+        listBtn.style.color = ''
+        listBtn.classList.add('btn-secondary')
+
+        // Render calendar for current month
+        if (typeof window.renderCalendar === 'function') {
+            const now = new Date()
+            window.renderCalendar(now.getFullYear(), now.getMonth())
+        }
+    } else {
+        // Show list, hide calendar
+        calendarContainer.style.display = 'none'
+        listContainer.style.display = 'block'
+
+        // Update button styles
+        listBtn.style.background = 'var(--brand-primary)'
+        listBtn.style.color = 'white'
+        listBtn.classList.remove('btn-secondary')
+        calendarBtn.style.background = ''
+        calendarBtn.style.color = ''
+        calendarBtn.classList.add('btn-secondary')
+    }
+}
+
+// ============================================
 // GLOBAL EXPORTS FOR LEGACY COMPATIBILITY
 // ============================================
 
@@ -842,6 +893,7 @@ if (typeof window !== 'undefined') {
     window.saveReservation = saveReservation
     window.editReservation = editReservation
     window.deleteReservation = deleteReservation
+    window.switchReservationView = switchReservationView
 }
 
 console.log('✅ Reservations CRUD and filtering module loaded')

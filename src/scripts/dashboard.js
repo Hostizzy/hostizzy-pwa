@@ -165,6 +165,11 @@ export async function loadDashboard() {
             window.updateTopPropertiesStats()
         }
 
+        // ✨ Render Revenue Forecast Widget (Premium Feature)
+        if (typeof window.renderRevenueForecast === 'function') {
+            window.renderRevenueForecast()
+        }
+
         // Restore saved filters
         setTimeout(() => {
             const savedFilters = loadFilterState('dashboard')

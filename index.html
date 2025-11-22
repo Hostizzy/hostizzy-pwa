@@ -140,8 +140,13 @@
                 <div style="flex: 1;"></div>
 
                 <!-- Dark Mode Toggle -->
-                <button class="theme-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode (CMD+SHIFT+D)" style="margin-right: 16px;">
+                <button class="theme-toggle" onclick="toggleDarkMode()" title="Toggle Dark Mode (CMD+SHIFT+D)" style="margin-right: 12px;">
                     <span id="themeIcon">☀️</span>
+                </button>
+
+                <!-- Color Theme Selector -->
+                <button class="theme-toggle" onclick="openThemeSelector()" title="Change Color Theme" style="margin-right: 16px;">
+                    <span>🎨</span>
                 </button>
 
                 <!-- Profile Dropdown (Desktop & Tablet) -->
@@ -852,6 +857,11 @@
                 </div>
             </div>
 
+            <!-- ✨ Revenue Forecast Widget (NEW PREMIUM FEATURE) -->
+            <div id="revenueForecast" style="margin-bottom: 24px;">
+                <!-- Forecast widget will be rendered here by JavaScript -->
+            </div>
+
             <!-- Enhanced Metrics -->
             <div id="enhancedMetrics" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; margin-bottom: 24px;">
                 <!-- Will be populated by JavaScript -->
@@ -1129,14 +1139,29 @@
         <div id="reservationsView" class="container hidden">
             <div class="card-header">
                 <h2>Reservations</h2>
-                <div style="display: flex; gap: 12px; flex-wrap: wrap;">
+                <div style="display: flex; gap: 12px; flex-wrap: wrap; align-items: center;">
+                    <!-- ✨ View Toggle (NEW) -->
+                    <div class="btn-group" style="margin-right: 12px;">
+                        <button class="btn btn-sm" id="listViewBtn" onclick="switchReservationView('list')" style="background: var(--brand-primary); color: white; border-radius: 8px 0 0 8px;">
+                            📋 List
+                        </button>
+                        <button class="btn btn-sm btn-secondary" id="calendarViewBtn" onclick="switchReservationView('calendar')" style="border-radius: 0 8px 8px 0;">
+                            📅 Calendar
+                        </button>
+                    </div>
                     <button class="btn btn-success btn-sm" onclick="openImportModal()">📤 Import CSV</button>
                     <button class="btn btn-secondary btn-sm" onclick="exportCSV()">📥 Export CSV</button>
                     <button class="btn btn-primary" onclick="openReservationModal()">+ New Reservation</button>
                 </div>
             </div>
 
-            <div class="card">
+            <!-- ✨ Calendar View Container (NEW PREMIUM FEATURE) -->
+            <div id="reservationCalendarContainer" class="calendar-container" style="display: none; margin-bottom: 24px;">
+                <div id="bookingCalendar"></div>
+            </div>
+
+            <!-- List View Container -->
+            <div id="reservationListContainer" class="card">
                 <div class="filters">
                     <div class="filter-item" style="flex: 1; max-width: 350px;">
                         <input type="text" id="searchReservations" placeholder="🔍 Search by guest, booking ID, phone, property..." onkeypress="if(event.key==='Enter') filterReservations()" style="width: 100%;">
